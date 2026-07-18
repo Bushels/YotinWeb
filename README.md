@@ -17,7 +17,7 @@ Future equipment is intentionally not included in the deployed site until it is 
 - GSAP 3.15.0 + ScrollTrigger, pinned from jsDelivr, for progressive motion.
 - Phosphor Icons 2.1.2, pinned from jsDelivr.
 - Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
-- Existing WebP WellFi cutaway with a static-first, reduced-motion-safe presentation.
+- Existing WebP WellFi cutaway with the prior continuous uplink/downhole-pulse behavior restored; all motion collapses safely under `prefers-reduced-motion`.
 - ChatFi messages render with `textContent`; requests abort when the panel closes.
 
 ## Structure

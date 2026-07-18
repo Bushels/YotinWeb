@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-live.webp" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260717-7">
+  <link rel="stylesheet" href="styles.css?v=20260718-1">
 
   <script type="application/ld+json">
   {
@@ -116,7 +116,14 @@
         </div>
 
         <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
-          <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080" fetchpriority="high">
+          <div class="hero-scene">
+            <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080" fetchpriority="high">
+            <svg class="data-pulses" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+              <path class="uplink uplink-halo" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
+              <path class="uplink uplink-core" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
+            </svg>
+            <span class="em-pulse" aria-hidden="true"></span>
+          </div>
           <dl class="reading reading-surface">
             <div><dt>Surface</dt><dd>101.3 kPa</dd></div>
             <div><dt>Temperature</dt><dd>14.2 °C</dd></div>
@@ -243,6 +250,6 @@
 
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-  <script defer src="main.js?v=20260717-1"></script>
+  <script defer src="main.js?v=20260718-1"></script>
 </body>
 </html>
