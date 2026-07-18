@@ -4,7 +4,7 @@
 
 - No actionable P0, P1, or P2 differences remain.
 - The July 18 follow-up restores the prior continuous downhole signal behavior and reduces the hero headline without changing the approved WellFi/Indigenous composition.
-- The July 18 ChatFi follow-up replaces the native chat surface with integrity-pinned Deep Chat 2.4.2 while retaining the existing Cloud Run request contract. Local page delivery, JavaScript syntax, the exact CDN integrity hash, and a live streamed ChatFi response from the allowed localhost origin pass. The older ChatFi screenshots below remain historical evidence for the native interface, not visual proof of the new Deep Chat surface.
+- The July 18 ChatFi follow-up replaces the native chat surface with integrity-pinned Deep Chat 2.4.2 while retaining the existing Cloud Run request contract. Browser QA found and fixed the initial loader failure: the ESM bundle had been inserted as a classic script, so the browser stopped at its final `export` statement. The loader now declares `type="module"` and automatically falls back from jsDelivr to unpkg. Fresh-tab desktop and mobile exchanges pass with no console errors.
 - [P3] The source uses more decorative signal diagrams and leader lines in the three-step strip. The implementation uses pinned Phosphor icons and the same cyan/orange signal language. This is an intentional simplification that preserves the hierarchy without fabricating bespoke graphic assets.
 - [P3] The implementation includes `Our Company` and `Contact` in the desktop header. The source only showed `WellFi`; the additional links are intentional because the finished one-page site has real company and conversion sections.
 
@@ -42,8 +42,9 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 - Mobile contact: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\19-mobile-contact.png`
 - Mobile animated hero at 390 × 844: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\25-mobile-hero-motion.png`
 - Tablet animated hero at 834 × 1112: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\26-tablet-hero-motion.png`
-- Primary interactions tested against the native interface: mobile menu open; ChatFi opened from the mobile menu; live question submitted from the allowed `localhost` origin; answer received; panel closed; focus returned to the launcher. The Deep Chat transport was revalidated on July 18; its browser visuals have not replaced the historical captures above.
-- Console errors checked: none.
+- Primary interactions retested with Deep Chat 2.4.2: mobile menu open; ChatFi opened from the mobile menu; live questions submitted from the allowed `localhost` origin; streamed answers received; panel closed; focus returned to the launcher.
+- Responsive Deep Chat geometry passed at 390 × 844 and 320 × 568. The page had no horizontal overflow; the 390 px chat panel stayed within 8 px side/bottom insets, and the 320 px panel fit within a 304 × 552 px box while keeping its header, message body, input, close control, and disclosure visible.
+- Console errors checked in a new tab after the loader fix: none.
 - Motion verification: the uplink dash offset changed from `-42.494px` to `-78.7415px` over 900 ms; the pulse ring transform and opacity changed at the same time, proving that both continuous animation channels were running.
 
 **Comparison history**
@@ -52,6 +53,7 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 2. P1 — the cutaway kept its HTML height while CSS changed only its width, stretching the grid to 1080 px and pushing the signal strip below the intended fold. Fix: set the image height to auto and normalized the hero shell/grid. Post-fix evidence: `05-desktop-corrected.png`.
 3. P2 — the headline wrapped to three lines and the cutaway scale/crop was smaller and lower than the source. Fix: removed the extra hero paragraph, tuned display size, widened the cutaway, removed its base vertical offset, and enlarged/repositioned the Yotin lockup. Post-fix evidence: `11-desktop-final.png` and `12-reference-vs-final.png`.
 4. P2 — the redesigned hero kept its entrance and scroll motion but lost the baseline's continuous downhole pulse/uplink behavior; the 64 px headline also carried more weight than requested. Fix: restored the baseline signal path and radiating tool-node cycle, kept it attached to the real WellFi image at every breakpoint, and reduced the headline to a 42–56 px responsive range. Post-fix evidence: `21-hero-motion-frame-a.png`, `22-hero-motion-frame-b.png`, `23-before-vs-restored.png`, `25-mobile-hero-motion.png`, and `26-tablet-hero-motion.png`.
+5. P1 — Deep Chat displayed the contact fallback because its ESM bundle was loaded as a classic script. Fix: load the pinned bundle as a module, retain SRI, and add an automatic second CDN source. Post-fix evidence: successful fresh-tab desktop and 390 px mobile responses with an empty error/warning console.
 
 **Open questions**
 
@@ -62,10 +64,10 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 
 - [x] Match the selected Signal Atlas desktop direction.
 - [x] Verify the focused WellFi/Indigenous content scope.
-- [x] Verify mobile hero, menu, WellFi, company, contact, and native ChatFi states.
+- [x] Verify mobile hero, menu, WellFi, company, contact, and Deep Chat states.
 - [x] Revalidate a live ChatFi answer from the allowed `http://localhost:5050/` origin after the Deep Chat integration.
-- [x] Check native-interface focus return and browser console.
-- [ ] Replace the historical native ChatFi captures with Deep Chat desktop/mobile interaction evidence before production deployment.
+- [x] Check Deep Chat focus return, 390/320 px geometry, and a fresh browser console.
+- [x] Replace the historical native-interface functional checks with live Deep Chat desktop/mobile interaction evidence.
 - [ ] Complete the separately gated production ChatFi identity/CORS change after relationship approval.
 
-final result: site and transport passed; Deep Chat visual recapture remains part of the production gate
+final result: site, responsive Deep Chat interface, and local transport passed; production identity/CORS remains the release gate

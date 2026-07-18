@@ -115,7 +115,10 @@
   var lastOpener = null;
   var activeController = null;
   var deepChatReady = null;
-  var DEEP_CHAT_SRC = "https://unpkg.com/deep-chat@2.4.2/dist/deepChat.bundle.js";
+  var DEEP_CHAT_SOURCES = [
+    "https://cdn.jsdelivr.net/npm/deep-chat@2.4.2/dist/deepChat.bundle.js",
+    "https://unpkg.com/deep-chat@2.4.2/dist/deepChat.bundle.js"
+  ];
   var DEEP_CHAT_INTEGRITY = "sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m";
   var CHATFI_ERROR = "ChatFi can’t connect from this site yet. Email info@yotinenergy.ca and the team will help directly.";
 
@@ -123,48 +126,58 @@
     if (window.customElements && window.customElements.get("deep-chat")) return Promise.resolve();
     if (deepChatReady) return deepChatReady;
 
-    deepChatReady = new Promise(function (resolve, reject) {
-      var script = document.createElement("script");
-      var settled = false;
-      var timeout = window.setTimeout(function () {
-        if (settled) return;
-        settled = true;
-        script.remove();
-        deepChatReady = null;
-        reject(new Error("Deep Chat load timed out"));
-      }, 12000);
+    function loadSource(source) {
+      return new Promise(function (resolve, reject) {
+        var script = document.createElement("script");
+        var settled = false;
+        var timeout = window.setTimeout(function () {
+          if (settled) return;
+          settled = true;
+          script.remove();
+          reject(new Error("Deep Chat load timed out: " + source));
+        }, 9000);
 
-      function resolveLoad() {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(timeout);
-        resolve();
-      }
-
-      function rejectLoad(error) {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(timeout);
-        script.remove();
-        deepChatReady = null;
-        reject(error);
-      }
-
-      script.src = DEEP_CHAT_SRC;
-      script.integrity = DEEP_CHAT_INTEGRITY;
-      script.crossOrigin = "anonymous";
-      script.referrerPolicy = "no-referrer";
-      script.onload = function () {
-        if (!window.customElements) {
-          rejectLoad(new Error("Custom elements are not supported"));
-          return;
+        function resolveLoad() {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          resolve();
         }
-        window.customElements.whenDefined("deep-chat").then(resolveLoad, rejectLoad);
-      };
-      script.onerror = function () {
-        rejectLoad(new Error("Deep Chat failed to load"));
-      };
-      document.head.appendChild(script);
+
+        function rejectLoad(error) {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          script.remove();
+          reject(error);
+        }
+
+        script.src = source;
+        script.type = "module";
+        script.integrity = DEEP_CHAT_INTEGRITY;
+        script.crossOrigin = "anonymous";
+        script.referrerPolicy = "no-referrer";
+        script.onload = function () {
+          if (!window.customElements) {
+            rejectLoad(new Error("Custom elements are not supported"));
+            return;
+          }
+          window.customElements.whenDefined("deep-chat").then(resolveLoad, rejectLoad);
+        };
+        script.onerror = function () {
+          rejectLoad(new Error("Deep Chat failed to load: " + source));
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    deepChatReady = DEEP_CHAT_SOURCES.reduce(function (attempt, source) {
+      return attempt.catch(function () {
+        return loadSource(source);
+      });
+    }, Promise.reject(new Error("No Deep Chat source attempted"))).catch(function (error) {
+      deepChatReady = null;
+      throw error;
     });
 
     return deepChatReady;
@@ -331,9 +344,10 @@
       configureDeepChat();
       if (chatBody) chatBody.classList.add("is-ready");
       if (loading) loading.setAttribute("aria-hidden", "true");
-    }).catch(function () {
+    }).catch(function (error) {
+      console.error("ChatFi interface failed to initialize", error);
       showChatUnavailable();
-      throw new Error("ChatFi interface unavailable");
+      throw error;
     });
   }
 
