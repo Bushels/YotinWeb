@@ -1,353 +1,248 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="en-CA">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0d1722">
-<script>document.documentElement.classList.add('js');</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#03070b">
 
-<title>Yotin Energy — Sand Control, Flow Control &amp; Well-Fi</title>
-<meta name="description" content="Yotin is Canada's only Indigenous-owned sand control and flow control company, engineering completions and Well-Fi wireless downhole telemetry for thermal and conventional wells in Western Canada. From the ground up.">
-<link rel="canonical" href="https://yotinenergy.ca/">
+  <title>Yotin Energy — Indigenous Energy Services &amp; WellFi Telemetry</title>
+  <meta name="description" content="Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan. Explore WellFi wireless downhole telemetry for live pressure, temperature, and vibration data without a downhole cable.">
+  <link rel="canonical" href="https://yotinenergy.ca/">
 
-<!-- Open Graph / social -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Yotin Energy">
-<meta property="og:title" content="Yotin Energy — From the Ground Up">
-<meta property="og:description" content="Canada's only Indigenous-owned sand control and flow control company — plus Well-Fi wireless downhole telemetry. From the ground up.">
-<meta property="og:url" content="https://yotinenergy.ca/">
-<meta property="og:image" content="https://yotin-energy.vercel.app/assets/og-card-2.jpg">
-<meta property="og:image:secure_url" content="https://yotin-energy.vercel.app/assets/og-card-2.jpg">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Yotin Energy — Indigenous-owned sand control, flow control, and Well-Fi downhole telemetry.">
-<meta property="og:locale" content="en_CA">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Yotin Energy — From the Ground Up">
-<meta name="twitter:description" content="Canada's only Indigenous-owned sand control & flow control company — plus Well-Fi wireless downhole telemetry.">
-<meta name="twitter:image" content="https://yotin-energy.vercel.app/assets/og-card-2.jpg">
-<meta name="twitter:image:alt" content="Yotin Energy — Indigenous-owned sand control, flow control, and Well-Fi downhole telemetry.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Yotin Energy">
+  <meta property="og:title" content="Yotin Energy — Know What’s Happening Downhole">
+  <meta property="og:description" content="An Indigenous Energy Services Company. Explore WellFi wireless downhole telemetry.">
+  <meta property="og:url" content="https://yotinenergy.ca/">
+  <meta property="og:image" content="https://yotinenergy.ca/assets/yotin-wellfi-og-2026.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Yotin Energy and WellFi wireless downhole telemetry.">
 
-<link rel="icon" href="assets/yotin-icon.png">
-<link rel="apple-touch-icon" href="assets/yotin-icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Yotin Energy — Know What’s Happening Downhole">
+  <meta name="twitter:description" content="An Indigenous Energy Services Company. Explore WellFi wireless downhole telemetry.">
+  <meta name="twitter:image" content="https://yotinenergy.ca/assets/yotin-wellfi-og-2026.png">
+  <meta name="twitter:image:alt" content="Yotin Energy and WellFi wireless downhole telemetry.">
 
-<!-- Fonts: Archivo (display), IBM Plex Sans (body), IBM Plex Mono (data) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="assets/wellfi-island-live.webp" fetchpriority="high">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/yotin-icon.png">
+  <link rel="apple-touch-icon" href="assets/yotin-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+  <link rel="preload" as="image" href="assets/wellfi-island-live.webp" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20260717-7">
 
-<link rel="stylesheet" href="styles.css">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Yotin Energy",
-  "slogan": "From the Ground Up.",
-  "url": "https://yotinenergy.ca/",
-  "logo": "https://yotinenergy.ca/assets/yotin-icon.png",
-  "description": "Canada's only Indigenous-owned sand control and flow control company, also providing Well-Fi wireless downhole telemetry for thermal and conventional wells.",
-  "email": "info@yotinenergy.ca",
-  "areaServed": ["CA-AB", "CA-SK"],
-  "address": {
-    "@type": "PostalAddress",
-    "addressRegion": "SK",
-    "addressCountry": "CA",
-    "addressLocality": "Pierceland"
-  },
-  "knowsAbout": ["Sand control", "Slotted liner completions", "Flow control", "Inflow control devices", "Downhole telemetry", "SAGD", "Heavy oil completions"]
-}
-</script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Yotin Energy",
+    "url": "https://yotinenergy.ca/",
+    "logo": "https://yotinenergy.ca/assets/yotin-icon.png",
+    "description": "An Indigenous energy services company providing WellFi wireless downhole telemetry for Western Canadian wells.",
+    "email": "info@yotinenergy.ca",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Pierceland",
+      "addressRegion": "SK",
+      "addressCountry": "CA"
+    },
+    "areaServed": "Western Canada",
+    "knowsAbout": [
+      "Wireless downhole telemetry",
+      "Pressure monitoring",
+      "Temperature monitoring",
+      "Vibration monitoring",
+      "MODBUS integration",
+      "Heavy oil wells",
+      "Thermal wells"
+    ]
+  }
+  </script>
 </head>
-<body>
 
-<a class="skip-link" href="#main">Skip to content</a>
+<body id="top" data-chatfi-api="https://chatfi-server-851855129205.us-central1.run.app">
+  <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- ============ HEADER ============ -->
-<header class="site-header" id="siteHeader" data-header>
-  <div class="shell header-inner">
-    <a class="brand" href="#top" aria-label="Yotin Energy — home">
-      <img class="brand-mark" src="assets/yotin-icon.png" alt="" width="34" height="34">
-      <span class="brand-word">
-        <span class="brand-name">YOTIN</span>
-        <span class="brand-sub">ENERGY</span>
-      </span>
-    </a>
+  <header class="site-header" data-header>
+    <div class="shell header-inner">
+      <a class="brand-mini" href="#top" aria-label="Yotin Energy — home">
+        <img src="assets/yotin-icon.png" alt="" width="54" height="38">
+        <span>YOTIN</span>
+      </a>
 
-    <nav class="nav" aria-label="Primary">
-      <a href="#offerings">What&nbsp;We&nbsp;Do</a>
-      <a href="#wellfi">Well-Fi</a>
-      <a href="#sand-control">Sand&nbsp;Control</a>
-      <a href="#flow-control">Flow&nbsp;Control</a>
-      <a href="#about">About</a>
-      <a class="nav-cta" href="#contact">Get in Touch</a>
+      <nav class="desktop-nav" aria-label="Primary">
+        <a href="#wellfi">WellFi</a>
+        <a href="#company">Our Company</a>
+        <a href="#contact">Contact</a>
+        <button class="nav-chat" type="button" data-chatfi-open>Ask ChatFi</button>
+      </nav>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu" data-nav-toggle>
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile" data-mobile-nav hidden>
+      <a href="#wellfi">WellFi</a>
+      <a href="#company">Our Company</a>
+      <a href="#contact">Contact</a>
+      <button type="button" data-chatfi-open>Ask ChatFi</button>
     </nav>
+  </header>
 
-    <button class="nav-toggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu" data-nav-toggle>
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <a class="brand-lockup" href="#top" aria-label="Yotin Energy — home">
+            <img src="assets/yotin-icon.png" alt="Yotin wind mark" width="337" height="239">
+            <span class="brand-lockup-copy">
+              <span class="brand-lockup-name">YOTIN</span>
+              <span class="brand-lockup-tagline">An Indigenous Energy Services Company</span>
+            </span>
+          </a>
 
-  <div class="mobile-nav" id="mobileNav" data-mobile-nav hidden>
-    <a href="#offerings">What We Do</a>
-    <a href="#wellfi">Well-Fi</a>
-    <a href="#sand-control">Sand Control</a>
-    <a href="#flow-control">Flow Control</a>
-    <a href="#about">About</a>
-    <a class="mobile-cta" href="#contact">Get in Touch</a>
-  </div>
-</header>
+          <div class="hero-message">
+            <p class="eyebrow">WELLFI</p>
+            <h1 id="hero-title">Know What’s<br>Happening Downhole<span>.</span></h1>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+              <button class="button button-secondary" type="button" data-chatfi-open>Ask ChatFi <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
 
-<main id="main">
-<span id="top"></span>
-
-<!-- ============ HERO — Well-Fi living diorama ============ -->
-<section class="hero" id="hero" aria-labelledby="hero-title">
-
-  <!-- Full-bleed diorama, cover-fit via fixed-aspect wrapper so the EM pulse
-       stays pinned to the tool node in image coordinates -->
-  <div class="hero-scene" aria-hidden="true">
-    <img src="assets/wellfi-island-live.webp" alt="" fetchpriority="high" width="1920" height="1080">
-    <!-- data uplink — telemetry flowing up the vertical string to the pad -->
-    <svg class="data-pulses" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
-      <path class="uplink uplink--halo" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
-      <path class="uplink uplink--core" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
-    </svg>
-    <span class="em-pulse"></span>
-  </div>
-
-  <div class="hero-atmos" aria-hidden="true">
-    <svg class="wind" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" role="presentation">
-      <defs>
-        <linearGradient id="windStroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#3eadbd" stop-opacity="0"></stop>
-          <stop offset="0.5" stop-color="#3eadbd" stop-opacity="0.55"></stop>
-          <stop offset="1" stop-color="#3eadbd" stop-opacity="0"></stop>
-        </linearGradient>
-        <linearGradient id="windStroke2" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#d86629" stop-opacity="0"></stop>
-          <stop offset="0.5" stop-color="#d86629" stop-opacity="0.5"></stop>
-          <stop offset="1" stop-color="#d86629" stop-opacity="0"></stop>
-        </linearGradient>
-      </defs>
-      <g class="wind-lines" fill="none" stroke-width="1.5">
-        <path stroke="url(#windStroke)" d="M-200,150 C200,90 500,210 760,150 S1200,90 1640,160"></path>
-        <path stroke="url(#windStroke)" d="M-200,250 C220,180 520,320 780,250 S1220,180 1640,260"></path>
-        <path stroke="url(#windStroke2)" d="M-200,360 C240,300 540,430 800,360 S1240,300 1640,370"></path>
-      </g>
-    </svg>
-  </div>
-
-  <div class="shell hero-content">
-    <div class="hero-copy">
-      <div class="badges reveal" data-reveal>
-        <span class="badge badge--dot">Indigenous-Owned</span>
-        <span class="hero-slogan">Canada's only Indigenous-owned Sand &amp; Flow Control company</span>
+        <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
+          <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080" fetchpriority="high">
+          <dl class="reading reading-surface">
+            <div><dt>Surface</dt><dd>101.3 kPa</dd></div>
+            <div><dt>Temperature</dt><dd>14.2 °C</dd></div>
+          </dl>
+          <dl class="reading reading-downhole">
+            <div><dt>Downhole</dt><dd>8,742.6 kPa</dd></div>
+            <div><dt>Temperature</dt><dd>113.8 °C</dd></div>
+          </dl>
+        </div>
       </div>
-      <p class="eyebrow eyebrow--teal reveal" data-reveal>Flagship Tool — Well-Fi</p>
-      <h1 class="hero-title reveal" data-reveal id="hero-title">Know the Unknown.</h1>
-      <p class="hero-lead reveal" data-reveal>Well-Fi is Yotin's wireless downhole telemetry tool — live pressure, temperature, and vibration from deep in the well, with no cable run. It leads our completions lineup, and it's built into what comes next: every Yotin sand control and flow control system deploys Well-Fi-ready, so the completion that protects your well also reports on it.</p>
-      <div class="hero-chips reveal" data-reveal>
-        <span class="badge">130+ Installed Globally</span>
-        <span class="badge">Modbus Ready</span>
-        <span class="badge">Seamless Install</span>
+
+      <div class="shell signal-strip" aria-label="WellFi signal path">
+        <article class="signal-step">
+          <span class="signal-number">01</span>
+          <i class="ph ph-broadcast" aria-hidden="true"></i>
+          <div><h2>Signal</h2><p>WellFi sends a low-power wireless pulse from deep inside the well.</p></div>
+        </article>
+        <article class="signal-step">
+          <span class="signal-number">02</span>
+          <i class="ph ph-wave-sine" aria-hidden="true"></i>
+          <div><h2>Measure</h2><p>Pressure, temperature, vibration, and fluid-condition data are captured.</p></div>
+        </article>
+        <article class="signal-step">
+          <span class="signal-number">03</span>
+          <i class="ph ph-monitor" aria-hidden="true"></i>
+          <div><h2>Insight</h2><p>Live telemetry lands in the control system operators already use.</p></div>
+        </article>
       </div>
-      <div class="hero-actions reveal" data-reveal>
-        <a class="btn btn--solid" href="#wellfi">Explore Well-Fi</a>
-        <a class="btn btn--ghost" href="#contact">Talk to our team</a>
+    </section>
+
+    <section class="wellfi-section" id="wellfi" aria-labelledby="wellfi-title">
+      <div class="shell">
+        <div class="section-intro">
+          <p class="eyebrow">WIRELESS DOWNHOLE TELEMETRY</p>
+          <h2 id="wellfi-title">A well that used to run blind starts reporting back.</h2>
+          <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485.</p>
+        </div>
+
+        <ol class="journey-list" aria-label="How WellFi works">
+          <li><span>01</span><div><h3>Create the antenna gap</h3><p>A fiberglass collar electrically separates the tubing string.</p></div></li>
+          <li><span>02</span><div><h3>Transmit through the formation</h3><p>The downhole tool sends a low-power electromagnetic signal without a new cable.</p></div></li>
+          <li><span>03</span><div><h3>Decode at surface</h3><p>A surface receiver and ground reference recover the telemetry.</p></div></li>
+          <li><span>04</span><div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 for the existing RTU or SCADA system.</p></div></li>
+        </ol>
+
+        <dl class="spec-grid" aria-label="WellFi public specifications">
+          <div><dt>Pressure rating</dt><dd>10,000 <small>psi</small></dd></div>
+          <div><dt>Temperature rating</dt><dd>150 <small>°C</small></dd></div>
+          <div><dt>Tool outer diameter</dt><dd>46 <small>mm</small></dd></div>
+          <div><dt>Battery life</dt><dd>5+ <small>years</small></dd></div>
+          <div><dt>International installs</dt><dd>130+</dd></div>
+          <div><dt>Surface output</dt><dd>RS-485</dd></div>
+        </dl>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <a class="scroll-cue" href="#offerings" aria-label="Scroll to what we do">
-    <span>Closer</span>
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-  </a>
-</section>
-
-<!-- ============ OFFERINGS ============ -->
-<section class="offerings section" id="offerings" aria-labelledby="offerings-title">
-  <div class="shell">
-    <div class="section-head">
-      <p class="eyebrow eyebrow--orange">What We Do</p>
-      <h2 class="section-title" id="offerings-title">Three disciplines. One outcome: wells that perform predictably.</h2>
-      <p class="section-lead">Every well is a system, and so is our lineup. The telemetry that tells you what's really happening downhole, the screen that keeps sand out, and the devices that even out flow — engineered together, with Well-Fi monitoring built into every Yotin completion.</p>
-    </div>
-
-    <div class="cards">
-      <a class="card reveal" data-reveal href="#wellfi">
-        <span class="card-num">01</span>
-        <h3 class="card-title">Well-Fi</h3>
-        <p class="card-desc">Wireless downhole telemetry that brings pressure, temperature, and vibration to surface — no cable run.</p>
-        <span class="card-link">See how it works <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="card reveal" data-reveal href="#sand-control">
-        <span class="card-num">02</span>
-        <h3 class="card-title">Sand Control</h3>
-        <p class="card-desc">Slotted-liner completions engineered to each well's real operating envelope, not pulled off a shelf.</p>
-        <span class="card-link">See how it works <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="card reveal" data-reveal href="#flow-control">
-        <span class="card-num">03</span>
-        <h3 class="card-title">Flow Control</h3>
-        <p class="card-desc">Inflow control that keeps long laterals and multilateral wells producing evenly, end to end.</p>
-        <span class="card-link">See how it works <span aria-hidden="true">→</span></span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ WELL-FI ============ -->
-<section class="wellfi feature--dark section" id="wellfi" aria-labelledby="wellfi-title">
-  <div class="shell">
-    <div class="wellfi-head">
-      <p class="eyebrow eyebrow--teal">01 — Well-Fi</p>
-      <div class="wellfi-brandline">
-        <span class="wellfi-word">WELL-FI</span>
-        <span class="wellfi-tag">“Know the Unknown.”</span>
+    <section class="company-section" id="company" aria-labelledby="company-title">
+      <div class="shell company-grid">
+        <div>
+          <p class="eyebrow eyebrow-orange">ABOUT YOTIN</p>
+          <h2 id="company-title">Indigenous-owned.<br>Built from the ground up.</h2>
+        </div>
+        <div class="company-copy">
+          <p>Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada.</p>
+          <p>The name comes from <em>yôtin</em>, the Cree word for wind—a force that crosses the land without being seen. WellFi works on the same useful truth: what cannot be seen can still be measured.</p>
+          <p class="location"><i class="ph ph-map-pin" aria-hidden="true"></i> Pierceland, Saskatchewan, Canada</p>
+        </div>
       </div>
-      <h2 class="feature-title" id="wellfi-title">Know what's happening downhole, without running a single cable.</h2>
-      <p class="feature-lead">Well-Fi is a wireless downhole telemetry tool. It brings pressure, temperature, vibration, and fluid-condition data up from deep in a well with no new cable — most often added as a quick retrofit during a pump change, on any pump type, but it also goes into new wells. A well that used to run blind between interventions starts reporting back in real time. And it isn't a standalone product — Well-Fi is the monitoring layer inside every sand control and flow control system we build.</p>
-    </div>
+    </section>
 
-    <div class="wellfi-steps reveal" data-reveal>
-      <p class="wellfi-steps-label">How it gets data to surface, with no cable</p>
-      <ol class="steps">
-        <li class="step">
-          <span class="step-n">01</span>
-          <p>A fiberglass collar splits the tubing string — the antenna gap that makes everything else possible.</p>
-        </li>
-        <li class="step">
-          <span class="step-n">02</span>
-          <p>A low-power EM signal radiates into the surrounding rock instead of looping through steel.</p>
-        </li>
-        <li class="step">
-          <span class="step-n">03</span>
-          <p>A surface receiver and ground reference pick up the signal and decode it.</p>
-        </li>
-        <li class="step">
-          <span class="step-n">04</span>
-          <p>Readings land on MODBUS RS-485, straight into your existing RTU/SCADA.</p>
-        </li>
-      </ol>
-    </div>
-
-    <div class="spec-panel reveal" data-reveal aria-label="Well-Fi specifications">
-      <div class="spec"><span class="spec-value" data-count data-to="10000" data-suffix=" psi" data-format="comma">10,000 psi</span><span class="spec-label">Pressure rating</span></div>
-      <div class="spec"><span class="spec-value" data-count data-to="150" data-suffix="°C">150°C</span><span class="spec-label">Temperature rating</span></div>
-      <div class="spec"><span class="spec-value" data-count data-to="46" data-suffix=" mm">46 mm</span><span class="spec-label">Tool outer diameter</span></div>
-      <div class="spec"><span class="spec-value">5+ yrs</span><span class="spec-label">Battery life</span></div>
-      <div class="spec"><span class="spec-value" data-count data-to="130" data-suffix="+">130+</span><span class="spec-label">International installations</span></div>
-      <div class="spec"><span class="spec-value">RS-485</span><span class="spec-label">MODBUS surface output</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SAND CONTROL ============ -->
-<section class="feature feature--light section" id="sand-control" aria-labelledby="sand-title">
-  <div class="shell feature-grid">
-    <div class="feature-copy reveal" data-reveal>
-      <p class="eyebrow eyebrow--teal">02 — Sand Control</p>
-      <h2 class="feature-title feature-title--ink" id="sand-title">Slotted-liner systems engineered to the well, not the catalog.</h2>
-      <p class="feature-lead feature-lead--ink">Sand control is the difference between a well that produces clean for years and one that sands in early. We size every slotted liner against the well's real operating envelope — erosion limits, structural limits, and inflow conformance along the whole lateral — and validate it with computational fluid dynamics instead of rule-of-thumb sizing. It takes longer to engineer. It holds up longer in the ground.</p>
-      <ul class="feature-list feature-list--teal feature-list--ink">
-        <li>Slot geometry sized to the well's real operating envelope, not a standard catalog size</li>
-        <li>Validated against erosion and structural limits with computational fluid dynamics</li>
-        <li>Engineered for SAGD, thermal, and conventional completions</li>
-        <li>Well-Fi-ready — telemetry deploys inside the completion, so the liner that controls sand also monitors the well</li>
-      </ul>
-    </div>
-    <figure class="feature-figure reveal" data-reveal>
-      <div class="schematic-card">
-        <img src="assets/slotted-liner.png" alt="Engineering schematic of a slotted liner sand control screen" width="900" height="520" loading="lazy">
+    <section class="contact-section" id="contact" aria-labelledby="contact-title">
+      <div class="shell contact-grid">
+        <div>
+          <p class="eyebrow">REVIEW A CANDIDATE WELL</p>
+          <h2 id="contact-title">Bring the well.<br>We’ll bring the questions.</h2>
+        </div>
+        <div class="contact-actions">
+          <p>Share the well type, changeout timing, and the data you need before a deployment decision.</p>
+          <a class="button button-primary" href="mailto:info@yotinenergy.ca">Email Yotin <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+          <button class="text-button" type="button" data-chatfi-open>Or ask ChatFi about WellFi</button>
+        </div>
       </div>
-      <figcaption>Slotted liner — sand control screen detail</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ============ FLOW CONTROL ============ -->
-<section class="feature feature--dark section" id="flow-control" aria-labelledby="flow-title">
-  <div class="shell feature-grid feature-grid--reverse">
-    <figure class="feature-figure feature-figure--photo reveal" data-reveal>
-      <div class="photo-frame" data-tilt>
-        <img src="assets/hero-multilateral.webp" alt="Cutaway render of a multilateral open-hole completion with inflow distributed across laterals" width="1280" height="853" loading="lazy">
-        <figcaption>Multilateral open-hole completion — inflow distributed across laterals</figcaption>
-      </div>
-    </figure>
-    <div class="feature-copy reveal" data-reveal>
-      <p class="eyebrow eyebrow--orange">03 — Flow Control</p>
-      <h2 class="feature-title" id="flow-title">Even inflow, end to end — not just sand kept out.</h2>
-      <p class="feature-lead">Keeping sand out isn't the same as producing evenly. Long laterals and multilateral wells tend to draw unevenly: a few hot zones do most of the work while the rest of the wellbore rides along for the trip. Our flow control engineering manages that inflow profile across the entire lateral, using the same CFD-driven design discipline behind our sand control work, so production stays distributed instead of concentrated.</p>
-      <ul class="feature-list feature-list--orange">
-        <li>Engineered alongside sand control, not bolted on after the fact</li>
-        <li>Built for multilateral and long-reach completions</li>
-        <li>Manages conformance along the whole lateral, not just at one point</li>
-        <li>Pairs with Well-Fi telemetry to verify the inflow profile in real time — not just at design time</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ABOUT ============ -->
-<section class="about feature--light section" id="about" aria-labelledby="about-title">
-  <div class="shell about-inner">
-    <p class="eyebrow eyebrow--orange">About Yotin</p>
-    <h2 class="section-title section-title--ink reveal" data-reveal id="about-title">Indigenous-owned. Built from the ground up.</h2>
-    <div class="about-body reveal" data-reveal>
-      <p>Yotin is Canada's only Indigenous-owned sand control and flow control company, based in Pierceland, Saskatchewan and serving the heavy-oil and oil sands corridor on both sides of the Alberta border. We bring engineering-led sand control, flow control, and downhole telemetry to the operators working this ground — thermal, conventional, and everything those wells need to keep producing safely.</p>
-      <p>The name comes from <em>yôtin</em>, the Cree word for wind — a force that has always moved across this land. It's a fitting name for a company built to keep energy moving safely out of the ground, and opportunity moving back into the communities here.</p>
-    </div>
-    <p class="about-place reveal" data-reveal>
-      <span class="dot" aria-hidden="true"></span>
-      Headquartered in Pierceland, Saskatchewan, Canada
-    </p>
-  </div>
-</section>
-
-<!-- ============ CONTACT ============ -->
-<section class="contact section" id="contact" aria-labelledby="contact-title">
-  <div class="contact-atmos" aria-hidden="true">
-    <svg class="wind wind--soft" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice" role="presentation">
-      <g class="wind-lines" fill="none" stroke-width="1.5">
-        <path stroke="url(#windStroke)" d="M-200,140 C220,80 520,210 780,140 S1220,80 1640,150"></path>
-        <path stroke="url(#windStroke2)" d="M-200,300 C240,240 540,370 800,300 S1240,240 1640,310"></path>
-        <path stroke="url(#windStroke)" d="M-200,450 C220,390 520,520 780,450 S1220,390 1640,460"></path>
-      </g>
-    </svg>
-  </div>
-  <div class="shell contact-inner">
-    <p class="eyebrow eyebrow--teal">Get In Touch</p>
-    <h2 class="contact-title reveal" data-reveal id="contact-title">Let's talk about your well.</h2>
-    <p class="contact-lead reveal" data-reveal>Tell us what you're running and what it's doing. We'll tell you what we can do about it.</p>
-    <div class="contact-actions reveal" data-reveal>
-      <a class="btn btn--solid btn--lg" href="mailto:info@yotinenergy.ca">Email info@yotinenergy.ca</a>
-    </div>
-    <p class="contact-slogan">From the Ground Up.</p>
-    <p class="contact-place">Pierceland, Saskatchewan, Canada</p>
-  </div>
+    </section>
+  </main>
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <a class="brand brand--footer" href="#top" aria-label="Yotin Energy — home">
-        <img src="assets/yotin-icon.png" alt="" width="22" height="22">
-        <span>© 2026 Yotin Energy — an Indigenous-owned company. All rights reserved.</span>
+      <a class="footer-brand" href="#top">
+        <img src="assets/yotin-icon.png" alt="" width="58" height="41">
+        <span><strong>YOTIN</strong><small>An Indigenous Energy Services Company</small></span>
       </a>
-      <nav class="footer-nav" aria-label="Footer">
-        <a href="#wellfi">Well-Fi</a>
-        <a href="#sand-control">Sand Control</a>
-        <a href="#flow-control">Flow Control</a>
-        <a href="#about">About</a>
+      <nav aria-label="Footer">
+        <a href="#wellfi">WellFi</a>
+        <a href="#company">Our Company</a>
         <a href="#contact">Contact</a>
       </nav>
+      <p>© 2026 Yotin Energy. All rights reserved.</p>
     </div>
   </footer>
-</section>
 
-</main>
+  <button class="chatfi-launcher" type="button" aria-label="Ask ChatFi about WellFi" data-chatfi-open>
+    <i class="ph ph-chats-circle" aria-hidden="true"></i>
+    <span>ChatFi</span>
+  </button>
 
-<script src="main.js" defer></script>
+  <section class="chatfi-panel" role="dialog" aria-modal="true" aria-labelledby="chatfi-title" data-chatfi-panel hidden>
+    <header class="chatfi-header">
+      <div>
+        <p id="chatfi-title">ChatFi</p>
+        <span>WellFi assistant</span>
+      </div>
+      <button type="button" aria-label="Close ChatFi" data-chatfi-close><i class="ph ph-x" aria-hidden="true"></i></button>
+    </header>
+
+    <div class="chatfi-messages" aria-live="polite" aria-relevant="additions text" data-chatfi-messages></div>
+
+    <form class="chatfi-form" data-chatfi-form>
+      <label class="sr-only" for="chatfi-input">Ask about WellFi</label>
+      <textarea id="chatfi-input" name="message" rows="1" maxlength="4000" placeholder="Ask about WellFi…" data-chatfi-input></textarea>
+      <button type="submit" aria-label="Send message" data-chatfi-send><i class="ph ph-paper-plane-tilt" aria-hidden="true"></i></button>
+    </form>
+    <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
+  </section>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script defer src="main.js?v=20260717-1"></script>
 </body>
 </html>
