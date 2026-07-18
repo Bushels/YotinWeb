@@ -1,0 +1,4 @@
+# Keep the deploy lean — these aren't part of the published site
+.claude/
+design-source/
+README.md

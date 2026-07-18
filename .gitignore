@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/
+
+# Local environment
+.env*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local preview tooling (not part of the site)
+.claude/launch.json
+
+.vercel
+.env*

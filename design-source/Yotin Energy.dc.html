@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-injected>html,body{background:transparent}</style><script data-omelette-injected>(()=>{{const Y=new URLSearchParams(location.search).get("theme");if(Y==="light"||Y==="dark"){document.documentElement.dataset.theme=Y}}{const Y=()=>{try{if(document.querySelector('meta[name="color-scheme"]'))return;const k=getComputedStyle(document.documentElement).getPropertyValue("color-scheme").trim();if(k&&k!=="normal")return;const w=(X)=>{if(!X)return null;const F=getComputedStyle(X).backgroundColor.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)$/);if(!F)return null;const K=F[4]==null?1:parseFloat(F[4])/(F[4].endsWith("%")?100:1);if(K<0.99)return null;return[+F[1],+F[2],+F[3]]};const U=w(document.body)||w(document.documentElement);if(!U)return;const x=(X)=>{const F=X/255;return F<=0.04045?F/12.92:((F+0.055)/1.055)**2.4};const D=0.2126*x(U[0])+0.7152*x(U[1])+0.0722*x(U[2]);document.documentElement.style.setProperty("color-scheme",D<0.4?"dark":"light")}catch{}};if(document.readyState==="complete")Y();else window.addEventListener("load",Y)}var _=[];var v=false;var P=30000;var h=3000;document.addEventListener("DOMContentLoaded",()=>{const Y=window.Babel;const k="om-src-id";if(Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[k])){Y.registerPlugin(k,({types:D})=>({visitor:{JSXOpeningElement(X,F){const K=X.node;if(K.name&&K.name.type==="JSXMemberExpression")return;for(let z=0;z<K.attributes.length;z++){const V=K.attributes[z];if(V.type==="JSXAttribute"&&V.name&&V.name.name==="data-om-id")return}const B=F.file&&F.file.opts&&F.file.opts.filename||"?";const A=K.loc&&K.loc.start;const J=`jsx:${B}:${K.start??0}:${A?A.line:0}:${A?A.column+1:0}`;K.attributes.push(D.jsxAttribute(D.jsxIdentifier("data-om-id"),D.stringLiteral(J)))}}}))}const w="om-text-extract";let U=false;if(v&&Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[w])){const D=window.React;if(D&&D.useSyncExternalStore&&D.createElement){U=true;const X={};const F=new Set;let K=0;window.__omTextO=X;window.__omTextSet=(J)=>{for(const z in J){const V=J[z];if(V==null)delete X[z];else X[z]=V}K++;F.forEach((z)=>z())};const B=(J)=>{F.add(J);return()=>F.delete(J)};const A=()=>K;window.__OmT=function J(z){D.useSyncExternalStore(B,A,A);return D.createElement("span",{"data-om-text":z.i,className:"__om-t"},z.i in X?X[z.i]:z.children)};Y.registerPlugin(w,({types:J})=>{const z={style:1,script:1,noscript:1,textarea:1,title:1,option:1,text:1,tspan:1,textPath:1};const V={placeholder:1,alt:1,title:1,label:1,"aria-label":1,"aria-description":1,"aria-placeholder":1};const W=(Z,H)=>J.logicalExpression("??",J.memberExpression(J.logicalExpression("||",J.memberExpression(J.identifier("window"),J.identifier("__omTextO")),J.objectExpression([])),J.stringLiteral(Z),true),H);const Q=(Z)=>Z.file&&Z.file.opts&&Z.file.opts.filename||"?";const j=(Z)=>Z.file&&Z.file.code||"";const G=(Z,H)=>{const N=($)=>$&&$.start!=null&&$.end!=null&&($.type==="StringLiteral"||$.type==="TemplateLiteral"&&$.expressions.length===0)?[$.start,$.end]:null;const L=N(H);if(L)return L;if(H&&H.type==="Identifier"){const $=Z.scope.getBinding(H.name);if($&&$.constant&&$.path.node.type==="VariableDeclarator"){return N($.path.node.init)}}return null};const R=(Z,H,N)=>{const L=Z.node;let $=false;const M=(q,E)=>{$=true;return J.jsxElement(J.jsxOpeningElement(J.jsxIdentifier("__OmT"),[J.jsxAttribute(J.jsxIdentifier("i"),J.stringLiteral(q))],false),J.jsxClosingElement(J.jsxIdentifier("__OmT")),[E],false)};const C=L.children.map((q)=>{if(q.type==="JSXText"){if(q.start==null||q.end==null)return q;const E=N.slice(q.start,q.end);const f=E.length-E.trimStart().length;const I=E.length-E.trimEnd().length;if(f+I>=E.length)return q;return M(`txt:${H}:${q.start+f}:${q.end-I}`,q)}if(q.type==="JSXExpressionContainer"){const E=G(Z,q.expression);if(E)return M(`str:${H}:${E[0]}:${E[1]}`,q)}return q});if($)L.children=C};return{visitor:{JSXOpeningElement(Z,H){const N=Z.node;const L=Q(H);const $={};for(let M=0;M<N.attributes.length;M++){const C=N.attributes[M];if(C.type!=="JSXAttribute"||!C.name)continue;const q=C.name.name;if(!V[q])continue;if(!C.value||C.value.type!=="StringLiteral")continue;if(C.value.start==null||C.value.end==null)continue;const E=`txt:${L}:${C.value.start}:${C.value.end}`;$[q]=E;C.value=J.jsxExpressionContainer(W(E,J.stringLiteral(C.value.value)))}if(Object.keys($).length){N.attributes.push(J.jsxAttribute(J.jsxIdentifier("data-om-text-attrs"),J.stringLiteral(JSON.stringify($))))}},JSXElement(Z,H){const N=Z.node.openingElement;const L=N&&N.name&&N.name.name;if(L==="__OmT")return;if(typeof L==="string"&&z[L])return;R(Z,Q(H),j(H))},JSXFragment(Z,H){R(Z,Q(H),j(H))}}}})}}const x=U?["transform-react-jsx-source",k,w]:["transform-react-jsx-source",k];document.querySelectorAll('script[type="text/babel"],script[type="text/jsx"]').forEach((D,X)=>{const F=D.getAttribute("data-plugins")||"";const K=x.filter((B)=>F.indexOf(B)<0);if(K.length){D.setAttribute("data-plugins",F?`${F},${K.join(",")}`:K.join(","))}if(!D.hasAttribute("data-filename")){D.setAttribute("data-filename",D.getAttribute("src")||`inline-${X}`)}})});var S=window.parent;if(S&&S!==window){const Y=(J,z)=>{try{S.postMessage({__omelette_log:true,type:J,data:z},"*")}catch{}};["log","warn","error"].forEach((J)=>{const z=console[J];console[J]=(...V)=>{const W=V.map((Q)=>{try{return typeof Q==="object"?JSON.stringify(Q):String(Q)}catch{try{return String(Q)}catch{return"[unstringifiable]"}}}).join(" ");Y(J,W);z.apply(console,V)}});window.addEventListener("error",(J)=>{const z=J.target;if(z&&z!==window&&z.tagName){const V=z.src||z.href||"";Y("resource_error",`${z.tagName} failed to load: ${V}`)}else{Y("error",`${J.message||"Unknown error"} at ${J.filename||"?"}:${J.lineno||0}:${J.colno||0}`)}},true);window.addEventListener("unhandledrejection",(J)=>{const z=J.reason;const V=z instanceof Error?`${z.message} ${z.stack}`:String(z);Y("error",`Unhandled rejection: ${V}`)});const k=()=>{try{S.postMessage({type:"omelette:height",height:document.documentElement.scrollHeight},"*")}catch{}};if(window.ResizeObserver)new ResizeObserver(k).observe(document.documentElement);const w=()=>{k();if(!document.querySelector('script[type="text/babel"],script[type="text/jsx"]'))return;const J=()=>document.getElementById("root")||document.querySelector("body > div[id]");const z=J()?.firstElementChild??null;let V=0;const W=()=>{const Q=J();if(Q&&Q.firstElementChild!==z||++V>30){k();return}setTimeout(W,100)};setTimeout(W,100)};if(document.readyState==="complete")w();else window.addEventListener("load",w);const U={};let x=0;const D=(J)=>new Promise((z,V)=>{if(!_.length){V(new Error("claude.complete: no parent origin"));return}const W=`c${++x}`;const Q=()=>setTimeout(()=>{delete U[W];V(new Error(`claude.complete: no data for ${P/1000}s`))},P);const j=Q();U[W]={resolve:z,reject:V,text:"",t:j,arm:Q};try{for(const G of _){S.postMessage({__om_api:true,id:W,body:J},G)}}catch(G){clearTimeout(j);delete U[W];V(G)}});const X=8;const F=async(J,z)=>{if(!Array.isArray(J.messages)){throw new Error("claude.complete: tools require a messages array")}const V=J.messages.slice();const W={...J,tools:J.tools.map((G)=>{if(G===null||typeof G!=="object")return G;const R={};for(const Z of Object.keys(G)){if(typeof G[Z]!=="function")R[Z]=G[Z]}return R})};const Q=W.tool_choice;const j=Q!=null&&(Q.type==="any"||Q.type==="tool")?{...W,tool_choice:Q.disable_parallel_tool_use!==undefined?{type:"auto",disable_parallel_tool_use:Q.disable_parallel_tool_use}:{type:"auto"}}:W;for(let G=0;G<X;G++){const R=await D({...G===0?W:j,messages:V});const Z=R.message;const H=Z&&Array.isArray(Z.content)?Z.content:null;const N=H?H.filter(($)=>$?.type==="tool_use"):[];if(Z?.stop_reason!=="tool_use"||N.length===0){return R.text}const L=[];for(const $ of N){const M=z.get($.name);if(!M){L.push({type:"tool_result",tool_use_id:$.id,content:`no handler for tool "${$.name}"`,is_error:true});continue}try{const C=await M($.input);const q=typeof C==="string"?C:A(C)??"";L.push({type:"tool_result",tool_use_id:$.id,content:q})}catch(C){L.push({type:"tool_result",tool_use_id:$.id,content:String(C?.message??C??"tool handler failed"),is_error:true})}}V.push({role:"assistant",content:H},{role:"user",content:L})}throw new Error(`claude.complete: exceeded ${X} tool turns`)};window.claude={complete(J){const z=J;if(z!==null&&typeof z==="object"&&Array.isArray(z.tools)&&z.tools.some((V)=>V!==null&&typeof V==="object"&&typeof V.run==="function")){const V=new Map;for(const W of z.tools){if(W!==null&&typeof W==="object"&&typeof W.run==="function"){V.set(String(W.name),W.run)}}return F(z,V)}return D(J).then((V)=>V.text)}};const K={};let B=0;window.omelette={writeFile:(J,z)=>new Promise((V,W)=>{if(!_.length){V();return}const Q=`f${++B}`;const j=setTimeout(()=>{delete K[Q];V()},h);K[Q]={resolve:V,reject:W,t:j};try{for(const G of _){S.postMessage({__om_file:true,id:Q,op:"write",path:J,content:z},G)}}catch{clearTimeout(j);delete K[Q];V()}})};const A=(J)=>{try{return JSON.stringify(J)}catch{return JSON.stringify(String(J))}};window.addEventListener("message",(J)=>{if(_.indexOf(J.origin)<0)return;if(J.source!==S)return;const z=J.data;if(!z)return;if(z.type==="omelette-preview-refresh"){if(typeof z.token!=="string"||!/^[0-9a-f.-]+(\.(rc|pr-[0-9]+))?(\.[0-9]+\.[0-9a-f]{16})?$/.test(z.token))return;const Q=Math.max(1,Math.floor((z.expiresAt||0)-Date.now()/1000));document.cookie="__Host-omelette-preview="+z.token+"; Path=/; Secure; SameSite=None; Partitioned; Max-Age="+Q;return}if(z.__om_file_r){const Q=K[z.id];if(!Q)return;clearTimeout(Q.t);delete K[z.id];if(z.ok)Q.resolve();else Q.reject(new Error(z.error||"write failed"));return}if(z.__om_api_r){const Q=U[z.id];if(!Q)return;if(z.error!=null){clearTimeout(Q.t);delete U[z.id];Q.reject(new Error(z.error));return}if(z.chunk!=null){clearTimeout(Q.t);Q.t=Q.arm();Q.text+=z.chunk;return}if(z.done){clearTimeout(Q.t);delete U[z.id];Q.resolve({text:z.text!=null?z.text:Q.text,message:z.message});return}return}if(!z.__om_eval)return;const V=z;const W=(Q)=>{J.source.postMessage({...Q,__om_eval_r:1,id:V.id},J.origin)};try{const Q=(0,eval)(V.code);if(Q&&typeof Q.then==="function"){Q.then((j)=>W({ok:1,v:A(j)}),(j)=>W({ok:0,e:String(j)}))}else{W({ok:1,v:A(Q)})}}catch(Q){W({ok:0,e:String(Q)})}})}})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Yotin Energy — Sand Control, Flow Control &amp; Well-Fi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Yotin is an Indigenous-owned energy services company specializing in sand control, flow control, and Well-Fi downhole telemetry.">
+<link rel="icon" href="assets/yotin-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+@keyframes yotin-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes yotin-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+body { margin: 0; -webkit-font-smoothing: antialiased; }
+</style>
+</helmet>
+
+<div id="top" style="background:#F5F2EC;font-family:'IBM Plex Sans',sans-serif;color:#16212c">
+
+  <header style="position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 40px;background:rgba(11,19,28,0.86);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap">
+    <a href="#top" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <img src="assets/yotin-icon.png" alt="Yotin" style="height:30px;width:auto;display:block">
+      <span style="display:flex;flex-direction:column;line-height:1.05">
+        <span style="font-family:Archivo,sans-serif;font-weight:800;font-size:17px;letter-spacing:0.03em;color:#ffffff">YOTIN</span>
+        <span style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:8.5px;letter-spacing:0.22em;color:rgba(255,255,255,0.5)">ENERGY</span>
+      </span>
+    </a>
+    <nav style="display:flex;align-items:center;gap:26px;flex-wrap:wrap">
+      <sc-for list="{{ navLinks }}" as="link" hint-placeholder-count="5">
+        <a href="{{ link.href }}" style="color:rgba(255,255,255,0.75);text-decoration:none;font-size:14px;font-weight:500" style-hover="color:#ffffff">{{ link.label }}</a>
+      </sc-for>
+      <a href="#contact" style="background:#d86629;color:#0d1722;text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;border-radius:100px;white-space:nowrap" style-hover="background:#c2581f">Get in Touch</a>
+    </nav>
+  </header>
+
+  <section id="hero" data-screen-label="Hero" style="position:relative;overflow:hidden;background:radial-gradient(ellipse 900px 600px at 85% 8%, rgba(62,173,189,0.16), transparent 60%), radial-gradient(ellipse 700px 500px at 5% 95%, rgba(216,102,41,0.14), transparent 55%), #0d1722;padding:152px 40px 100px;scroll-margin-top:80px">
+    <img src="assets/yotin-icon.png" alt="" style="position:absolute;top:-140px;right:-180px;width:620px;opacity:0.07;animation:yotin-spin 160s linear infinite;pointer-events:none">
+    <div style="max-width:1180px;margin:0 auto;position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:56px;align-items:center">
+      <div>
+        <sc-if value="{{ showOwnershipBadge }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+            <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.85);font-size:12.5px;font-weight:600;letter-spacing:0.03em;padding:7px 14px;border-radius:100px">
+              <span style="width:6px;height:6px;border-radius:50%;background:#d86629;display:inline-block"></span>
+              Indigenous-Owned
+            </span>
+            <span style="display:inline-flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.85);font-size:12.5px;font-weight:600;letter-spacing:0.03em;padding:7px 14px;border-radius:100px">Alberta, Canada</span>
+          </div>
+        </sc-if>
+        <h1 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(36px,4.8vw,62px);line-height:1.06;letter-spacing:-0.01em;color:#ffffff;margin:0 0 22px">Engineering certainty, from the reservoir to the surface.</h1>
+        <p style="font-size:18px;line-height:1.65;color:rgba(255,255,255,0.7);max-width:560px;margin:0 0 34px;text-wrap:pretty">Yotin is an Indigenous-owned energy services company specializing in sand control, flow control, and downhole intelligence — the completions equipment and monitoring tools that keep thermal and conventional wells producing with confidence.</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <a href="#offerings" style="background:#d86629;color:#0d1722;text-decoration:none;font-weight:700;font-size:15px;padding:15px 28px;border-radius:100px" style-hover="background:#c2581f">Explore what we do</a>
+          <a href="#contact" style="background:transparent;color:#ffffff;border:1.5px solid rgba(255,255,255,0.32);text-decoration:none;font-weight:600;font-size:15px;padding:15px 28px;border-radius:100px" style-hover="border-color:#ffffff;background:rgba(255,255,255,0.06)">Talk to our team</a>
+        </div>
+      </div>
+      <div style="position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.14);box-shadow:0 30px 70px -20px rgba(0,0,0,0.55);aspect-ratio:3/2">
+        <sc-if value="{{ isHeroSagd }}" hint-placeholder-val="{{ true }}">
+          <img src="assets/hero-sagd-island.png" alt="Well pad cutaway render" style="width:100%;height:100%;object-fit:cover;display:block">
+          <div style="position:absolute;bottom:14px;left:14px;background:rgba(11,19,28,0.74);backdrop-filter:blur(8px);color:#fff;font-size:12px;padding:8px 14px;border-radius:10px;max-width:80%">SAGD well pad — steam &amp; production strings, cutaway view</div>
+        </sc-if>
+        <sc-if value="{{ isHeroMultilateral }}" hint-placeholder-val="{{ false }}">
+          <img src="assets/hero-multilateral.png" alt="Multilateral open-hole completion cutaway render" style="width:100%;height:100%;object-fit:cover;display:block">
+          <div style="position:absolute;bottom:14px;left:14px;background:rgba(11,19,28,0.74);backdrop-filter:blur(8px);color:#fff;font-size:12px;padding:8px 14px;border-radius:10px;max-width:80%">Multilateral open-hole completion, cutaway view</div>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <section id="offerings" data-screen-label="What We Do" style="background:#F5F2EC;padding:108px 40px;scroll-margin-top:80px">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="max-width:680px;margin:0 0 56px">
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#d86629;margin-bottom:14px">What We Do</div>
+        <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(28px,3.4vw,42px);line-height:1.1;letter-spacing:-0.01em;color:#16212c;margin:0 0 18px">Three disciplines. One outcome: wells that perform predictably.</h2>
+        <p style="font-size:17px;line-height:1.65;color:#525d68;margin:0;text-wrap:pretty">Every well is a system. We engineer the pieces that keep it under control — from the screen that keeps sand out, to the devices that even out flow, to the tools that tell you what's really happening downhole.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+        <sc-for list="{{ offerings }}" as="o" hint-placeholder-count="3">
+          <a href="{{ o.href }}" style="display:block;background:#ffffff;border:1px solid rgba(22,33,44,0.08);border-radius:18px;padding:34px 30px;text-decoration:none;box-shadow:0 1px 3px rgba(22,33,44,0.04)" style-hover="box-shadow:0 16px 32px -12px rgba(22,33,44,0.16);transform:translateY(-2px)">
+            <div style="font-family:Archivo,sans-serif;font-weight:800;font-size:13px;color:#3eadbd;margin-bottom:16px">{{ o.num }}</div>
+            <div style="font-family:Archivo,sans-serif;font-weight:800;font-size:22px;color:#16212c;margin-bottom:10px">{{ o.name }}</div>
+            <div style="font-size:15px;line-height:1.55;color:#525d68;margin-bottom:18px;text-wrap:pretty">{{ o.desc }}</div>
+            <div style="font-size:14px;font-weight:700;color:#d86629">See how it works →</div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="sand-control" data-screen-label="Sand Control" style="background:#12202c;padding:108px 40px;scroll-margin-top:80px">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:56px;align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#3eadbd;margin-bottom:14px">01 — Sand Control</div>
+        <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(26px,3.1vw,36px);line-height:1.15;letter-spacing:-0.01em;color:#ffffff;margin:0 0 18px">Slotted-liner systems engineered to the well, not the catalog.</h2>
+        <p style="font-size:16.5px;line-height:1.65;color:rgba(255,255,255,0.68);margin:0 0 28px;text-wrap:pretty">Sand control is the difference between a well that produces clean for years and one that sands in early. We size every slotted liner against the well's real operating envelope — erosion limits, structural limits, and inflow conformance along the whole lateral — and validate it with computational fluid dynamics instead of rule-of-thumb sizing. It takes longer to engineer. It holds up longer in the ground.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ sandFeatures }}" as="f" hint-placeholder-count="3">
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <span style="width:7px;height:7px;border-radius:50%;background:#3eadbd;margin-top:8px;flex:none"></span>
+              <span style="font-size:15.5px;line-height:1.55;color:rgba(255,255,255,0.82)">{{ f }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="background:#ffffff;border-radius:18px;padding:28px;box-shadow:0 24px 60px -20px rgba(0,0,0,0.5)">
+          <img src="assets/slotted-liner.png" alt="Slotted liner sand control schematic" style="width:100%;height:auto;display:block">
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:14px;text-align:center">Slotted liner — sand control screen detail</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="flow-control" data-screen-label="Flow Control" style="background:#F5F2EC;padding:108px 40px;scroll-margin-top:80px">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:56px;align-items:center">
+      <div style="order:2">
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#d86629;margin-bottom:14px">02 — Flow Control</div>
+        <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(26px,3.1vw,36px);line-height:1.15;letter-spacing:-0.01em;color:#16212c;margin:0 0 18px">Even inflow, end to end — not just sand kept out.</h2>
+        <p style="font-size:16.5px;line-height:1.65;color:#525d68;margin:0 0 28px;text-wrap:pretty">Keeping sand out isn't the same as producing evenly. Long laterals and multilateral wells tend to draw unevenly: a few hot zones do most of the work while the rest of the wellbore rides along for the trip. Our flow control engineering manages that inflow profile across the entire lateral, using the same CFD-driven design discipline behind our sand control work, so production stays distributed instead of concentrated.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ flowFeatures }}" as="f" hint-placeholder-count="3">
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <span style="width:7px;height:7px;border-radius:50%;background:#d86629;margin-top:8px;flex:none"></span>
+              <span style="font-size:15.5px;line-height:1.55;color:#3b4450">{{ f }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="order:1;position:relative;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px -20px rgba(22,33,44,0.25);aspect-ratio:3/2">
+        <img src="assets/hero-multilateral.png" alt="Multilateral open-hole completion cutaway" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;bottom:14px;left:14px;background:rgba(11,19,28,0.74);backdrop-filter:blur(8px);color:#fff;font-size:12px;padding:8px 14px;border-radius:10px;max-width:85%">Multilateral open-hole completion — inflow distributed across laterals</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="wellfi" data-screen-label="Well-Fi" style="background:#12202c;padding:108px 40px;scroll-margin-top:80px">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="max-width:700px;margin:0 0 52px">
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#3eadbd;margin-bottom:14px">03 — Well-Fi</div>
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px">
+          <span style="font-family:Archivo,sans-serif;font-weight:800;font-size:15px;letter-spacing:0.06em;color:#ffffff">WELL-FI</span>
+          <span style="font-size:15px;font-weight:500;font-style:italic;color:#3eadbd">"Know the Unknown."</span>
+        </div>
+        <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(26px,3.1vw,36px);line-height:1.15;letter-spacing:-0.01em;color:#ffffff;margin:0 0 18px">Know what's happening downhole, without running a single cable.</h2>
+        <p style="font-size:16.5px;line-height:1.65;color:rgba(255,255,255,0.68);margin:0;text-wrap:pretty">Well-Fi is a wireless downhole telemetry tool. It brings pressure, temperature, vibration, and fluid-condition data up from deep in a well with no new cable — most often added as a quick retrofit during a pump change, on any pump type, but it also goes into new wells. A well that used to run blind between interventions starts reporting back in real time.</p>
+      </div>
+
+      <sc-if value="{{ showHowItWorks }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-bottom:52px">
+          <div style="font-size:13px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.5);margin-bottom:18px">HOW IT GETS DATA TO SURFACE, WITH NO CABLE</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px">
+            <sc-for list="{{ wellfiSteps }}" as="step" hint-placeholder-count="4">
+              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:24px 22px">
+                <div style="font-family:Archivo,sans-serif;font-weight:800;font-size:28px;color:rgba(62,173,189,0.4);margin-bottom:10px">{{ step.n }}</div>
+                <div style="font-size:14.5px;line-height:1.5;color:rgba(255,255,255,0.78)">{{ step.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+          <sc-for list="{{ wellfiSpecs }}" as="spec" hint-placeholder-count="6">
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:14px;padding:20px 16px;text-align:left">
+              <div style="font-family:Archivo,sans-serif;font-weight:800;font-size:21px;color:#3eadbd">{{ spec.value }}</div>
+              <div style="font-size:12px;letter-spacing:0.02em;color:rgba(255,255,255,0.55);margin-top:6px">{{ spec.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" data-screen-label="About" style="background:#F5F2EC;padding:108px 40px;scroll-margin-top:80px">
+    <div style="max-width:760px;margin:0 auto">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#d86629;margin-bottom:14px">About Yotin</div>
+      <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(28px,3.4vw,42px);line-height:1.12;letter-spacing:-0.01em;color:#16212c;margin:0 0 26px">Indigenous-owned. Built on the ground we work.</h2>
+      <p style="font-size:17px;line-height:1.7;color:#3b4450;margin:0 0 22px;text-wrap:pretty">Yotin is an Indigenous-owned energy services company based in Alberta's heavy-oil and oil sands corridor. We bring engineering-led sand control, flow control, and downhole telemetry to the operators working this ground — thermal, conventional, and everything those wells need to keep producing safely.</p>
+      <p style="font-size:17px;line-height:1.7;color:#3b4450;margin:0 0 36px;text-wrap:pretty">The name comes from <em>yôtin</em>, the Cree word for wind — a force that has always moved across this land. It's a fitting name for a company built to keep energy moving safely out of the ground, and opportunity moving back into the communities here.</p>
+      <div style="display:flex;align-items:center;gap:12px;padding-top:24px;border-top:1px solid rgba(22,33,44,0.12)">
+        <span style="width:8px;height:8px;border-radius:50%;background:#d86629;flex:none"></span>
+        <span style="font-size:14.5px;font-weight:600;color:#16212c">Headquartered in the Cold Lake – Bonnyville region, Alberta, Canada</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" data-screen-label="Contact" style="position:relative;overflow:hidden;background:radial-gradient(ellipse 800px 500px at 12% 0%, rgba(62,173,189,0.14), transparent 60%), #0d1722;padding:108px 40px 56px;scroll-margin-top:80px">
+    <div style="max-width:760px;margin:0 auto;text-align:center;position:relative">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#3eadbd;margin-bottom:18px">Get In Touch</div>
+      <h2 style="font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(30px,4vw,48px);line-height:1.1;letter-spacing:-0.01em;color:#ffffff;margin:0 0 18px">Let's talk about your well.</h2>
+      <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,0.68);margin:0 0 34px">Tell us what you're running and what it's doing. We'll tell you what we can do about it.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:18px">
+        <a href="mailto:info@yotinenergy.ca" style="background:#d86629;color:#0d1722;text-decoration:none;font-weight:700;font-size:15px;padding:15px 30px;border-radius:100px" style-hover="background:#c2581f">Email info@yotinenergy.ca</a>
+      </div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.5)">Cold Lake – Bonnyville region, Alberta, Canada</div>
+    </div>
+
+    <div style="max-width:1180px;margin:88px auto 0;padding-top:28px;border-top:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative">
+      <a href="#top" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+        <img src="assets/yotin-icon.png" alt="Yotin" style="height:22px;width:auto;display:block">
+        <span style="font-size:13px;color:rgba(255,255,255,0.45)">© 2026 Yotin Energy — an Indigenous-owned company. All rights reserved.</span>
+      </a>
+      <nav style="display:flex;gap:22px;flex-wrap:wrap">
+        <sc-for list="{{ footerNav }}" as="link" hint-placeholder-count="5">
+          <a href="{{ link.href }}" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:13.5px" style-hover="color:#ffffff">{{ link.label }}</a>
+        </sc-for>
+      </nav>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 1440},
+  &quot;heroRender&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;sagd&quot;, &quot;options&quot;: [&quot;sagd&quot;, &quot;multilateral&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Hero&quot;, &quot;label&quot;: &quot;Hero render&quot;},
+  &quot;showOwnershipBadge&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Brand&quot;, &quot;label&quot;: &quot;Show \&quot;Indigenous-Owned\&quot; badge&quot;},
+  &quot;showHowItWorks&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Well-Fi&quot;, &quot;label&quot;: &quot;Show \&quot;how it works\&quot; steps&quot;}
+}">
+class Component extends DCLogic {
+  renderVals() {
+    const heroRender = this.props.heroRender ?? 'sagd';
+
+    const navLinks = [
+      { href: '#sand-control', label: 'Sand Control' },
+      { href: '#flow-control', label: 'Flow Control' },
+      { href: '#wellfi', label: 'Well-Fi' },
+      { href: '#about', label: 'About' },
+      { href: '#contact', label: 'Contact' },
+    ];
+
+    return {
+      isHeroSagd: heroRender === 'sagd',
+      isHeroMultilateral: heroRender === 'multilateral',
+      showOwnershipBadge: this.props.showOwnershipBadge ?? true,
+      showHowItWorks: this.props.showHowItWorks ?? true,
+      navLinks: navLinks,
+      footerNav: navLinks,
+      offerings: [
+        { num: '01', name: 'Sand Control', desc: "Slotted-liner completions engineered to each well's real operating envelope, not pulled off a shelf.", href: '#sand-control' },
+        { num: '02', name: 'Flow Control', desc: "Inflow control that keeps long laterals and multilateral wells producing evenly, end to end.", href: '#flow-control' },
+        { num: '03', name: 'Well-Fi', desc: "Wireless downhole telemetry that brings pressure, temperature, and vibration to surface — no cable run.", href: '#wellfi' },
+      ],
+      sandFeatures: [
+        "Slot geometry sized to the well's real operating envelope, not a standard catalog size",
+        "Validated against erosion and structural limits with computational fluid dynamics",
+        "Engineered for SAGD, thermal, and conventional completions",
+      ],
+      flowFeatures: [
+        "Engineered alongside sand control, not bolted on after the fact",
+        "Built for multilateral and long-reach completions",
+        "Manages conformance along the whole lateral, not just at one point",
+      ],
+      wellfiSteps: [
+        { n: '01', text: 'A fiberglass collar splits the tubing string — the antenna gap that makes everything else possible' },
+        { n: '02', text: 'A low-power EM signal radiates into the surrounding rock instead of looping through steel' },
+        { n: '03', text: 'A surface receiver and ground reference pick up the signal and decode it' },
+        { n: '04', text: 'Readings land on MODBUS RS-485, straight into your existing RTU/SCADA' },
+      ],
+      wellfiSpecs: [
+        { value: '10,000 psi', label: 'Pressure rating' },
+        { value: '150°C', label: 'Temperature rating' },
+        { value: '46 mm', label: 'Tool outer diameter' },
+        { value: '5+ yrs', label: 'Battery life' },
+        { value: '130+', label: 'International installations' },
+        { value: 'RS-485', label: 'MODBUS surface output' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
