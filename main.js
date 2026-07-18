@@ -105,34 +105,236 @@
   var panel = document.querySelector("[data-chatfi-panel]");
   var openButtons = Array.prototype.slice.call(document.querySelectorAll("[data-chatfi-open]"));
   var closeButton = document.querySelector("[data-chatfi-close]");
-  var messagesEl = document.querySelector("[data-chatfi-messages]");
-  var form = document.querySelector("[data-chatfi-form]");
-  var input = document.querySelector("[data-chatfi-input]");
-  var sendButton = document.querySelector("[data-chatfi-send]");
+  var chatBody = document.querySelector("[data-chatfi-body]");
+  var chat = document.querySelector("[data-chatfi-chat]");
+  var loading = document.querySelector("[data-chatfi-loading]");
+  var statusText = document.querySelector("[data-chatfi-status]");
+  var fallbackLink = document.querySelector("[data-chatfi-fallback]");
   var launcher = document.querySelector(".chatfi-launcher");
   var apiBase = (document.body.getAttribute("data-chatfi-api") || "").replace(/\/$/, "");
   var lastOpener = null;
   var activeController = null;
-  var sending = false;
-  var history = [];
+  var deepChatReady = null;
+  var DEEP_CHAT_SRC = "https://unpkg.com/deep-chat@2.4.2/dist/deepChat.bundle.js";
+  var DEEP_CHAT_INTEGRITY = "sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m";
+  var CHATFI_ERROR = "ChatFi can’t connect from this site yet. Email info@yotinenergy.ca and the team will help directly.";
 
-  function appendMessage(role, content, status) {
-    if (!messagesEl) return null;
-    var message = document.createElement("div");
-    message.className = "chatfi-message";
-    message.setAttribute("data-role", role);
-    if (status) message.setAttribute("data-status", status);
-    message.textContent = content;
-    messagesEl.appendChild(message);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return message;
+  function loadDeepChat() {
+    if (window.customElements && window.customElements.get("deep-chat")) return Promise.resolve();
+    if (deepChatReady) return deepChatReady;
+
+    deepChatReady = new Promise(function (resolve, reject) {
+      var script = document.createElement("script");
+      var settled = false;
+      var timeout = window.setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        script.remove();
+        deepChatReady = null;
+        reject(new Error("Deep Chat load timed out"));
+      }, 12000);
+
+      function resolveLoad() {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeout);
+        resolve();
+      }
+
+      function rejectLoad(error) {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeout);
+        script.remove();
+        deepChatReady = null;
+        reject(error);
+      }
+
+      script.src = DEEP_CHAT_SRC;
+      script.integrity = DEEP_CHAT_INTEGRITY;
+      script.crossOrigin = "anonymous";
+      script.referrerPolicy = "no-referrer";
+      script.onload = function () {
+        if (!window.customElements) {
+          rejectLoad(new Error("Custom elements are not supported"));
+          return;
+        }
+        window.customElements.whenDefined("deep-chat").then(resolveLoad, rejectLoad);
+      };
+      script.onerror = function () {
+        rejectLoad(new Error("Deep Chat failed to load"));
+      };
+      document.head.appendChild(script);
+    });
+
+    return deepChatReady;
   }
 
-  function seedGreeting() {
-    if (history.length) return;
-    var greeting = "I’m ChatFi. Ask how WellFi works, what it reads, or whether it fits your wells.";
-    history.push({ role: "assistant", content: greeting });
-    appendMessage("assistant", greeting);
+  function toChatFiMessages(messages) {
+    return (messages || []).slice(-24).map(function (message) {
+      return {
+        role: message.role === "ai" ? "assistant" : "user",
+        content: typeof message.text === "string" ? message.text : ""
+      };
+    }).filter(function (message) { return message.content; });
+  }
+
+  function configureDeepChat() {
+    if (!chat || chat.getAttribute("data-configured") === "true") return;
+
+    chat.setAttribute("data-configured", "true");
+    chat.chatStyle = {
+      width: "100%",
+      height: "100%",
+      border: "0",
+      borderRadius: "0",
+      backgroundColor: "#09131b",
+      fontFamily: "IBM Plex Sans, sans-serif"
+    };
+    chat.introMessage = {
+      text: "I’m ChatFi. Ask how WellFi works, what it reads, or whether it fits your wells."
+    };
+    chat.requestBodyLimits = { maxMessages: 24 };
+    chat.maxVisibleMessages = 60;
+    chat.remarkable = { html: false, breaks: true, linkTarget: "_blank" };
+    chat.hiddenMessages = {
+      clickScroll: "last",
+      smoothScroll: !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    };
+    chat.errorMessages = {
+      displayServiceErrorMessages: false,
+      overrides: { default: CHATFI_ERROR, service: CHATFI_ERROR }
+    };
+    chat.inputAreaStyle = {
+      backgroundColor: "#09131b",
+      borderTop: "1px solid rgba(255, 255, 255, 0.12)",
+      padding: "12px 14px 14px"
+    };
+    chat.textInput = {
+      characterLimit: 4000,
+      placeholder: { text: "Ask about WellFi…", style: { color: "#718087" } },
+      styles: {
+        text: { color: "#f3f6f7", fontSize: "14px", lineHeight: "1.45" },
+        container: {
+          minHeight: "48px",
+          maxHeight: "130px",
+          backgroundColor: "#03070b",
+          border: "1px solid rgba(255, 255, 255, 0.16)",
+          borderRadius: "14px"
+        },
+        focus: { border: "1px solid #68c8dc", boxShadow: "0 0 0 3px rgba(104, 200, 220, 0.12)" }
+      }
+    };
+    chat.messageStyles = {
+      default: {
+        shared: {
+          bubble: {
+            maxWidth: "88%",
+            padding: "12px 14px",
+            borderRadius: "14px",
+            color: "#dfe6e9",
+            fontSize: "14px",
+            lineHeight: "1.55"
+          }
+        },
+        ai: { bubble: { backgroundColor: "#132631", borderBottomLeftRadius: "4px" } },
+        user: { bubble: { backgroundColor: "#e47d3d", color: "#03070b", borderBottomRightRadius: "4px" } }
+      },
+      intro: { bubble: { backgroundColor: "#132631", color: "#dfe6e9", borderBottomLeftRadius: "4px" } },
+      error: { bubble: { backgroundColor: "#391a17", color: "#ffd7cf" } },
+      loading: {
+        message: { styles: { bubble: { backgroundColor: "#132631", color: "#8c9ba2" } } }
+      }
+    };
+    chat.submitButtonStyles = {
+      submit: {
+        container: {
+          default: { width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#68c8dc" },
+          hover: { backgroundColor: "#8bd7e6" },
+          click: { backgroundColor: "#4fb5c9" }
+        },
+        svg: { styles: { default: { filter: "brightness(0) saturate(100%)" } } }
+      },
+      stop: { container: { default: { backgroundColor: "#e47d3d" } } },
+      position: "inside-end",
+      tooltip: { text: "Send message" }
+    };
+    chat.auxiliaryStyle = "a { color: #68c8dc; } ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: #203846; border-radius: 999px; }";
+
+    chat.connect = {
+      stream: true,
+      handler: function (body, signals) {
+        if (!apiBase) {
+          signals.onResponse({ error: CHATFI_ERROR });
+          signals.onClose();
+          return;
+        }
+        activeController = new AbortController();
+        signals.stopClicked.listener = function () {
+          if (activeController) activeController.abort();
+        };
+
+        (async function () {
+          var reply = "";
+          try {
+            var response = await fetch(apiBase + "/chat", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ messages: toChatFiMessages(body.messages) }),
+              signal: activeController.signal
+            });
+
+            if (!response.ok) throw new Error("ChatFi returned " + response.status);
+            if (!response.body) throw new Error("ChatFi response was empty");
+
+            signals.onOpen();
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder();
+
+            while (true) {
+              var part = await reader.read();
+              if (part.done) break;
+              var chunk = decoder.decode(part.value, { stream: true });
+              if (!chunk) continue;
+              reply += chunk;
+              await signals.onResponse({ text: chunk });
+            }
+
+            var finalChunk = decoder.decode();
+            if (finalChunk) {
+              reply += finalChunk;
+              await signals.onResponse({ text: finalChunk });
+            }
+            if (!reply.trim()) throw new Error("ChatFi response contained no text");
+          } catch (error) {
+            if (!error || error.name !== "AbortError") {
+              await signals.onResponse({ error: CHATFI_ERROR });
+            }
+          } finally {
+            activeController = null;
+            signals.onClose();
+          }
+        })();
+      }
+    };
+  }
+
+  function showChatUnavailable() {
+    if (statusText) statusText.textContent = "ChatFi could not load. The direct contact route is still available.";
+    if (fallbackLink) fallbackLink.hidden = false;
+  }
+
+  function prepareChat() {
+    if (statusText) statusText.textContent = "Preparing the secure connection…";
+    if (fallbackLink) fallbackLink.hidden = true;
+    return loadDeepChat().then(function () {
+      configureDeepChat();
+      if (chatBody) chatBody.classList.add("is-ready");
+      if (loading) loading.setAttribute("aria-hidden", "true");
+    }).catch(function () {
+      showChatUnavailable();
+      throw new Error("ChatFi interface unavailable");
+    });
   }
 
   function updateVisualViewport() {
@@ -152,12 +354,17 @@
     if (!panel) return;
     lastOpener = event && event.currentTarget ? event.currentTarget : document.activeElement;
     closeNav(false);
-    seedGreeting();
     panel.hidden = false;
     document.body.classList.add("chatfi-open");
     if (launcher) launcher.hidden = true;
     updateVisualViewport();
-    window.setTimeout(function () { if (input) input.focus(); }, 20);
+    prepareChat().then(function () {
+      if (!panel.hidden && chat && typeof chat.focusInput === "function") {
+        window.setTimeout(function () { chat.focusInput(); }, 20);
+      }
+    }).catch(function () {
+      if (!panel.hidden && fallbackLink) fallbackLink.focus();
+    });
   }
 
   function closeChat() {
@@ -166,100 +373,35 @@
       activeController.abort();
       activeController = null;
     }
-    sending = false;
-    if (sendButton) sendButton.disabled = false;
     panel.hidden = true;
     document.body.classList.remove("chatfi-open");
     if (launcher) launcher.hidden = false;
     if (lastOpener && typeof lastOpener.focus === "function") lastOpener.focus();
   }
 
-  function autoSizeInput() {
-    if (!input) return;
-    input.style.height = "auto";
-    input.style.height = Math.min(input.scrollHeight, 130) + "px";
-  }
-
-  async function sendMessage(text) {
-    var trimmed = text.trim();
-    if (!trimmed || sending || !apiBase) return;
-
-    sending = true;
-    if (sendButton) sendButton.disabled = true;
-    history.push({ role: "user", content: trimmed });
-    if (history.length > 24) history = history.slice(history.length - 24);
-    appendMessage("user", trimmed);
-    if (input) {
-      input.value = "";
-      autoSizeInput();
-    }
-
-    var thinking = appendMessage("assistant", "Reading the signal…", "thinking");
-    activeController = new AbortController();
-
-    try {
-      var response = await fetch(apiBase + "/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: history }),
-        signal: activeController.signal
-      });
-
-      if (!response.ok) throw new Error("ChatFi returned " + response.status);
-      if (!response.body) throw new Error("ChatFi response was empty");
-
-      var reader = response.body.getReader();
-      var decoder = new TextDecoder();
-      var reply = "";
-      thinking.removeAttribute("data-status");
-      thinking.textContent = "";
-
-      while (true) {
-        var part = await reader.read();
-        if (part.done) break;
-        reply += decoder.decode(part.value, { stream: true });
-        thinking.textContent = reply;
-        if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
-      }
-      reply += decoder.decode();
-      reply = reply.trim();
-      if (!reply) throw new Error("ChatFi response contained no text");
-      thinking.textContent = reply;
-      history.push({ role: "assistant", content: reply });
-    } catch (error) {
-      if (error && error.name === "AbortError") {
-        if (thinking && thinking.parentNode) thinking.parentNode.removeChild(thinking);
-      } else {
-        if (thinking) {
-          thinking.setAttribute("data-status", "error");
-          thinking.textContent = "ChatFi can’t connect from this site yet. Email info@yotinenergy.ca and the team will help directly.";
-        }
-      }
-    } finally {
-      activeController = null;
-      sending = false;
-      if (sendButton) sendButton.disabled = false;
-      if (input && !panel.hidden) input.focus();
-    }
-  }
-
   openButtons.forEach(function (button) { button.addEventListener("click", openChat); });
   if (closeButton) closeButton.addEventListener("click", closeChat);
-  if (input) input.addEventListener("input", autoSizeInput);
 
-  if (form) {
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      if (input) sendMessage(input.value);
-    });
+  function deepestActiveElement() {
+    var active = document.activeElement;
+    while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active;
   }
 
-  if (input) {
-    input.addEventListener("keydown", function (event) {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        if (form && typeof form.requestSubmit === "function") form.requestSubmit();
-      }
+  function panelFocusables() {
+    var focusable = [];
+    if (closeButton) focusable.push(closeButton);
+    if (chat && chat.shadowRoot) {
+      focusable = focusable.concat(Array.prototype.slice.call(chat.shadowRoot.querySelectorAll(
+        "button:not([disabled]), textarea:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])"
+      )));
+    } else if (fallbackLink && !fallbackLink.hidden) {
+      focusable.push(fallbackLink);
+    }
+    return focusable.filter(function (element) {
+      return element && !element.disabled && (element.offsetWidth || element.offsetHeight || element.getClientRects().length);
     });
   }
 
@@ -271,14 +413,15 @@
     }
 
     if (event.key !== "Tab" || !panel || panel.hidden) return;
-    var focusable = Array.prototype.slice.call(panel.querySelectorAll("button:not([disabled]), textarea:not([disabled]), a[href]"));
+    var focusable = panelFocusables();
     if (!focusable.length) return;
     var first = focusable[0];
     var last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
+    var active = deepestActiveElement();
+    if (event.shiftKey && active === first) {
       event.preventDefault();
       last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
+    } else if (!event.shiftKey && active === last) {
       event.preventDefault();
       first.focus();
     }

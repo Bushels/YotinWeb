@@ -4,6 +4,7 @@
 
 - No actionable P0, P1, or P2 differences remain.
 - The July 18 follow-up restores the prior continuous downhole signal behavior and reduces the hero headline without changing the approved WellFi/Indigenous composition.
+- The July 18 ChatFi follow-up replaces the native chat surface with integrity-pinned Deep Chat 2.4.2 while retaining the existing Cloud Run request contract. Local page delivery, JavaScript syntax, the exact CDN integrity hash, and a live streamed ChatFi response from the allowed localhost origin pass. The older ChatFi screenshots below remain historical evidence for the native interface, not visual proof of the new Deep Chat surface.
 - [P3] The source uses more decorative signal diagrams and leader lines in the three-step strip. The implementation uses pinned Phosphor icons and the same cyan/orange signal language. This is an intentional simplification that preserves the hierarchy without fabricating bespoke graphic assets.
 - [P3] The implementation includes `Our Company` and `Contact` in the desktop header. The source only showed `WellFi`; the additional links are intentional because the finished one-page site has real company and conversion sections.
 
@@ -34,14 +35,14 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 
 - Mobile hero: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\13-mobile-hero.png`
 - Mobile menu: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\14-mobile-menu.png`
-- ChatFi open: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\15-mobile-chat-open.png`
-- ChatFi live reply: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\16-mobile-chat-live.png`
+- ChatFi open, native interface before Deep Chat: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\15-mobile-chat-open.png`
+- ChatFi live reply, native interface before Deep Chat: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\16-mobile-chat-live.png`
 - Mobile WellFi: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\17-mobile-wellfi.png`
 - Mobile company: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\18-mobile-company.png`
 - Mobile contact: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\19-mobile-contact.png`
 - Mobile animated hero at 390 × 844: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\25-mobile-hero-motion.png`
 - Tablet animated hero at 834 × 1112: `C:\Users\kyle\.codex\visualizations\2026\07\17\019f7255-ca15-7fb1-be98-c0e4b4219ad2\yotin-build\26-tablet-hero-motion.png`
-- Primary interactions tested: mobile menu open; ChatFi opened from the mobile menu; live question submitted from the allowed `localhost` origin; answer received; panel closed; focus returned to the launcher.
+- Primary interactions tested against the native interface: mobile menu open; ChatFi opened from the mobile menu; live question submitted from the allowed `localhost` origin; answer received; panel closed; focus returned to the launcher. The Deep Chat transport was revalidated on July 18; its browser visuals have not replaced the historical captures above.
 - Console errors checked: none.
 - Motion verification: the uplink dash offset changed from `-42.494px` to `-78.7415px` over 900 ms; the pulse ring transform and opacity changed at the same time, proving that both continuous animation channels were running.
 
@@ -61,9 +62,10 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 
 - [x] Match the selected Signal Atlas desktop direction.
 - [x] Verify the focused WellFi/Indigenous content scope.
-- [x] Verify mobile hero, menu, WellFi, company, contact, and ChatFi states.
-- [x] Exercise a live ChatFi answer on `http://localhost:5050/`.
-- [x] Check focus return and browser console.
+- [x] Verify mobile hero, menu, WellFi, company, contact, and native ChatFi states.
+- [x] Revalidate a live ChatFi answer from the allowed `http://localhost:5050/` origin after the Deep Chat integration.
+- [x] Check native-interface focus return and browser console.
+- [ ] Replace the historical native ChatFi captures with Deep Chat desktop/mobile interaction evidence before production deployment.
 - [ ] Complete the separately gated production ChatFi identity/CORS change after relationship approval.
 
-final result: passed
+final result: site and transport passed; Deep Chat visual recapture remains part of the production gate

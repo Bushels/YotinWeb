@@ -460,7 +460,7 @@ a { color: inherit; text-decoration: none; }
   width: min(410px, calc(100vw - 32px));
   height: min(660px, calc(var(--chatfi-vh) - 48px));
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 18px;
@@ -474,19 +474,41 @@ a { color: inherit; text-decoration: none; }
 .chatfi-header button { width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
 .chatfi-header button:hover { background: rgba(255, 255, 255, 0.07); color: var(--white); }
 .chatfi-header i { font-size: 22px; }
-.chatfi-messages { overflow-y: auto; padding: 18px; scrollbar-color: var(--navy-3) transparent; }
-.chatfi-message { max-width: 88%; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; white-space: pre-wrap; word-break: break-word; font-size: 14px; line-height: 1.55; }
-.chatfi-message[data-role="assistant"] { margin-right: auto; background: #132631; color: #dfe6e9; border-bottom-left-radius: 4px; }
-.chatfi-message[data-role="user"] { margin-left: auto; background: var(--orange); color: var(--void); border-bottom-right-radius: 4px; }
-.chatfi-message[data-status="error"] { background: #391a17; color: #ffd7cf; }
-.chatfi-message[data-status="thinking"] { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
-.chatfi-form { display: grid; grid-template-columns: 1fr 46px; gap: 8px; margin: 0 14px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--void); }
-.chatfi-form textarea { min-height: 44px; max-height: 130px; resize: none; padding: 10px 8px; border: 0; outline: 0; background: transparent; color: var(--white); line-height: 1.45; }
-.chatfi-form textarea::placeholder { color: #718087; }
-.chatfi-form button { align-self: end; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--cyan); color: var(--void); cursor: pointer; }
-.chatfi-form button:disabled { opacity: 0.45; cursor: wait; }
-.chatfi-form button i { font-size: 20px; }
+.chatfi-body { position: relative; min-height: 0; overflow: hidden; background: #09131b; }
+.chatfi-chat { display: block; width: 100%; height: 100%; visibility: hidden; }
+.chatfi-body.is-ready .chatfi-chat { visibility: visible; }
+.chatfi-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 32px;
+  background: #09131b;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+.chatfi-loading::before {
+  width: 10px;
+  height: 10px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--cyan-bright);
+  box-shadow: 0 0 0 0 rgba(104, 200, 220, 0.42);
+  content: "";
+  animation: chatfi-ready-pulse 1.5s ease-out infinite;
+}
+.chatfi-loading a { color: var(--orange); text-decoration: underline; text-underline-offset: 3px; }
+.chatfi-body.is-ready .chatfi-loading { display: none; }
 .chatfi-disclosure { margin: 10px 18px 16px; color: #718087; font-size: 10px; line-height: 1.45; text-align: center; }
+
+@keyframes chatfi-ready-pulse {
+  70%, 100% { box-shadow: 0 0 0 14px rgba(104, 200, 220, 0); }
+}
 
 /* Enhancement hooks: content is visible without JS. */
 [data-motion] { opacity: 1; transform: none; }

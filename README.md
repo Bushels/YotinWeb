@@ -6,7 +6,7 @@ Static marketing site for **Yotin Energy**, an Indigenous energy services compan
 
 - Yotin company positioning and Indigenous ownership.
 - WellFi telemetry: pressure, temperature, vibration, and fluid-condition data without a downhole cable.
-- Native ChatFi widget UI connected to the existing Cloud Run API.
+- Deep Chat-powered ChatFi interface connected to the existing Cloud Run API.
 - Candidate-well contact path.
 
 Future equipment is intentionally not included in the deployed site until it is launch-ready.
@@ -18,7 +18,9 @@ Future equipment is intentionally not included in the deployed site until it is 
 - Phosphor Icons 2.1.2, pinned from jsDelivr.
 - Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
 - Existing WebP WellFi cutaway with the prior continuous uplink/downhole-pulse behavior restored; all motion collapses safely under `prefers-reduced-motion`.
-- ChatFi messages render with `textContent`; requests abort when the panel closes.
+- Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when the panel opens, keeping its roughly 400 KB bundle off the initial page load.
+- A custom stream adapter preserves the existing `{ messages: [{ role, content }] }` Cloud Run contract; requests abort when the panel closes or the visitor presses stop.
+- Model credentials remain server-side. The browser never connects directly to Gemini.
 
 ## Structure
 
