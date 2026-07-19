@@ -5,6 +5,7 @@
 - No actionable P0, P1, or P2 differences remain.
 - The July 18 follow-up restores the prior continuous downhole signal behavior and reduces the hero headline without changing the approved WellFi/Indigenous composition.
 - The July 18 ChatFi follow-up replaces the native chat surface with integrity-pinned Deep Chat 2.4.2 while retaining the existing Cloud Run request contract. Browser QA found and fixed the initial loader failure: the ESM bundle had been inserted as a classic script, so the browser stopped at its final `export` statement. The loader now declares `type="module"` and automatically falls back from jsDelivr to unpkg. Fresh-tab desktop and mobile exchanges pass with no console errors.
+- The July 19 WellFi merge restores the locked `Know the Unknown` hierarchy, the approved proof chips, `Data Below. Insight Above.`, and `Know the Unknown — One Changeout Away.` The decorative CSS signal loops were replaced with the original verified 12-second WellFi island export, including the surface readout for pressure, temperature, and vibration. The 947 KB H.264 asset is hash-identical to the original WellFi export and keeps the existing 84 KB poster as its first-paint, reduced-motion, and autoplay fallback.
 - [P3] The source uses more decorative signal diagrams and leader lines in the three-step strip. The implementation uses pinned Phosphor icons and the same cyan/orange signal language. This is an intentional simplification that preserves the hierarchy without fabricating bespoke graphic assets.
 - [P3] The implementation includes `Our Company` and `Contact` in the desktop header. The source only showed `WellFi`; the additional links are intentional because the finished one-page site has real company and conversion sections.
 
@@ -54,6 +55,7 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 3. P2 — the headline wrapped to three lines and the cutaway scale/crop was smaller and lower than the source. Fix: removed the extra hero paragraph, tuned display size, widened the cutaway, removed its base vertical offset, and enlarged/repositioned the Yotin lockup. Post-fix evidence: `11-desktop-final.png` and `12-reference-vs-final.png`.
 4. P2 — the redesigned hero kept its entrance and scroll motion but lost the baseline's continuous downhole pulse/uplink behavior; the 64 px headline also carried more weight than requested. Fix: restored the baseline signal path and radiating tool-node cycle, kept it attached to the real WellFi image at every breakpoint, and reduced the headline to a 42–56 px responsive range. Post-fix evidence: `21-hero-motion-frame-a.png`, `22-hero-motion-frame-b.png`, `23-before-vs-restored.png`, `25-mobile-hero-motion.png`, and `26-tablet-hero-motion.png`.
 5. P1 — Deep Chat displayed the contact fallback because its ESM bundle was loaded as a classic script. Fix: load the pinned bundle as a module, retain SRI, and add an automatic second CDN source. Post-fix evidence: successful fresh-tab desktop and 390 px mobile responses with an empty error/warning console.
+6. P1 — the Yotin adaptation had drifted from WellFi's strongest approved positioning and replaced the original relay story with independent decorative loops. Fix: restore the approved slogans and use the original poster-first 12-second H.264 export instead of importing the full R3F runtime. Source, asset hash, HTTP 200 delivery, `video/mp4` MIME type, one-H1 structure, and no-sand-control scope pass. Final browser recapture is pending because the in-app browser remained on its earlier connection-refused interstitial after the local server restarted.
 
 **Open questions**
 
@@ -68,6 +70,7 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 - [x] Revalidate a live ChatFi answer from the allowed `http://localhost:5050/` origin after the Deep Chat integration.
 - [x] Check Deep Chat focus return, 390/320 px geometry, and a fresh browser console.
 - [x] Replace the historical native-interface functional checks with live Deep Chat desktop/mobile interaction evidence.
+- [ ] Recapture the July 19 animated hero at desktop, 390 px mobile, and the dark surface-readout frame after the in-app browser interstitial is manually reloaded.
 - [ ] Complete the separately gated production ChatFi identity/CORS change after relationship approval.
 
-final result: site, responsive Deep Chat interface, and local transport passed; production identity/CORS remains the release gate
+final result: prior responsive site and ChatFi gates passed; July 19 WellFi merge is source/asset validated and awaits its final browser recapture; production identity/CORS remains the release gate

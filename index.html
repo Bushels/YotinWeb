@@ -11,8 +11,8 @@
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Yotin Energy">
-  <meta property="og:title" content="Yotin Energy — Know What’s Happening Downhole">
-  <meta property="og:description" content="An Indigenous Energy Services Company. Explore WellFi wireless downhole telemetry.">
+  <meta property="og:title" content="Yotin Energy — Know the Unknown">
+  <meta property="og:description" content="An Indigenous Energy Services Company. WellFi real-time wireless downhole telemetry.">
   <meta property="og:url" content="https://yotinenergy.ca/">
   <meta property="og:image" content="https://yotinenergy.ca/assets/yotin-wellfi-og-2026.png">
   <meta property="og:image:width" content="1200">
@@ -20,8 +20,8 @@
   <meta property="og:image:alt" content="Yotin Energy and WellFi wireless downhole telemetry.">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Yotin Energy — Know What’s Happening Downhole">
-  <meta name="twitter:description" content="An Indigenous Energy Services Company. Explore WellFi wireless downhole telemetry.">
+  <meta name="twitter:title" content="Yotin Energy — Know the Unknown">
+  <meta name="twitter:description" content="An Indigenous Energy Services Company. WellFi real-time wireless downhole telemetry.">
   <meta name="twitter:image" content="https://yotinenergy.ca/assets/yotin-wellfi-og-2026.png">
   <meta name="twitter:image:alt" content="Yotin Energy and WellFi wireless downhole telemetry.">
 
@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-live.webp" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260718-2">
+  <link rel="stylesheet" href="styles.css?v=20260719-1">
 
   <script type="application/ld+json">
   {
@@ -107,7 +107,12 @@
 
           <div class="hero-message">
             <p class="eyebrow">WELLFI</p>
-            <h1 id="hero-title">Know What’s<br>Happening Downhole<span>.</span></h1>
+            <h1 id="hero-title">Know the<br>Unknown<span>.</span></h1>
+            <ul class="proof-chips" aria-label="WellFi deployment highlights">
+              <li>130+ Installed Internationally</li>
+              <li>MODBUS Ready</li>
+              <li>Rapid Deployment</li>
+            </ul>
             <div class="hero-actions">
               <a class="button button-primary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
               <button class="button button-secondary" type="button" data-chatfi-open>Ask ChatFi <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
@@ -117,21 +122,12 @@
 
         <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
           <div class="hero-scene">
-            <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080" fetchpriority="high">
-            <svg class="data-pulses" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-              <path class="uplink uplink-halo" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
-              <path class="uplink uplink-core" d="M686,628 C662,580 652,530 648,480 C645,450 644,430 643,416"></path>
-            </svg>
-            <span class="em-pulse" aria-hidden="true"></span>
+            <video class="hero-animation" autoplay muted loop playsinline preload="metadata" poster="assets/wellfi-island-live.webp" data-hero-animation role="img" aria-label="Animated cutaway showing WellFi transmitting pressure, temperature, and vibration data from downhole to a surface readout">
+              <source src="assets/wellfi-island-hero-12s.mp4" type="video/mp4">
+              <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080">
+            </video>
           </div>
-          <dl class="reading reading-surface">
-            <div><dt>Surface</dt><dd>101.3 kPa</dd></div>
-            <div><dt>Temperature</dt><dd>14.2 °C</dd></div>
-          </dl>
-          <dl class="reading reading-downhole">
-            <div><dt>Downhole</dt><dd>8,742.6 kPa</dd></div>
-            <div><dt>Temperature</dt><dd>113.8 °C</dd></div>
-          </dl>
+          <p class="sr-only">Surface readout: pressure 158 kilopascals, temperature 26 degrees Celsius, and vibration 4.2 millimetres per second RMS.</p>
         </div>
       </div>
 
@@ -157,9 +153,12 @@
     <section class="wellfi-section" id="wellfi" aria-labelledby="wellfi-title">
       <div class="shell">
         <div class="section-intro">
-          <p class="eyebrow">WIRELESS DOWNHOLE TELEMETRY</p>
-          <h2 id="wellfi-title">A well that used to run blind starts reporting back.</h2>
-          <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485.</p>
+          <p class="eyebrow">REAL-TIME WIRELESS DOWNHOLE TELEMETRY</p>
+          <h2 id="wellfi-title">Data Below.<br><span>Insight Above.</span></h2>
+          <div class="section-summary">
+            <p class="measurement-line">Pressure. Temperature. Vibration. At Surface.</p>
+            <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485.</p>
+          </div>
         </div>
 
         <ol class="journey-list" aria-label="How WellFi works">
@@ -170,7 +169,7 @@
         </ol>
 
         <dl class="spec-grid" aria-label="WellFi public specifications">
-          <div><dt>Pressure rating</dt><dd>10,000 <small>psi</small></dd></div>
+          <div><dt>Pressure rating</dt><dd>10,000 <small>psia</small></dd></div>
           <div><dt>Temperature rating</dt><dd>150 <small>°C</small></dd></div>
           <div><dt>Tool outer diameter</dt><dd>46 <small>mm</small></dd></div>
           <div><dt>Battery life</dt><dd>5+ <small>years</small></dd></div>
@@ -197,11 +196,11 @@
     <section class="contact-section" id="contact" aria-labelledby="contact-title">
       <div class="shell contact-grid">
         <div>
-          <p class="eyebrow">REVIEW A CANDIDATE WELL</p>
-          <h2 id="contact-title">Bring the well.<br>We’ll bring the questions.</h2>
+          <p class="eyebrow">CANDIDATE WELL REVIEW</p>
+          <h2 id="contact-title">Know the Unknown.<br><span>One Changeout Away.</span></h2>
         </div>
         <div class="contact-actions">
-          <p>Share the well type, changeout timing, and the data you need before a deployment decision.</p>
+          <p>Well type, changeout timing, and required data establish deployment fit.</p>
           <a class="button button-primary" href="mailto:info@yotinenergy.ca">Email Yotin <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
           <button class="text-button" type="button" data-chatfi-open>Or ask ChatFi about WellFi</button>
         </div>
@@ -250,6 +249,6 @@
 
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-  <script defer src="main.js?v=20260718-4"></script>
+  <script defer src="main.js?v=20260719-1"></script>
 </body>
 </html>

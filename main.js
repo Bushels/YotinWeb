@@ -4,6 +4,25 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* Original WellFi island loop, with a still fallback for reduced motion or blocked autoplay. */
+  var heroAnimation = document.querySelector("[data-hero-animation]");
+
+  function syncHeroAnimation() {
+    if (!heroAnimation) return;
+    if (reduceMotion || document.hidden) {
+      heroAnimation.pause();
+      return;
+    }
+    var playRequest = heroAnimation.play();
+    if (playRequest && typeof playRequest.catch === "function") playRequest.catch(function () {});
+  }
+
+  if (heroAnimation) {
+    if (reduceMotion) heroAnimation.removeAttribute("autoplay");
+    syncHeroAnimation();
+    document.addEventListener("visibilitychange", syncHeroAnimation);
+  }
+
   /* Header and navigation */
   var header = document.querySelector("[data-header]");
   var navToggle = document.querySelector("[data-nav-toggle]");
