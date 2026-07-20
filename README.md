@@ -27,7 +27,7 @@ Future equipment is intentionally not included in the deployed site until it is 
 ```text
 index.html          page content, SEO, JSON-LD, and ChatFi shell
 styles.css          Yotin design system and responsive layouts
-main.js             navigation, motion enhancement, and native ChatFi client
+main.js             navigation, motion enhancement, and Deep Chat adapter
 assets/             approved brand, WellFi, and current social-card assets
 robots.txt
 sitemap.xml
@@ -52,15 +52,24 @@ rg -n -i "sand control|flow control|slotted|multilateral" .\index.html .\main.js
 
 Visual QA is recorded in `design-qa.md`.
 
-## ChatFi release gate
+## Production status
 
-The UI is ported, but the live backend currently allows the MPS production origin and localhost—not the Yotin production domains. Its system prompt, fallback messages, lead routing, and corpus also describe MPS. Before enabling ChatFi on production:
+- GitHub repository: `Bushels/YotinWeb`, branch `master`.
+- Vercel project: `yotin-energy`; a push to `master` automatically creates the production deployment. The connection was proven with Git-sourced production deployment `dpl_H6r2acLMEzdmfVjdSp6ECsDcqyJi`.
+- Public Vercel alias: `https://yotin-energy.vercel.app`.
+- Canonical production domain: `https://yotinenergy.com`; both the apex and `www` domains are claimed by the Vercel project.
+- Porkbun DNS is still parked. The remaining registrar change is `A @ -> 76.76.21.21` and `A www -> 76.76.21.21`. Preserve the existing Porkbun MX records and SPF TXT record.
 
-1. Approve one public sentence defining the Yotin / MPS / WellFi commercial relationship and where leads go.
-2. Update the backend origin allowlist and public-facing identity in one coordinated change.
-3. Add a clear privacy link, bot proof, and a shared hard model-usage cap.
-4. Re-run the server unit, type, adversarial, CORS, consented-lead, and mobile gates.
+## ChatFi status and remaining release gates
+
+Production CORS is complete. Cloud Run revision `chatfi-server-00023-x2x` allows the exact Yotin production origins and the MPS production origin; disallowed and lookalike origins receive no CORS permission. The release passed 183/183 unit tests, a clean TypeScript build, 20/20 live adversarial probes, and a real browser-origin POST from the Vercel alias.
+
+Before broad promotion:
+
+1. Approve one public sentence defining the Yotin / MPS / WellFi commercial relationship and lead destination. ChatFi still identifies MPS as the Canadian commercial contact and routes leads to MPS.
+2. Add a clear privacy link, bot proof such as Turnstile, and a shared hard model-usage cap.
+3. After Porkbun DNS and TLS settle, re-run desktop/mobile browser QA and a live ChatFi exchange on both `yotinenergy.com` and `www.yotinenergy.com`.
 
 ## Deploy
 
-Vercel serves this directory directly. Framework preset: **Other**; no build command; output directory `.`.
+The normal release path is a reviewed commit followed by `git push origin master`. Vercel serves this directory directly and deploys that Git commit automatically. Framework preset: **Other**; no build command; output directory `.`. A manual `vercel --prod` deployment is not part of the release path.

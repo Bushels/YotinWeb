@@ -6,6 +6,7 @@
 - The July 18 follow-up restores the prior continuous downhole signal behavior and reduces the hero headline without changing the approved WellFi/Indigenous composition.
 - The July 18 ChatFi follow-up replaces the native chat surface with integrity-pinned Deep Chat 2.4.2 while retaining the existing Cloud Run request contract. Browser QA found and fixed the initial loader failure: the ESM bundle had been inserted as a classic script, so the browser stopped at its final `export` statement. The loader now declares `type="module"` and automatically falls back from jsDelivr to unpkg. Fresh-tab desktop and mobile exchanges pass with no console errors.
 - The July 19 WellFi merge restores the locked `Know the Unknown` hierarchy, the approved proof chips, `Data Below. Insight Above.`, and `Know the Unknown — One Changeout Away.` The decorative CSS signal loops were replaced with the original verified 12-second WellFi island export, including the surface readout for pressure, temperature, and vibration. The 947 KB H.264 asset is hash-identical to the original WellFi export and keeps the existing 84 KB poster as its first-paint, reduced-motion, and autoplay fallback.
+- The July 20 production pass connected `Bushels/YotinWeb` `master` to Vercel and proved Git-triggered production deployment. Canonical, social, robots, sitemap, contact, and structured-data references now use `yotinenergy.com`. ChatFi CORS shipped as Cloud Run revision `chatfi-server-00023-x2x`; 183/183 unit tests, a clean TypeScript build, 20/20 live adversarial probes, exact approved-origin responses, lookalike rejection, and a real POST from `https://yotin-energy.vercel.app` all pass. Porkbun DNS is the only domain-routing handoff.
 - [P3] The source uses more decorative signal diagrams and leader lines in the three-step strip. The implementation uses pinned Phosphor icons and the same cyan/orange signal language. This is an intentional simplification that preserves the hierarchy without fabricating bespoke graphic assets.
 - [P3] The implementation includes `Our Company` and `Contact` in the desktop header. The source only showed `WellFi`; the additional links are intentional because the finished one-page site has real company and conversion sections.
 
@@ -47,6 +48,7 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 - Responsive Deep Chat geometry passed at 390 × 844 and 320 × 568. The page had no horizontal overflow; the 390 px chat panel stayed within 8 px side/bottom insets, and the 320 px panel fit within a 304 × 552 px box while keeping its header, message body, input, close control, and disclosure visible.
 - Console errors checked in a new tab after the loader fix: none.
 - Motion verification: the uplink dash offset changed from `-42.494px` to `-78.7415px` over 900 ms; the pulse ring transform and opacity changed at the same time, proving that both continuous animation channels were running.
+- July 20 closeout recapture: 1536 × 1080 and 390 × 844 renders pass after the enlarged Yotin header merge. The desktop headline is capped at 56 px, both viewports have no horizontal overflow, the mobile tagline is visible at page top, and the 12-second WellFi video reports ready state 4 and plays.
 
 **Comparison history**
 
@@ -55,12 +57,13 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 3. P2 — the headline wrapped to three lines and the cutaway scale/crop was smaller and lower than the source. Fix: removed the extra hero paragraph, tuned display size, widened the cutaway, removed its base vertical offset, and enlarged/repositioned the Yotin lockup. Post-fix evidence: `11-desktop-final.png` and `12-reference-vs-final.png`.
 4. P2 — the redesigned hero kept its entrance and scroll motion but lost the baseline's continuous downhole pulse/uplink behavior; the 64 px headline also carried more weight than requested. Fix: restored the baseline signal path and radiating tool-node cycle, kept it attached to the real WellFi image at every breakpoint, and reduced the headline to a 42–56 px responsive range. Post-fix evidence: `21-hero-motion-frame-a.png`, `22-hero-motion-frame-b.png`, `23-before-vs-restored.png`, `25-mobile-hero-motion.png`, and `26-tablet-hero-motion.png`.
 5. P1 — Deep Chat displayed the contact fallback because its ESM bundle was loaded as a classic script. Fix: load the pinned bundle as a module, retain SRI, and add an automatic second CDN source. Post-fix evidence: successful fresh-tab desktop and 390 px mobile responses with an empty error/warning console.
-6. P1 — the Yotin adaptation had drifted from WellFi's strongest approved positioning and replaced the original relay story with independent decorative loops. Fix: restore the approved slogans and use the original poster-first 12-second H.264 export instead of importing the full R3F runtime. Source, asset hash, HTTP 200 delivery, `video/mp4` MIME type, one-H1 structure, and no-sand-control scope pass. Final browser recapture is pending because the in-app browser remained on its earlier connection-refused interstitial after the local server restarted.
+6. P1 — the Yotin adaptation had drifted from WellFi's strongest approved positioning and replaced the original relay story with independent decorative loops. Fix: restore the approved slogans and use the original poster-first 12-second H.264 export instead of importing the full R3F runtime. Source, asset hash, HTTP 200 delivery, `video/mp4` MIME type, one-H1 structure, no-sand-control scope, and the July 20 desktop/mobile browser recapture pass.
+7. P1 — production ChatFi returned `Access-Control-Allow-Origin: https://mpsgroup.energy` to every Yotin preflight, so browsers blocked the widget. Fix: add an exact multi-origin resolver for `yotinenergy.com`, `www.yotinenergy.com`, the Vercel alias, MPS, and the existing localhost QA path. Disallowed origins, paths, wildcards, and lookalikes now receive no `Access-Control-Allow-Origin` header.
 
 **Open questions**
 
-- Production ChatFi remains a release gate, not a design-QA failure: the live server still identifies and routes leads through MPS and does not allow Yotin's production origins. The UI and local request path pass.
-- Confirm the public Yotin / MPS / WellFi relationship sentence and lead destination before the backend identity and CORS allowlist are changed.
+- Production ChatFi CORS is complete. The remaining product decision is identity and lead routing: ChatFi still names MPS as the Canadian commercial contact and routes leads to MPS, so the public Yotin / MPS / WellFi relationship sentence still needs approval.
+- Porkbun still serves parking records. After replacing only the apex and `www` records with Vercel's `76.76.21.21` target, verify apex redirect/serving, `www`, TLS, desktop/mobile rendering, and a live ChatFi exchange on the `.com` domain. Preserve Porkbun mail MX and SPF records.
 
 **Implementation checklist**
 
@@ -70,7 +73,9 @@ No separate crop was needed. The normalized 3072 × 1080 side-by-side comparison
 - [x] Revalidate a live ChatFi answer from the allowed `http://localhost:5050/` origin after the Deep Chat integration.
 - [x] Check Deep Chat focus return, 390/320 px geometry, and a fresh browser console.
 - [x] Replace the historical native-interface functional checks with live Deep Chat desktop/mobile interaction evidence.
-- [ ] Recapture the July 19 animated hero at desktop, 390 px mobile, and the dark surface-readout frame after the in-app browser interstitial is manually reloaded.
-- [ ] Complete the separately gated production ChatFi identity/CORS change after relationship approval.
+- [x] Release and verify production ChatFi CORS on Cloud Run revision `chatfi-server-00023-x2x`.
+- [x] Recapture the animated hero at desktop, 390 px mobile, and the dark surface-readout frame.
+- [ ] Approve the public Yotin / MPS / WellFi relationship sentence and ChatFi lead destination.
+- [ ] Replace Porkbun parking DNS, then verify apex/`www`, TLS, desktop/mobile rendering, and live ChatFi on `yotinenergy.com`.
 
-final result: prior responsive site and ChatFi gates passed; July 19 WellFi merge is source/asset validated and awaits its final browser recapture; production identity/CORS remains the release gate
+final result: the WellFi/Indigenous site, enlarged Yotin identity, responsive hero, GitHub-to-Vercel auto-deploy, and production ChatFi CORS pass; Porkbun DNS and the separate ChatFi identity/lead-routing decision remain open
