@@ -139,7 +139,7 @@
     "https://unpkg.com/deep-chat@2.4.2/dist/deepChat.bundle.js"
   ];
   var DEEP_CHAT_INTEGRITY = "sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m";
-  var CHATFI_ERROR = "ChatFi can’t connect from this site yet. Email info@yotinenergy.ca and the team will help directly.";
+  var CHATFI_ERROR = "ChatFi can’t connect from this site yet. Email info@yotinenergy.com and the team will help directly.";
 
   function loadDeepChat() {
     if (window.customElements && window.customElements.get("deep-chat")) return Promise.resolve();

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yotinenergy.ca/sitemap.xml
+Sitemap: https://yotinenergy.com/sitemap.xml
