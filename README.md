@@ -16,8 +16,8 @@ Future equipment is intentionally not included in the deployed site until it is 
 - Plain **HTML + CSS + JavaScript** — no framework or build step.
 - GSAP 3.15.0 + ScrollTrigger, pinned from jsDelivr, for progressive motion.
 - Phosphor Icons 2.1.2, pinned from jsDelivr.
-- Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
-- Existing WebP WellFi cutaway with the prior continuous uplink/downhole-pulse behavior restored; all motion collapses safely under `prefers-reduced-motion`.
+- Space Grotesk for the WellFi hero, plus Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
+- The approved 12-second H.264 WellFi island export runs as the full-bleed hero with its WebP poster as first-paint and reduced-motion fallback.
 - Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when the panel opens, keeping its roughly 400 KB bundle off the initial page load.
 - A custom stream adapter preserves the existing `{ messages: [{ role, content }] }` Cloud Run contract; requests abort when the panel closes or the visitor presses stop.
 - Model credentials remain server-side. The browser never connects directly to Gemini.
@@ -55,7 +55,7 @@ Visual QA is recorded in `design-qa.md`.
 ## Production status
 
 - GitHub repository: `Bushels/YotinWeb`, branch `master`.
-- Vercel project: `yotin-energy`; a push to `master` automatically creates the production deployment. The connection was proven with Git-sourced production deployment `dpl_H6r2acLMEzdmfVjdSp6ECsDcqyJi`.
+- Vercel project: `yotin-energy`; a push to `master` automatically creates the production deployment. The final Option 3 implementation is commit `a3f4330bdc8c7ccfbcaebc89937192594da24f96`, released Ready as Git-sourced production deployment `dpl_2YoH5wH16hLfPocjVpNdE4YUgjjN`.
 - Public Vercel alias: `https://yotin-energy.vercel.app`.
 - Canonical production domain: `https://yotinenergy.com`; both the apex and `www` domains are claimed by the Vercel project.
 - Porkbun DNS is still parked. The remaining registrar change is `A @ -> 76.76.21.21` and `A www -> 76.76.21.21`. Preserve the existing Porkbun MX records and SPF TXT record.
