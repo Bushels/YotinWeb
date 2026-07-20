@@ -89,7 +89,6 @@
     intro
       .from(".hero-message > *", { autoAlpha: 0, y: 24, duration: 0.62, stagger: 0.1 }, "-=0.35")
       .from(".hero-scene", { autoAlpha: 0, x: 58, scale: 0.98, duration: 1.05 }, "-=0.72")
-      .from(".reading", { autoAlpha: 0, duration: 0.4, stagger: 0.12 }, "-=0.28")
       .from(".signal-step", { autoAlpha: 0, y: 22, duration: 0.5, stagger: 0.12 }, "-=0.12");
 
     if (!window.ScrollTrigger) return;
