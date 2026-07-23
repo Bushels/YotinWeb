@@ -29,10 +29,11 @@
   <link rel="apple-touch-icon" href="assets/yotin-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://mpsgroup.energy">
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
-  <link rel="preload" as="image" href="assets/wellfi-island-live.webp?v=20260723-2" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260720-2">
+  <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20260723-3">
 
   <script type="application/ld+json">
   {
@@ -115,11 +116,22 @@
         </div>
 
         <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
-          <div class="hero-scene">
-            <video class="hero-animation" muted loop playsinline preload="none" poster="assets/wellfi-island-live.webp?v=20260723-2" data-hero-animation role="img" aria-label="Animated cutaway showing WellFi transmitting pressure, temperature, and vibration data from the lower intermediate casing to a surface readout">
-              <source src="assets/wellfi-island-hero-12s.mp4?v=20260723-2" type="video/mp4">
-              <img src="assets/wellfi-island-live.webp" alt="Cutaway showing a WellFi telemetry signal travelling from downhole to surface" width="1920" height="1080">
-            </video>
+          <div
+            class="hero-scene"
+            data-wellfi-live
+            data-live-src="https://mpsgroup.energy/wellfi/animation"
+            data-live-src-local="http://127.0.0.1:3001/wellfi/animation"
+          >
+            <img
+              class="hero-poster"
+              src="assets/wellfi-island-r3f-poster.webp?v=20260723-4"
+              alt=""
+              width="1920"
+              height="1080"
+              fetchpriority="high"
+              decoding="async"
+              aria-hidden="true"
+            >
           </div>
           <p class="sr-only">Surface readout: pressure 158 kilopascals, temperature 26 degrees Celsius, and vibration 4.2 millimetres per second RMS.</p>
         </div>
@@ -241,6 +253,6 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260723-2"></script>
+  <script defer src="main.js?v=20260723-4"></script>
 </body>
 </html>

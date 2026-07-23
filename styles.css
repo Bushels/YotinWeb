@@ -248,24 +248,40 @@ a { color: inherit; text-decoration: none; }
 .hero-scene {
   position: absolute;
   top: -20px;
-  right: 0;
   width: min(114vw, 1800px);
+  aspect-ratio: 16 / 9;
   right: -190px;
   max-width: none;
   transform: translateX(0);
   filter: saturate(0.95) contrast(1.04);
   isolation: isolate;
+  background: #020408;
 }
-.hero-scene > .hero-animation {
+.hero-scene > .hero-poster,
+.hero-scene > .hero-live-frame {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
+  height: 100%;
   max-width: none;
   object-fit: cover;
   background: #020408;
   pointer-events: none;
 }
+.hero-scene > .hero-poster {
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 800ms var(--ease);
+}
+.hero-scene > .hero-live-frame {
+  z-index: 2;
+  border: 0;
+  opacity: 0;
+  transition: opacity 800ms var(--ease);
+}
+.hero-scene.is-live > .hero-poster { opacity: 0; }
+.hero-scene.is-live > .hero-live-frame { opacity: 1; }
 
 .signal-strip {
   display: grid;

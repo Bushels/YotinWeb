@@ -4,44 +4,98 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Original WellFi island loop, with a still fallback for reduced motion or blocked autoplay. */
-  var heroAnimation = document.querySelector("[data-hero-animation]");
-  var heroAnimationStarted = false;
-  var heroAnimationScheduled = false;
+  /*
+   * The poster paints first. The canonical live R3F scene then loads from the
+   * WellFi site and cross-fades only after its renderer reports a real frame.
+   */
+  var heroScene = document.querySelector("[data-wellfi-live]");
+  var liveFrame = null;
+  var liveOrigin = "";
+  var liveInView = true;
+  var liveReady = false;
+  var liveTimeout = 0;
+  var liveObserver = null;
 
-  function playHeroAnimation() {
-    if (!heroAnimation || reduceMotion || document.hidden) return;
-    heroAnimationStarted = true;
-    heroAnimation.preload = "auto";
-    var playRequest = heroAnimation.play();
-    if (playRequest && typeof playRequest.catch === "function") playRequest.catch(function () {});
+  function sendLiveActivity() {
+    if (!liveFrame || !liveFrame.contentWindow || !liveOrigin) return;
+    liveFrame.contentWindow.postMessage({
+      type: "wellfi:set-active",
+      active: liveInView && !document.hidden
+    }, liveOrigin);
   }
 
-  function scheduleHeroAnimation() {
-    if (!heroAnimation || reduceMotion || heroAnimationStarted || heroAnimationScheduled) return;
-    heroAnimationScheduled = true;
-    var start = function () {
-      heroAnimationScheduled = false;
-      playHeroAnimation();
-    };
-    if ("requestIdleCallback" in window) window.requestIdleCallback(start, { timeout: 1200 });
-    else window.setTimeout(start, 250);
+  function receiveLiveMessage(event) {
+    if (!liveFrame || event.source !== liveFrame.contentWindow || event.origin !== liveOrigin) return;
+    if (!event.data || event.data.type !== "wellfi:r3f-ready") return;
+
+    revealLiveFrame();
   }
 
-  function syncHeroAnimation() {
-    if (!heroAnimation) return;
-    if (reduceMotion || document.hidden) {
-      heroAnimation.pause();
-      return;
+  function revealLiveFrame() {
+    if (liveReady || !liveFrame) return;
+    liveReady = true;
+    window.clearTimeout(liveTimeout);
+    heroScene.classList.add("is-live");
+    sendLiveActivity();
+  }
+
+  function removeFailedLiveFrame() {
+    if (!liveReady && liveFrame) {
+      liveFrame.remove();
+      liveFrame = null;
+      window.removeEventListener("message", receiveLiveMessage);
+      document.removeEventListener("visibilitychange", sendLiveActivity);
+      if (liveObserver) {
+        liveObserver.disconnect();
+        liveObserver = null;
+      }
     }
-    if (heroAnimationStarted) playHeroAnimation();
-    else scheduleHeroAnimation();
   }
 
-  if (heroAnimation) {
-    document.addEventListener("visibilitychange", syncHeroAnimation);
-    if (document.readyState === "complete") scheduleHeroAnimation();
-    else window.addEventListener("load", scheduleHeroAnimation, { once: true });
+  function mountLiveHero() {
+    if (!heroScene || reduceMotion) return;
+    var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection && connection.saveData) return;
+
+    var isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+    var source = heroScene.getAttribute(isLocal ? "data-live-src-local" : "data-live-src");
+    if (!source) return;
+
+    var url = new URL(source);
+    url.searchParams.set("motion", "force");
+    url.searchParams.set("embed", "yotin");
+    url.searchParams.set("parentOrigin", window.location.origin);
+    liveOrigin = url.origin;
+
+    liveFrame = document.createElement("iframe");
+    liveFrame.className = "hero-live-frame";
+    liveFrame.title = "Live WellFi telemetry cutaway";
+    liveFrame.src = url.toString();
+    liveFrame.loading = "eager";
+    liveFrame.referrerPolicy = "strict-origin-when-cross-origin";
+    liveFrame.tabIndex = -1;
+    liveFrame.setAttribute("aria-hidden", "true");
+    liveFrame.addEventListener("error", removeFailedLiveFrame, { once: true });
+
+    window.addEventListener("message", receiveLiveMessage);
+    document.addEventListener("visibilitychange", sendLiveActivity);
+
+    if ("IntersectionObserver" in window) {
+      liveObserver = new IntersectionObserver(function (entries) {
+        liveInView = entries[0].isIntersecting;
+        sendLiveActivity();
+      }, { threshold: 0.02 });
+      liveObserver.observe(heroScene);
+    }
+
+    heroScene.appendChild(liveFrame);
+    liveTimeout = window.setTimeout(removeFailedLiveFrame, 15000);
+  }
+
+  if (heroScene) {
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(mountLiveHero);
+    });
   }
 
   /* Header and navigation */
