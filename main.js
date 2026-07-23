@@ -6,6 +6,27 @@
 
   /* Original WellFi island loop, with a still fallback for reduced motion or blocked autoplay. */
   var heroAnimation = document.querySelector("[data-hero-animation]");
+  var heroAnimationStarted = false;
+  var heroAnimationScheduled = false;
+
+  function playHeroAnimation() {
+    if (!heroAnimation || reduceMotion || document.hidden) return;
+    heroAnimationStarted = true;
+    heroAnimation.preload = "auto";
+    var playRequest = heroAnimation.play();
+    if (playRequest && typeof playRequest.catch === "function") playRequest.catch(function () {});
+  }
+
+  function scheduleHeroAnimation() {
+    if (!heroAnimation || reduceMotion || heroAnimationStarted || heroAnimationScheduled) return;
+    heroAnimationScheduled = true;
+    var start = function () {
+      heroAnimationScheduled = false;
+      playHeroAnimation();
+    };
+    if ("requestIdleCallback" in window) window.requestIdleCallback(start, { timeout: 1200 });
+    else window.setTimeout(start, 250);
+  }
 
   function syncHeroAnimation() {
     if (!heroAnimation) return;
@@ -13,14 +34,14 @@
       heroAnimation.pause();
       return;
     }
-    var playRequest = heroAnimation.play();
-    if (playRequest && typeof playRequest.catch === "function") playRequest.catch(function () {});
+    if (heroAnimationStarted) playHeroAnimation();
+    else scheduleHeroAnimation();
   }
 
   if (heroAnimation) {
-    if (reduceMotion) heroAnimation.removeAttribute("autoplay");
-    syncHeroAnimation();
     document.addEventListener("visibilitychange", syncHeroAnimation);
+    if (document.readyState === "complete") scheduleHeroAnimation();
+    else window.addEventListener("load", scheduleHeroAnimation, { once: true });
   }
 
   /* Header and navigation */
@@ -78,45 +99,6 @@
     }, { rootMargin: "-40% 0px -52% 0px" });
     sections.forEach(function (section) { sectionObserver.observe(section); });
   }
-
-  /* GSAP enhancement — the content remains fully usable if the CDN is unavailable. */
-  function initMotion() {
-    if (reduceMotion || !window.gsap) return;
-    var gsap = window.gsap;
-    if (window.ScrollTrigger) gsap.registerPlugin(window.ScrollTrigger);
-
-    var intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-    intro
-      .from(".hero-message > *", { autoAlpha: 0, y: 24, duration: 0.62, stagger: 0.1 }, "-=0.35")
-      .from(".hero-scene", { autoAlpha: 0, x: 58, scale: 0.98, duration: 1.05 }, "-=0.72")
-      .from(".signal-step", { autoAlpha: 0, y: 22, duration: 0.5, stagger: 0.12 }, "-=0.12");
-
-    if (!window.ScrollTrigger) return;
-    [
-      [".section-intro > *", ".wellfi-section"],
-      [".journey-list li", ".journey-list"],
-      [".spec-grid > div", ".spec-grid"],
-      [".company-grid > *", ".company-section"],
-      [".contact-grid > *", ".contact-section"]
-    ].forEach(function (group) {
-      gsap.from(group[0], {
-        scrollTrigger: { trigger: group[1], start: "top 78%", once: true },
-        autoAlpha: 0,
-        y: 28,
-        duration: 0.62,
-        stagger: 0.09,
-        ease: "power3.out"
-      });
-    });
-
-    gsap.to(".hero-scene", {
-      scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.6 },
-      yPercent: 5,
-      ease: "none"
-    });
-  }
-
-  window.addEventListener("load", initMotion, { once: true });
 
   /* ChatFi */
   var panel = document.querySelector("[data-chatfi-panel]");
