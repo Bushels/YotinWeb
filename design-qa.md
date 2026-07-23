@@ -115,5 +115,72 @@ final result: passed
 - Mobile menu: opens with `aria-expanded=true`, exposes all navigation actions, and closes with `aria-expanded=false`.
 - ChatFi: dialog opens, page scrolling locks, close control works, and the closed state is restored.
 - Fresh mobile browser console errors: none.
+- Follow-up review: the user identified the `0.34` placement as too high. This pass is superseded by the restored lower-model QA below.
+
+final result: blocked
+
+---
+
+# Design QA - restored lower intermediate-casing model
+
+## Outcome
+
+- No actionable P0, P1, or P2 differences remain after restoring the historical lower model.
+- The canonical WellFi scene now uses casing parameter `0.50`: the lower cased run below the pump, still inside the intermediate casing.
+- Parameter `0.55` was deliberately excluded because the historical source identifies it as the casing-shoe region.
+- The poster-first, idle-start, 24 fps performance treatment remains in place.
+
+## Comparison target
+
+- Current MPS source capture at the higher `0.34` placement: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\mpsgroup-live-lower-reference-20260723.jpg`
+- Historical source-state capture at the requested lower `0.50` placement: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\marketing-param050-before.jpg`
+- Authoritative regenerated lower-model poster: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\wellfi-lower-model-export\wellfi-island-hero-1280x720-poster.png`
+- Browser-rendered desktop implementation: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\yotin-lower-model-local-desktop.png`
+- Browser-rendered desktop playing state: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\yotin-lower-model-local-playing-2.png`
+- Browser-rendered mobile implementation: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\yotin-lower-model-local-mobile.png`
+- Browser-rendered mobile menu: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\yotin-lower-model-local-mobile-menu.png`
+- Full three-state comparison: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\wellfi-lower-model-qa-comparison.png`
+- Focused tool-and-casing comparison: `C:\Users\kyle\.codex\visualizations\2026\07\20\019f8174-46b6-7ba0-9099-0f377f3cb2f6\wellfi-lower-model-qa-focus.png`
+- Source and authoritative poster pixels: 1280 x 720 at density 1.
+- Desktop CSS viewport: 1602 x 745 at device scale factor 1; screenshot pixels: 1587 x 738 because the browser capture excludes scrollbars.
+- Mobile CSS viewport and screenshot: 390 x 844 at device scale factor 1.
+- Normalization: the three full-view panels were each normalized to 1280 x 720. The three focused regions were normalized to 430 x 360 and combined at 1290 x 360.
+- State: landing-page hero with the lower model visible; navigation closed except in the named menu capture.
+
+## Required fidelity surfaces
+
+- Fonts and typography: existing Archivo, Space Grotesk, and IBM Plex Mono families, weights, hierarchy, line height, letter spacing, wrapping, and optical balance are unchanged and readable at desktop and mobile sizes.
+- Spacing and layout rhythm: the Yotin canopy, left content column, proof chips, and CTA geometry are unchanged. The lower WellFi remains clear of the headline and reads inside the cased J-build.
+- Colors and tokens: Yotin orange, telemetry cyan, black field, opacity treatment, and text contrast remain consistent with the approved canopy hero.
+- Image quality and asset fidelity: the real canonical R3F scene is used. The replacement H.264 MP4 is 1280 x 720 at 24 fps and 569,838 bytes; the WebP poster is 21,876 bytes. No CSS, SVG, or placeholder approximation is used.
+- Copy and content: visible marketing copy is unchanged. The animation accessibility label now states that the data originates from the lower intermediate casing.
+- Responsiveness: no horizontal overflow at 1602 x 745 or 390 x 844. The lower tool remains visible on mobile without colliding with the text or action stack.
+- Accessibility and behavior: poster content is visible before playback, the mobile menu exposes its expanded state, ChatFi opens as a labeled dialog, page scroll locks while open, and closing restores the page.
+- Icons and surfaces: existing Yotin logo art, control borders, radii, and CTA surfaces remain unchanged and aligned.
+
+## Findings and comparison history
+
+1. [P1] The superseded `0.34` pass moved WellFi too high in the intermediate casing compared with the remembered lower model.
+2. Fix: restored the exact historical `0.50` casing parameter and updated its regression test.
+3. Post-fix evidence: the authoritative poster and focused comparison show the tool lower in the J-build while still above the casing-shoe region.
+4. [P2] The Yotin hero still referenced the previous higher-model MP4, poster, cache key, and middle-casing accessibility wording.
+5. Fix: regenerated the canonical scene, replaced both Yotin assets, advanced the cache key, and updated the accessibility wording.
+6. Post-fix evidence: desktop and mobile browser captures show the lower tool; playback reaches ready state 4 with no console errors.
+7. Final comparison: no actionable P0, P1, or P2 finding remains.
+
+## Full-view and focused evidence
+
+- Full view: the normalized three-panel comparison makes the downward move from `0.34` to `0.50` visible and confirms the Yotin crop preserves the requested placement.
+- Focused region: equal-size 430 x 360 crops show the prior higher tool, the authoritative lower source, and the browser implementation at a readable scale against the casing layers and J-build.
+- The Yotin crop intentionally differs from the MPS full-page composition because it supports the existing Yotin headline and CTA column; product location and casing relationship match the source scene.
+
+## Responsive and interaction evidence
+
+- Desktop: poster-first hero visible, one H1, no horizontal overflow, no GSAP scripts, no autoplay attribute, and correct lower-model asset URLs.
+- Playing state: video ready state 4, full hero opacity, identity transform, and no console errors.
+- Mobile: 390 x 844, no horizontal overflow, lower model visible, copy readable, and both primary actions usable.
+- Mobile menu: opens with `aria-expanded=true`, exposes all navigation actions, closes with `aria-expanded=false`, and restores the hidden state.
+- ChatFi: opens from the unique hero action, exposes the dialog, locks page scrolling, closes, and restores body scrolling.
+- Fresh desktop and mobile browser console errors: none.
 
 final result: passed
