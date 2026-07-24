@@ -403,6 +403,9 @@
     formationImg.alt = "";
     formationImg.setAttribute("aria-hidden", "true");
     formationImg.decoding = "async";
+    // Intrinsic size so the stage reserves space and doesn't shift on decode.
+    formationImg.width = 2048;
+    formationImg.height = 1152;
     stage.appendChild(formationImg);
 
     var svg = svgEl("svg", {
@@ -516,10 +519,11 @@
     sticky.appendChild(progress);
 
     /* ---- swap the static grid for the pinned stage ----
-       The fallback content stays in the DOM but is taken out of the visual
-       and accessibility trees, so the benefits are still announced once and
-       only once — by the pinned cards. */
-    fallback.hidden = true;
+       Remove rather than hide. Hiding left both copies in the DOM, so the
+       rendered page carried two "Benefits of WellFi" H2s and two of every
+       benefit H3 — duplicate headings a crawler has to reconcile. Crawlers
+       that don't run JS never get here and keep the static grid. */
+    fallback.remove();
     section.appendChild(sticky);
     /* 380vh made this section 42% of the entire page — long enough that
        scrolling through it read as the page being stuck. 260vh keeps every

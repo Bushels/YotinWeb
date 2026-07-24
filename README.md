@@ -14,7 +14,8 @@ Future equipment is intentionally not included in the deployed site until it is 
 ## Stack
 
 - Plain **HTML + CSS + JavaScript** — no framework or build step.
-- GSAP 3.15.0 + ScrollTrigger, integrity-pinned from jsDelivr, for the load-in, scroll reveals, spec counters, and the pinned drill sequence.
+- Reveals use **native CSS scroll-driven animation** (`animation-timeline: view()`). No library, no main-thread scroll handlers, and progress is bound to scroll position rather than fired once on a threshold.
+- GSAP 3.15.0 + ScrollTrigger, integrity-pinned from jsDelivr, is loaded **only** for the scrubbed drill sequence, or as the reveal fallback on browsers without native scroll-driven animation. Phones download none of it.
 - Phosphor Icons 2.1.2, pinned from jsDelivr.
 - Space Grotesk for the WellFi hero, plus Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
 - The hero embeds the canonical live WellFi R3F scene from `mpsgroup.energy/wellfi/animation`; the local WebP poster is first paint, and the permanent fallback for reduced-motion, Save-Data, and any load failure.
@@ -50,16 +51,135 @@ the strongest "generic dark template" tell on the page.
 
 ## Motion
 
-Motion is an enhancement, never a dependency. An inline `<head>` script adds
-`motion-ready` to `<html>`; that class — not CSS alone — is what hides animated
-elements. If GSAP fails to load, `main.js` removes the class and the page renders
-fully and statically. Verified by deliberately corrupting the GSAP SRI hash: all
-43 animated elements stayed visible.
+Motion is an enhancement, never a dependency. Modern browsers animate reveals
+purely in CSS. Only browsers **without** `animation-timeline: view()` get the
+`motion-ready` class from the inline `<head>` script, and that class — not CSS
+alone — is what hides elements for the GSAP fallback. If GSAP fails to load,
+`main.js` removes the class and the page renders fully and statically. Verified
+by deliberately corrupting the GSAP SRI hash: all 43 animated elements stayed
+visible.
 
 The `#benefits` drill sequence keeps its six benefits in the DOM once, as the
 static fallback grid. When the viewport is wide enough, has a fine pointer, and
-motion is allowed, `main.js` promotes that same content into a 380 vh pinned
-cutaway. Mobile, touch, reduced-motion, and no-JS all keep the static grid.
+motion is allowed, `main.js` promotes that same content into a 260 vh pinned
+cutaway and **removes** the fallback. Mobile, touch, reduced-motion, and no-JS
+all keep the static grid.
+
+### Three traps in scroll-driven animation (all hit on this site)
+
+1. **`overflow: hidden` creates a scroll container.** A `view()` timeline binds
+   to its nearest scroll-container ancestor, so any `overflow: hidden` between
+   the element and the document silently freezes it — no error, just a stuck
+   animation. Worse, `body { overflow-x: hidden }` computes `overflow-y` to
+   `auto`, making `<body>` a scroll container even though the *document*
+   scrolls. That put `.company-mark` at −461% progress. **Use `overflow: clip`**
+   (with a `hidden` line before it as the fallback). Applies to `body`,
+   `.hero`, `.channel-card`, `.device-banner`.
+2. **The range must resolve to 100% while the element is comfortably visible.**
+   Ending at `cover 46%` left the signal strip stuck at 0.76 opacity on a
+   1440px-tall monitor, because an element already on screen at load never
+   reaches that point. `cover 30%` puts the element's top at ~66% down the
+   viewport, and that ratio barely moves between 720px and 1440px tall.
+3. **Prefer `cover` over `entry` for reveals.** An `entry`-based end is scaled
+   by the *element's* height, so it drifts badly between a 130px card and a
+   500px block. `cover` is scaled by the viewport.
+
+A fire-and-forget tween has a fourth failure mode worth remembering: triggering
+at `top 88%` meant the 0.7s animation finished while the element was still in
+the bottom 13% of the screen, so nothing ever appeared to respond to scrolling.
+Scroll-*linked* beats scroll-*triggered* for anything the reader is looking at.
+
+## Cache keys — read before editing CSS or JS
+
+`vercel.json` serves `styles.css` and `main.js` with
+`Cache-Control: public, max-age=86400, must-revalidate`, and `index.html`
+references them with a manual key: `styles.css?v=YYYYMMDD-N`.
+
+**Any commit that changes either file must bump that key in the same commit.**
+Without it, anyone who loaded the site in the previous 24 hours gets the *new*
+HTML against the *old* cached CSS and JS. The origin and CDN are correct, so
+this is invisible in a fresh browser or behind a cache-busted URL — it only
+hits real returning visitors. It has bitten this project twice.
+
+To verify a deploy landed, check the **asset** under its new key, not the HTML:
+
+```bash
+curl -s "https://yotinenergy.com/styles.css?v=20260724-3" | grep -c animation-timeline
+```
+
+## Analytics
+
+Google Analytics 4 is wired but **inert**. `index.html` contains a gated
+snippet that makes no request and defines no globals until
+`GA_MEASUREMENT_ID` is a real `G-XXXXXXXXXX` value. A placeholder id would fire
+hits at a non-existent property and quietly poison the data, so the guard is a
+regex rather than a comment.
+
+To turn it on:
+
+1. Sign in to <https://analytics.google.com> as **kyle@bushelsenergy.com**.
+2. Admin → Create → Property. Name `Yotin Energy`, timezone
+   `(GMT-07:00) Edmonton`, currency `CAD`.
+3. Create a **Web** data stream for `https://yotinenergy.com`. Leave Enhanced
+   Measurement on — it gives scroll depth, outbound clicks and site search for
+   free, which matters on a one-page site.
+4. Copy the **Measurement ID** (`G-…`) into `GA_MEASUREMENT_ID` in
+   `index.html`, bump the `?v=` keys, commit, push.
+5. Add `www.yotinenergy.com` and `yotin-energy.vercel.app` as additional
+   stream domains if you want them counted.
+6. In Admin → Data Settings → Data Retention, raise event retention from the
+   2-month default to 14 months.
+
+Two things to settle before switching it on:
+
+- **Privacy notice.** GA sets cookies and sends visitor data to Google. The
+  README release gates already list a privacy link as outstanding; that should
+  land first, and under PIPEDA a short plain-language notice is the minimum.
+- **Vercel Web Analytics** is a cookie-free alternative that needs no banner
+  and no consent plumbing. If the goal is just traffic shape rather than
+  Google-ecosystem reporting, it is materially less work.
+
+## SEO
+
+Implemented on-page:
+
+- One `<h1>`, clean `h2`/`h3`/`h4` outline, no duplicate headings (the drill
+  fallback is *removed* rather than hidden when the pinned version takes over,
+  which previously produced two of every benefit heading).
+- Three JSON-LD blocks: `Organization`, `Product` (WellFi, with spec
+  `additionalProperty` rows), and `FAQPage` with five questions written against
+  real search phrasing — "does WellFi need a downhole cable", "what does WellFi
+  measure".
+- Canonical URL, `og:locale`, full OpenGraph and Twitter cards, `en-CA`.
+- Meta description rewritten to lead with the capability and the 160 figure.
+- Every image has explicit `width`/`height` (including the JS-injected
+  formation pass) so nothing shifts on decode; below-fold images are lazy.
+- `sitemap.xml` + `robots.txt`.
+
+### What still moves the needle — and only you can do it
+
+Ranked by likely return for a single-page Canadian oilfield services site:
+
+1. **Google Business Profile** for Pierceland, SK. Local pack placement for
+   "downhole telemetry Saskatchewan" is winnable and a one-page site otherwise
+   has no local signal at all.
+2. **Backlinks from industry bodies.** PTAC, Energy Safety Canada, SIGA/
+   Indigenous procurement directories, and any operator case study. A handful
+   of relevant .ca links outperform any amount of on-page work.
+3. **Give the content room to rank.** One page can only target one cluster.
+   The highest-value additions are a WellFi spec page, a "planned PCP
+   changeout" explainer, and one anonymised candidate-well case study — each
+   targeting a distinct query set and each linking back to the contact CTA.
+4. **Register both properties in Google Search Console** (apex + www), submit
+   the sitemap, and watch Core Web Vitals. This is also the only reliable way
+   to see which queries you already surface for.
+5. **Get the FAQ answers onto the visible page**, not just in JSON-LD. Google
+   increasingly wants the text to exist in the DOM for FAQ eligibility, and the
+   questions are genuinely what an engineer asks first.
+6. **Keep the 160 figure consistent everywhere**, including ChatFi's
+   server-side knowledge base, which lives in the Cloud Run service and is
+   **not** in this repo. A chat that says 130 while the page says 160 reads as
+   carelessness.
 
 ## Local preview
 

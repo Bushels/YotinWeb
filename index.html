@@ -6,10 +6,11 @@
   <meta name="theme-color" content="#03070b">
 
   <title>Yotin Energy — Indigenous Energy Services &amp; WellFi Telemetry</title>
-  <meta name="description" content="Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan. Explore WellFi wireless downhole telemetry for live pressure, temperature, and vibration data without a downhole cable.">
+  <meta name="description" content="WellFi brings live downhole pressure, temperature and vibration to surface with no cable, installed on a planned pump changeout. 160 deployed internationally. Indigenous-owned, Pierceland SK.">
   <link rel="canonical" href="https://yotinenergy.com/">
 
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_CA">
   <meta property="og:site_name" content="Yotin Energy">
   <meta property="og:title" content="Yotin Energy — Know the Unknown">
   <meta property="og:description" content="An Indigenous Energy Services Company. WellFi real-time wireless downhole telemetry.">
@@ -33,7 +34,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260724-2">
+  <link rel="stylesheet" href="styles.css?v=20260724-3">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -56,6 +57,38 @@
     })();
   </script>
 
+  <!--
+    Google Analytics 4.
+
+    Deliberately inert: it makes no network request and defines no globals
+    until GA_MEASUREMENT_ID below is a real "G-XXXXXXXXXX" value. Shipping a
+    placeholder id would fire hits at a property that doesn't exist and quietly
+    poison the data, so the guard is a real regex, not a comment.
+
+    To enable: create the GA4 property (see README "Analytics"), paste the
+    Measurement ID between the quotes, and bump the styles/script ?v= keys.
+    Note that switching this on starts sending visitor data to Google — the
+    privacy notice listed in the README release gates should land first.
+  -->
+  <script>
+    (function () {
+      var GA_MEASUREMENT_ID = "";
+      if (!/^G-[A-Z0-9]{6,}$/.test(GA_MEASUREMENT_ID)) return;
+
+      var tag = document.createElement("script");
+      tag.async = true;
+      tag.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_MEASUREMENT_ID;
+      document.head.appendChild(tag);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag("js", new Date());
+      // GA4 truncates IPs by default; the flag is explicit for auditability.
+      gtag("config", GA_MEASUREMENT_ID, { anonymize_ip: true });
+    })();
+  </script>
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -74,12 +107,87 @@
     "areaServed": "Western Canada",
     "knowsAbout": [
       "Wireless downhole telemetry",
+      "Electromagnetic telemetry",
       "Pressure monitoring",
       "Temperature monitoring",
       "Vibration monitoring",
+      "Produced fluid monitoring",
+      "Well data analytics",
       "MODBUS integration",
+      "Progressing cavity pump changeouts",
       "Heavy oil wells",
       "Thermal wells"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "WellFi",
+    "category": "Downhole telemetry system",
+    "url": "https://yotinenergy.com/#wellfi",
+    "image": "https://yotinenergy.com/assets/yotin-wellfi-og-2026.png",
+    "description": "WellFi is a wireless downhole telemetry tool that reports pressure, temperature, vibration and produced-fluid condition to surface over electromagnetic telemetry, with no downhole cable. It installs during a planned pump changeout and hands decoded readings to an existing RTU or SCADA system over MODBUS RS-485.",
+    "brand": { "@type": "Brand", "name": "WellFi" },
+    "manufacturer": { "@type": "Organization", "name": "Yotin Energy" },
+    "additionalProperty": [
+      { "@type": "PropertyValue", "name": "Pressure rating", "value": "10000 psia" },
+      { "@type": "PropertyValue", "name": "Temperature rating", "value": "150 °C" },
+      { "@type": "PropertyValue", "name": "Tool outer diameter", "value": "46 mm" },
+      { "@type": "PropertyValue", "name": "Battery life", "value": "5+ years" },
+      { "@type": "PropertyValue", "name": "Surface output", "value": "MODBUS RS-485" },
+      { "@type": "PropertyValue", "name": "Deployments", "value": "160 installed internationally" }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does WellFi need a downhole cable?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. WellFi sends a low-power electromagnetic signal through the formation to a surface receiver. A fiberglass collar creates the antenna gap in the tubing string, so there is no cable to run, clamp or damage."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does WellFi measure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pressure at the lift point, temperature at tool depth, pump and string vibration, produced-fluid composition changes, and interval flow behaviour interpreted from paired pressure and fluid-condition trends."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is WellFi installed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WellFi attaches to the interior or exterior of the tubing and goes in during work that is already scheduled, typically a planned progressing cavity pump changeout, or on a new completion. No separate intervention is required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does WellFi data reach our control system?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where does Yotin Energy operate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yotin Energy is an Indigenous-owned energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada."
+        }
+      }
     ]
   }
   </script>
@@ -154,7 +262,7 @@
             <h1 id="hero-title" data-hero-step>Know the<br>Unknown<span>.</span></h1>
             <p class="hero-lede" data-hero-step>Live pressure, temperature, and vibration from the bottom of the well — with no downhole cable, on a changeout you already have scheduled.</p>
             <ul class="proof-chips" aria-label="WellFi deployment highlights" data-hero-step>
-              <li><i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i> 130+ Installed Internationally</li>
+              <li><i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i> 160 Installed Internationally</li>
               <li><i class="ph ph-plugs" aria-hidden="true"></i> MODBUS Ready</li>
               <li><i class="ph ph-lightning" aria-hidden="true"></i> Rapid Deployment</li>
             </ul>
@@ -292,7 +400,7 @@
           <div data-motion="rise">
             <i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i>
             <dt>International installs</dt>
-            <dd><span data-count="130" data-count-suffix="+">130+</span></dd>
+            <dd><span data-count="160">160</span></dd>
           </div>
           <div data-motion="rise">
             <i class="ph ph-plugs" aria-hidden="true"></i>
@@ -379,6 +487,14 @@
           >
           <figcaption class="device-caption">WellFi in the tubing — EM isolator collar and sensor package</figcaption>
         </figure>
+
+        <aside class="portal-note" data-motion="rise">
+          <span class="portal-icon"><i class="ph ph-chart-line-up" aria-hidden="true"></i></span>
+          <div>
+            <h3>WellFi Access Portal</h3>
+            <p>The readings do not stop at raw numbers. The Access Portal analyzes the data coming off each well and turns it into recommendations — surfacing drawdown drift, vibration changes, and produced-fluid shifts while there is still time to act on them.</p>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -473,6 +589,6 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260724-2"></script>
+  <script defer src="main.js?v=20260724-3"></script>
 </body>
 </html>

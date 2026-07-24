@@ -832,6 +832,35 @@ a { color: inherit; text-decoration: none; }
   -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%);
 }
+/* Access Portal callout — the software half of the product, which the
+   hardware render alone doesn't communicate. */
+.portal-note {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 20px;
+  align-items: start;
+  max-width: 860px;
+  margin: clamp(38px, 4.5vw, 60px) auto 0;
+  padding: 26px 30px;
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--ember);
+  border-radius: 14px;
+  background: linear-gradient(100deg, rgba(242, 118, 34, 0.07), rgba(255, 255, 255, 0.02) 60%);
+}
+.portal-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(242, 118, 34, 0.3);
+  border-radius: 12px;
+  background: rgba(242, 118, 34, 0.09);
+  color: var(--ember);
+  font-size: 28px;
+}
+.portal-note h3 { margin: 4px 0 8px; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.02em; }
+.portal-note p { margin: 0; color: #b6c0c5; font-size: 15.5px; line-height: 1.65; }
+
 .device-caption {
   margin: clamp(22px, 3vw, 34px) auto 0;
   max-width: 620px;
@@ -1078,29 +1107,33 @@ a { color: inherit; text-decoration: none; }
 /* --- Modern path: native scroll-driven animation ------------------------ */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
+    /* The range MUST be chosen so that "element is comfortably in view" maps
+       to >= 100% progress. Otherwise anything already on screen at load sits
+       permanently half-revealed — which is exactly what happened to the signal
+       strip on tall monitors: fully visible at scrollY 0, stuck at 0.76.
+
+       `cover 30%` puts the element's top at roughly 66% down the viewport when
+       the reveal completes, and that ratio barely moves across viewport heights
+       (0.28-0.32 from 720px to 1440px). An `entry`-based end is scaled by the
+       ELEMENT's height instead, so it drifts wildly between a 130px card and a
+       500px block. Prefer `cover` for reveals. */
     [data-motion] {
       animation: reveal-rise linear both;
       animation-timeline: view();
-      /* Begins as the element enters and resolves by the time it is ~30% up
-         the viewport — the span you are actually looking at. */
-      animation-range: entry 4% cover 30%;
+      animation-range: cover 0% cover 30%;
     }
     [data-motion="fade"] { animation-name: reveal-fade; }
-
-    /* The signal strip sits at the very bottom of the hero. It needs a later,
-       longer range or it resolves before it is properly on screen — which is
-       exactly why these three read as "never brightening". */
-    .signal-step[data-motion] { animation-range: entry 16% cover 46%; }
 
     .channel-card[data-channel] {
       animation: reveal-rise linear both;
       animation-timeline: view();
-      animation-range: entry 6% cover 34%;
+      animation-range: cover 0% cover 32%;
     }
+    /* Sweeps just behind its card so it reads as the channel locking on. */
     .channel-sweep {
       animation: sweep-in linear both;
       animation-timeline: view();
-      animation-range: entry 20% cover 48%;
+      animation-range: cover 8% cover 40%;
     }
 
     /* Parallax, compositor-side. Replaces a scrubbed JS tween. */
@@ -1194,6 +1227,7 @@ a { color: inherit; text-decoration: none; }
   .signal-step, .signal-step:first-child, .signal-step:last-child { padding: 24px 0; border-right: 0; border-bottom: 1px solid var(--line); }
   .signal-step:last-child { border-bottom: 0; }
 
+  .portal-note { grid-template-columns: 1fr; gap: 16px; padding: 22px; }
   .section-intro, .company-grid, .contact-grid { grid-template-columns: 1fr; gap: 38px; }
   .section-intro .eyebrow { grid-column: auto; }
   .channel-head { flex-direction: column; align-items: flex-start; gap: 8px; }
