@@ -33,7 +33,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260723-3">
+  <link rel="stylesheet" href="styles.css?v=20260724-1">
+
+  <!--
+    Opt the page into the animated start state before first paint. CSS alone
+    can't do this safely: if it hid elements unconditionally and the motion
+    layer then failed to load, the page would render blank. Setting the class
+    here — and removing it in main.js on any failure — fails open instead.
+  -->
+  <script>
+    (function () {
+      try {
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          document.documentElement.classList.add("motion-ready");
+        }
+      } catch (e) { /* no motion, no problem — content stays visible */ }
+    })();
+  </script>
 
   <script type="application/ld+json">
   {
@@ -79,9 +95,14 @@
 
       <nav class="desktop-nav" aria-label="Primary">
         <a href="#wellfi">WellFi</a>
+        <a href="#benefits">Benefits</a>
         <a href="#company">Our Company</a>
         <a href="#contact">Contact</a>
       </nav>
+
+      <button class="nav-cta" type="button" data-chatfi-open>
+        <i class="ph ph-chats-circle" aria-hidden="true"></i> Ask ChatFi
+      </button>
 
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu" data-nav-toggle>
         <span></span><span></span><span></span>
@@ -90,6 +111,7 @@
 
     <nav class="mobile-nav" id="mobileNav" aria-label="Mobile" data-mobile-nav hidden>
       <a href="#wellfi">WellFi</a>
+      <a href="#benefits">Benefits</a>
       <a href="#company">Our Company</a>
       <a href="#contact">Contact</a>
       <button type="button" data-chatfi-open>Ask ChatFi</button>
@@ -98,59 +120,62 @@
 
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
+        <div
+          class="hero-scene"
+          data-wellfi-live
+          data-live-src="https://mpsgroup.energy/wellfi/animation"
+          data-live-src-local="http://127.0.0.1:3001/wellfi/animation"
+        >
+          <img
+            class="hero-poster"
+            src="assets/wellfi-island-r3f-poster.webp?v=20260723-4"
+            alt=""
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            decoding="async"
+            aria-hidden="true"
+          >
+        </div>
+        <p class="sr-only">Surface readout: pressure 158 kilopascals, temperature 26 degrees Celsius, and vibration 4.2 millimetres per second RMS.</p>
+      </div>
+      <div class="hero-scrim" aria-hidden="true"></div>
+
       <div class="shell hero-grid">
         <div class="hero-copy">
           <div class="hero-message">
-            <p class="eyebrow">WELLFI</p>
-            <h1 id="hero-title">Know the<br>Unknown<span>.</span></h1>
-            <ul class="proof-chips" aria-label="WellFi deployment highlights">
-              <li>130+ Installed Internationally</li>
-              <li>MODBUS Ready</li>
-              <li>Rapid Deployment</li>
+            <p class="eyebrow" data-hero-step>WELLFI</p>
+            <h1 id="hero-title" data-hero-step>Know the<br>Unknown<span>.</span></h1>
+            <p class="hero-lede" data-hero-step>Live pressure, temperature, and vibration from the bottom of the well — with no downhole cable, on a changeout you already have scheduled.</p>
+            <ul class="proof-chips" aria-label="WellFi deployment highlights" data-hero-step>
+              <li><i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i> 130+ Installed Internationally</li>
+              <li><i class="ph ph-plugs" aria-hidden="true"></i> MODBUS Ready</li>
+              <li><i class="ph ph-lightning" aria-hidden="true"></i> Rapid Deployment</li>
             </ul>
-            <div class="hero-actions">
+            <div class="hero-actions" data-hero-step>
               <a class="button button-primary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
               <button class="button button-secondary" type="button" data-chatfi-open>Ask ChatFi <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
             </div>
           </div>
         </div>
 
-        <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
-          <div
-            class="hero-scene"
-            data-wellfi-live
-            data-live-src="https://mpsgroup.energy/wellfi/animation"
-            data-live-src-local="http://127.0.0.1:3001/wellfi/animation"
-          >
-            <img
-              class="hero-poster"
-              src="assets/wellfi-island-r3f-poster.webp?v=20260723-4"
-              alt=""
-              width="1920"
-              height="1080"
-              fetchpriority="high"
-              decoding="async"
-              aria-hidden="true"
-            >
-          </div>
-          <p class="sr-only">Surface readout: pressure 158 kilopascals, temperature 26 degrees Celsius, and vibration 4.2 millimetres per second RMS.</p>
-        </div>
+        <p class="scroll-cue" data-hero-step aria-hidden="true">
+          <i class="ph ph-arrow-down" aria-hidden="true"></i> Scroll
+        </p>
       </div>
 
       <div class="shell signal-strip" aria-label="WellFi signal path">
-        <article class="signal-step">
-          <span class="signal-number">01</span>
-          <i class="ph ph-broadcast" aria-hidden="true"></i>
+        <article class="signal-step" data-motion="rise">
+          <span class="signal-icon"><i class="ph ph-broadcast" aria-hidden="true"></i><span class="signal-number">01</span></span>
           <div><h2>Signal</h2><p>WellFi sends a low-power wireless pulse from deep inside the well.</p></div>
         </article>
-        <article class="signal-step">
-          <span class="signal-number">02</span>
-          <i class="ph ph-wave-sine" aria-hidden="true"></i>
+        <article class="signal-step" data-motion="rise">
+          <span class="signal-icon"><i class="ph ph-wave-sine" aria-hidden="true"></i><span class="signal-number">02</span></span>
           <div><h2>Measure</h2><p>Pressure, temperature, vibration, and fluid-condition data are captured.</p></div>
         </article>
-        <article class="signal-step">
-          <span class="signal-number">03</span>
-          <i class="ph ph-monitor" aria-hidden="true"></i>
+        <article class="signal-step" data-motion="rise">
+          <span class="signal-icon"><i class="ph ph-monitor" aria-hidden="true"></i><span class="signal-number">03</span></span>
           <div><h2>Insight</h2><p>Live telemetry lands in the control system operators already use.</p></div>
         </article>
       </div>
@@ -159,42 +184,227 @@
     <section class="wellfi-section" id="wellfi" aria-labelledby="wellfi-title">
       <div class="shell">
         <div class="section-intro">
-          <p class="eyebrow">REAL-TIME WIRELESS DOWNHOLE TELEMETRY</p>
-          <h2 id="wellfi-title">Data Below.<br><span>Insight Above.</span></h2>
-          <div class="section-summary">
+          <p class="eyebrow" data-motion="rise">REAL-TIME WIRELESS DOWNHOLE TELEMETRY</p>
+          <h2 id="wellfi-title" data-motion="rise">Data Below.<br><span>Insight Above.</span></h2>
+          <div class="section-summary" data-motion="rise">
             <p class="measurement-line">Pressure. Temperature. Vibration. At Surface.</p>
             <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485.</p>
           </div>
         </div>
 
+        <div class="channel-head">
+          <h3 data-motion="rise">Explore your data</h3>
+          <p data-motion="rise">Five channels · one tool</p>
+        </div>
+        <div class="channel-grid" data-channels>
+          <article class="channel-card" data-channel>
+            <span class="channel-sweep" aria-hidden="true"></span>
+            <div class="channel-top">
+              <span class="channel-icon"><i class="ph ph-gauge" aria-hidden="true"></i></span>
+              <span class="channel-tag">CH-01</span>
+            </div>
+            <h4>Pressure</h4>
+            <p>Pump-intake and reservoir response pressure at the lift point.</p>
+          </article>
+          <article class="channel-card" data-channel>
+            <span class="channel-sweep" aria-hidden="true"></span>
+            <div class="channel-top">
+              <span class="channel-icon"><i class="ph ph-thermometer-simple" aria-hidden="true"></i></span>
+              <span class="channel-tag">CH-02</span>
+            </div>
+            <h4>Temperature</h4>
+            <p>Temperature trends at the tool depth and operating interval.</p>
+          </article>
+          <article class="channel-card" data-channel>
+            <span class="channel-sweep" aria-hidden="true"></span>
+            <div class="channel-top">
+              <span class="channel-icon"><i class="ph ph-waveform" aria-hidden="true"></i></span>
+              <span class="channel-tag">CH-03</span>
+            </div>
+            <h4>Vibration</h4>
+            <p>Pump and string vibration changes before abnormal operation escalates.</p>
+          </article>
+          <article class="channel-card" data-channel>
+            <span class="channel-sweep" aria-hidden="true"></span>
+            <div class="channel-top">
+              <span class="channel-icon"><i class="ph ph-drop-half" aria-hidden="true"></i></span>
+              <span class="channel-tag">CH-04</span>
+            </div>
+            <h4>Fluid Composition</h4>
+            <p>Produced-fluid composition changes from the tool location or paired layouts.</p>
+          </article>
+          <article class="channel-card" data-channel>
+            <span class="channel-sweep" aria-hidden="true"></span>
+            <div class="channel-top">
+              <span class="channel-icon"><i class="ph ph-trend-up" aria-hidden="true"></i></span>
+              <span class="channel-tag">CH-05</span>
+            </div>
+            <h4>Flow Insight</h4>
+            <p>Interval behaviour interpreted from paired pressure and fluid-condition trends.</p>
+          </article>
+        </div>
+
         <ol class="journey-list" aria-label="How WellFi works">
-          <li><span>01</span><div><h3>Create the antenna gap</h3><p>A fiberglass collar electrically separates the tubing string.</p></div></li>
-          <li><span>02</span><div><h3>Transmit through the formation</h3><p>The downhole tool sends a low-power electromagnetic signal without a new cable.</p></div></li>
-          <li><span>03</span><div><h3>Decode at surface</h3><p>A surface receiver and ground reference recover the telemetry.</p></div></li>
-          <li><span>04</span><div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 for the existing RTU or SCADA system.</p></div></li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-link-break" aria-hidden="true"></i><span>01</span></span>
+            <div><h3>Create the antenna gap</h3><p>A fiberglass collar electrically separates the tubing string.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-wifi-high" aria-hidden="true"></i><span>02</span></span>
+            <div><h3>Transmit through the formation</h3><p>The downhole tool sends a low-power electromagnetic signal without a new cable.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-cpu" aria-hidden="true"></i><span>03</span></span>
+            <div><h3>Decode at surface</h3><p>A surface receiver and ground reference recover the telemetry.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-plugs-connected" aria-hidden="true"></i><span>04</span></span>
+            <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 for the existing RTU or SCADA system.</p></div>
+          </li>
         </ol>
 
         <dl class="spec-grid" aria-label="WellFi public specifications">
-          <div><dt>Pressure rating</dt><dd>10,000 <small>psia</small></dd></div>
-          <div><dt>Temperature rating</dt><dd>150 <small>°C</small></dd></div>
-          <div><dt>Tool outer diameter</dt><dd>46 <small>mm</small></dd></div>
-          <div><dt>Battery life</dt><dd>5+ <small>years</small></dd></div>
-          <div><dt>International installs</dt><dd>130+</dd></div>
-          <div><dt>Surface output</dt><dd>RS-485</dd></div>
+          <div data-motion="rise">
+            <i class="ph ph-gauge" aria-hidden="true"></i>
+            <dt>Pressure rating</dt>
+            <dd><span data-count="10000" data-count-format="comma">10,000</span> <small>psia</small></dd>
+          </div>
+          <div data-motion="rise">
+            <i class="ph ph-thermometer-simple" aria-hidden="true"></i>
+            <dt>Temperature rating</dt>
+            <dd><span data-count="150">150</span> <small>°C</small></dd>
+          </div>
+          <div data-motion="rise">
+            <i class="ph ph-ruler" aria-hidden="true"></i>
+            <dt>Tool outer diameter</dt>
+            <dd><span data-count="46">46</span> <small>mm</small></dd>
+          </div>
+          <div data-motion="rise">
+            <i class="ph ph-battery-high" aria-hidden="true"></i>
+            <dt>Battery life</dt>
+            <dd><span data-count="5" data-count-suffix="+">5+</span> <small>years</small></dd>
+          </div>
+          <div data-motion="rise">
+            <i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i>
+            <dt>International installs</dt>
+            <dd><span data-count="130" data-count-suffix="+">130+</span></dd>
+          </div>
+          <div data-motion="rise">
+            <i class="ph ph-plugs" aria-hidden="true"></i>
+            <dt>Surface output</dt>
+            <dd>RS-485</dd>
+          </div>
         </dl>
+      </div>
+    </section>
+
+    <!--
+      Benefits. The static list below is the source of truth and the no-JS /
+      mobile / reduced-motion experience. When the viewport can support it,
+      main.js promotes this same content into a pinned, scroll-driven cutaway
+      so nothing is duplicated in the DOM.
+    -->
+    <section class="drill-section" id="benefits" aria-labelledby="benefits-title" data-drill
+             data-formation="assets/drill-formation.webp"
+             data-casing="assets/drill-casing.webp">
+      <div class="shell drill-fallback" data-drill-fallback>
+        <div class="drill-fallback-head">
+          <p class="eyebrow">WHY OPERATORS RUN IT</p>
+          <h2 id="benefits-title">Benefits of WellFi</h2>
+        </div>
+        <ul data-drill-benefits>
+          <li data-icon="ph-gear">
+            <i class="ph ph-gear" aria-hidden="true"></i>
+            <h3>Extend Pump Life</h3>
+            <p>Know your hydrostatic, understand vibration, avoid pump failure.</p>
+          </li>
+          <li data-icon="ph-trend-up">
+            <i class="ph ph-trend-up" aria-hidden="true"></i>
+            <h3>Increase Production</h3>
+            <p>Run closer to optimal without flying blind.</p>
+          </li>
+          <li data-icon="ph-bell-ringing">
+            <i class="ph ph-bell-ringing" aria-hidden="true"></i>
+            <h3>Drawdown Management</h3>
+            <p>Set notifications to ensure your drawdown stays consistent.</p>
+          </li>
+          <li data-icon="ph-waves">
+            <i class="ph ph-waves" aria-hidden="true"></i>
+            <h3>Reservoir Monitoring</h3>
+            <p>See reservoir response at the lift point.</p>
+          </li>
+          <li data-icon="ph-drop-half">
+            <i class="ph ph-drop-half" aria-hidden="true"></i>
+            <h3>Track Fluid Changes</h3>
+            <p>Spot produced-fluid changes as they happen.</p>
+          </li>
+          <li data-icon="ph-target">
+            <i class="ph ph-target" aria-hidden="true"></i>
+            <h3>Well Optimization</h3>
+            <p>Reservoir-fluid monitoring that turns data into production efficiencies.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="insight-section" id="insight" aria-labelledby="insight-title">
+      <div class="shell">
+        <div class="insight-head">
+          <p class="eyebrow" data-motion="rise">THE TOOL</p>
+          <h2 id="insight-title" data-motion="rise">Inside the string.<br><span>Out of the way.</span></h2>
+          <p data-motion="rise">WellFi attaches to the interior or exterior of the tubing, on new installs or pump changes. It reports over wireless electromagnetic telemetry, which removes the risk that comes with running a cable.</p>
+          <ul class="application-chips" data-motion="rise">
+            <li><i class="ph ph-drop" aria-hidden="true"></i> Light Oil</li>
+            <li><i class="ph ph-drop-half" aria-hidden="true"></i> Heavy Oil</li>
+            <li><i class="ph ph-flame" aria-hidden="true"></i> Gas</li>
+            <li><i class="ph ph-thermometer-hot" aria-hidden="true"></i> Thermal</li>
+          </ul>
+        </div>
+
+        <figure class="device-banner" data-motion="fade">
+          <span class="device-glow" aria-hidden="true"></span>
+          <img
+            src="assets/wellfi-internal-ghost.webp"
+            alt="The WellFi tool deployed inside production tubing, with the housing ghosted to reveal the electromagnetic isolator collar and the internal sensor package."
+            width="1800"
+            height="392"
+            loading="lazy"
+            decoding="async"
+            data-device-img
+          >
+          <figcaption class="device-caption">WellFi in the tubing — EM isolator collar and sensor package</figcaption>
+        </figure>
       </div>
     </section>
 
     <section class="company-section" id="company" aria-labelledby="company-title">
       <div class="shell company-grid">
         <div>
-          <p class="eyebrow eyebrow-orange">ABOUT YOTIN</p>
-          <h2 id="company-title">Indigenous-owned.<br>Built from the ground up.</h2>
+          <p class="eyebrow eyebrow-ink" data-motion="rise">ABOUT YOTIN</p>
+          <h2 id="company-title" data-motion="rise">Indigenous-owned.<br>Built from the ground up.</h2>
         </div>
         <div class="company-copy">
-          <p>Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada.</p>
-          <p>The name comes from <em>yôtin</em>, the Cree word for wind—a force that crosses the land without being seen. WellFi works on the same useful truth: what cannot be seen can still be measured.</p>
-          <p class="location"><i class="ph ph-map-pin" aria-hidden="true"></i> Pierceland, Saskatchewan, Canada</p>
+          <p data-motion="rise">Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada.</p>
+          <p data-motion="rise">The name comes from <em>yôtin</em>, the Cree word for wind—a force that crosses the land without being seen. WellFi works on the same useful truth: what cannot be seen can still be measured.</p>
+          <p class="location" data-motion="rise"><i class="ph ph-map-pin" aria-hidden="true"></i> Pierceland, Saskatchewan, Canada</p>
+
+          <div class="company-marks">
+            <div class="company-mark" data-motion="rise">
+              <i class="ph ph-handshake" aria-hidden="true"></i>
+              <strong>Indigenous-owned</strong>
+              <span>Locally rooted, Western Canada focused.</span>
+            </div>
+            <div class="company-mark" data-motion="rise">
+              <i class="ph ph-hard-hat" aria-hidden="true"></i>
+              <strong>Field service</strong>
+              <span>Support through install and beyond.</span>
+            </div>
+            <div class="company-mark" data-motion="rise">
+              <i class="ph ph-drop-half" aria-hidden="true"></i>
+              <strong>Heavy oil &amp; thermal</strong>
+              <span>Built for the corridor we work in.</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -202,13 +412,16 @@
     <section class="contact-section" id="contact" aria-labelledby="contact-title">
       <div class="shell contact-grid">
         <div>
-          <p class="eyebrow">CANDIDATE WELL REVIEW</p>
-          <h2 id="contact-title">Know the Unknown.<br><span>One Changeout Away.</span></h2>
+          <p class="eyebrow" data-motion="rise">CANDIDATE WELL REVIEW</p>
+          <h2 id="contact-title" data-motion="rise">Know the Unknown.<br><span>One Changeout Away.</span></h2>
         </div>
         <div class="contact-actions">
-          <p>Well type, changeout timing, and required data establish deployment fit.</p>
-          <a class="button button-primary" href="mailto:info@yotinenergy.com">Email Yotin <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-          <button class="text-button" type="button" data-chatfi-open>Or ask ChatFi about WellFi</button>
+          <p data-motion="rise">Well type, changeout timing, and required data establish deployment fit.</p>
+          <a class="button button-primary" href="mailto:info@yotinenergy.com" data-motion="rise">Email Yotin <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+          <!-- Visible address: if no mail client is configured the button is a
+               dead end, so the address has to be readable and copyable here. -->
+          <p class="contact-email" data-motion="rise">or reach us directly at <a href="mailto:info@yotinenergy.com">info@yotinenergy.com</a></p>
+          <button class="text-button" type="button" data-chatfi-open data-motion="rise">Or ask ChatFi about WellFi</button>
         </div>
       </div>
     </section>
@@ -222,6 +435,7 @@
       </a>
       <nav aria-label="Footer">
         <a href="#wellfi">WellFi</a>
+        <a href="#benefits">Benefits</a>
         <a href="#company">Our Company</a>
         <a href="#contact">Contact</a>
       </nav>
@@ -253,6 +467,6 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260723-4"></script>
+  <script defer src="main.js?v=20260724-1"></script>
 </body>
 </html>

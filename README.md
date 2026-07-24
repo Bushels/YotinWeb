@@ -14,10 +14,10 @@ Future equipment is intentionally not included in the deployed site until it is 
 ## Stack
 
 - Plain **HTML + CSS + JavaScript** — no framework or build step.
-- GSAP 3.15.0 + ScrollTrigger, pinned from jsDelivr, for progressive motion.
+- GSAP 3.15.0 + ScrollTrigger, integrity-pinned from jsDelivr, for the load-in, scroll reveals, spec counters, and the pinned drill sequence.
 - Phosphor Icons 2.1.2, pinned from jsDelivr.
 - Space Grotesk for the WellFi hero, plus Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
-- The approved 12-second H.264 WellFi island export runs as the full-bleed hero with its WebP poster as first-paint and reduced-motion fallback.
+- The hero embeds the canonical live WellFi R3F scene from `mpsgroup.energy/wellfi/animation`; the local WebP poster is first paint, and the permanent fallback for reduced-motion, Save-Data, and any load failure.
 - Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when the panel opens, keeping its roughly 400 KB bundle off the initial page load.
 - A custom stream adapter preserves the existing `{ messages: [{ role, content }] }` Cloud Run contract; requests abort when the panel closes or the visitor presses stop.
 - Model credentials remain server-side. The browser never connects directly to Gemini.
@@ -27,12 +27,39 @@ Future equipment is intentionally not included in the deployed site until it is 
 ```text
 index.html          page content, SEO, JSON-LD, and ChatFi shell
 styles.css          Yotin design system and responsive layouts
-main.js             navigation, motion enhancement, and Deep Chat adapter
+main.js             navigation, motion enhancement, drill sequence, Deep Chat adapter
 assets/             approved brand, WellFi, and current social-card assets
 robots.txt
 sitemap.xml
 vercel.json         caching and security headers
 ```
+
+## Design system
+
+The accent family is **ember + sand**. Cyan is retired from all UI chrome — it
+survives only inside the embedded R3F well scene and the EM transmission glow,
+where it reads as *signal* rather than as brand. Hairlines are sand-tinted
+(`rgba(232,220,200,…)`) rather than white; a cold white rule on near-black was
+the strongest "generic dark template" tell on the page.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--ember` | `#f27622` | eyebrows, icons, primary CTA, counters |
+| `--ember-ink` | `#9f470d` | the only ember safe for text on `--paper` |
+| `--sand` | `#e8dcc8` | secondary accent, hairlines, quiet structure |
+
+## Motion
+
+Motion is an enhancement, never a dependency. An inline `<head>` script adds
+`motion-ready` to `<html>`; that class — not CSS alone — is what hides animated
+elements. If GSAP fails to load, `main.js` removes the class and the page renders
+fully and statically. Verified by deliberately corrupting the GSAP SRI hash: all
+43 animated elements stayed visible.
+
+The `#benefits` drill sequence keeps its six benefits in the DOM once, as the
+static fallback grid. When the viewport is wide enough, has a fine pointer, and
+motion is allowed, `main.js` promotes that same content into a 380 vh pinned
+cutaway. Mobile, touch, reduced-motion, and no-JS all keep the static grid.
 
 ## Local preview
 
@@ -42,6 +69,11 @@ py -3 -m http.server 5050
 ```
 
 Open `http://localhost:5050/`. ChatFi's development CORS policy allows `localhost`; it intentionally rejects `127.0.0.1`.
+
+The hero's live R3F scene points at `127.0.0.1:3001` on localhost, so the hero
+shows the poster locally unless the WellFi dev server is also running
+(`cd wellfi-marketing/site && next dev -p 3001`). This is expected; production
+uses `mpsgroup.energy`.
 
 ## Verification
 

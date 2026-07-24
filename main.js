@@ -3,11 +3,14 @@
   "use strict";
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement;
 
-  /*
-   * The poster paints first. The canonical live R3F scene then loads from the
-   * WellFi site and cross-fades only after its renderer reports a real frame.
-   */
+  /* ======================================================================
+     Hero — canonical live R3F scene
+     The poster paints first. The live scene loads from the WellFi site and
+     cross-fades only after its renderer reports a real frame.
+     ====================================================================== */
+
   var heroScene = document.querySelector("[data-wellfi-live]");
   var liveFrame = null;
   var liveOrigin = "";
@@ -17,7 +20,10 @@
   var liveObserver = null;
 
   function sendLiveActivity() {
-    if (!liveFrame || !liveFrame.contentWindow || !liveOrigin) return;
+    // Only meaningful once the child has navigated and announced itself.
+    // Posting earlier targets a still-same-origin about:blank document and
+    // throws a console warning on every observer tick.
+    if (!liveReady || !liveFrame || !liveFrame.contentWindow || !liveOrigin) return;
     liveFrame.contentWindow.postMessage({
       type: "wellfi:set-active",
       active: liveInView && !document.hidden
@@ -27,7 +33,6 @@
   function receiveLiveMessage(event) {
     if (!liveFrame || event.source !== liveFrame.contentWindow || event.origin !== liveOrigin) return;
     if (!event.data || event.data.type !== "wellfi:r3f-ready") return;
-
     revealLiveFrame();
   }
 
@@ -98,7 +103,10 @@
     });
   }
 
-  /* Header and navigation */
+  /* ======================================================================
+     Header and navigation
+     ====================================================================== */
+
   var header = document.querySelector("[data-header]");
   var navToggle = document.querySelector("[data-nav-toggle]");
   var mobileNav = document.querySelector("[data-mobile-nav]");
@@ -154,7 +162,431 @@
     sections.forEach(function (section) { sectionObserver.observe(section); });
   }
 
-  /* ChatFi */
+  /* ======================================================================
+     Motion layer
+     GSAP is an enhancement, never a dependency. `motion-ready` (set by the
+     inline head script) is what hides elements; if GSAP fails to arrive we
+     drop that class and the page is simply static and fully visible.
+     ====================================================================== */
+
+  var GSAP_SRC = "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js";
+  var GSAP_SRI = "sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly";
+  var ST_SRC = "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js";
+  var ST_SRI = "sha384-wl5TeDVvOWt30Pbf8aSo2ZrzsOjddu3avOBvHe+p+OhJt9gP6w9YXmDkN5DK2/dF";
+
+  function loadScript(src, integrity) {
+    return new Promise(function (resolve, reject) {
+      var el = document.createElement("script");
+      var settled = false;
+      var timer = window.setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        el.remove();
+        reject(new Error("Timed out: " + src));
+      }, 8000);
+
+      el.src = src;
+      el.integrity = integrity;
+      el.crossOrigin = "anonymous";
+      el.referrerPolicy = "no-referrer";
+      el.onload = function () {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        resolve();
+      };
+      el.onerror = function () {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        el.remove();
+        reject(new Error("Failed: " + src));
+      };
+      document.head.appendChild(el);
+    });
+  }
+
+  function abandonMotion() {
+    root.classList.remove("motion-ready");
+  }
+
+  function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function seg(p, a, b) { return clamp01((p - a) / (b - a)); }
+
+  /* --- counters ---------------------------------------------------------- */
+
+  function formatCount(value, node) {
+    var out = String(Math.round(value));
+    if (node.getAttribute("data-count-format") === "comma") {
+      out = out.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    return out + (node.getAttribute("data-count-suffix") || "");
+  }
+
+  function buildCounters(gsap) {
+    document.querySelectorAll("[data-count]").forEach(function (node) {
+      var target = parseFloat(node.getAttribute("data-count"));
+      if (!isFinite(target)) return;
+      var state = { v: 0 };
+      gsap.to(state, {
+        v: target,
+        duration: 1.4,
+        ease: "power1.inOut",
+        scrollTrigger: { trigger: node, start: "top 88%", once: true },
+        onStart: function () { node.textContent = formatCount(0, node); },
+        onUpdate: function () { node.textContent = formatCount(state.v, node); },
+        onComplete: function () { node.textContent = formatCount(target, node); }
+      });
+    });
+  }
+
+  /* --- hero load-in ------------------------------------------------------ */
+
+  function buildHeroIntro(gsap) {
+    var steps = document.querySelectorAll("[data-hero-step]");
+    if (!steps.length) return;
+    gsap.to(steps, {
+      opacity: 1,
+      y: 0,
+      duration: 0.75,
+      ease: "power2.out",
+      stagger: 0.11,
+      delay: 0.12,
+      clearProps: "transform"
+    });
+  }
+
+  /* --- generic reveal ---------------------------------------------------- */
+
+  function buildReveals(gsap) {
+    document.querySelectorAll("[data-motion]").forEach(function (node) {
+      gsap.to(node, {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: "power2.out",
+        scrollTrigger: { trigger: node, start: "top 88%", once: true },
+        clearProps: "transform"
+      });
+    });
+  }
+
+  /* --- telemetry channel cards ------------------------------------------- */
+
+  function buildChannels(gsap) {
+    var grid = document.querySelector("[data-channels]");
+    if (!grid) return;
+    var cards = grid.querySelectorAll("[data-channel]");
+    var sweeps = grid.querySelectorAll(".channel-sweep");
+    if (!cards.length) return;
+
+    var tl = gsap.timeline({ scrollTrigger: { trigger: grid, start: "top 84%", once: true } });
+    tl.fromTo(cards,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.1, clearProps: "transform" });
+    // The hairline sweeping across each card reads as the channel "acquiring".
+    tl.to(sweeps, { scaleX: 1, duration: 0.55, ease: "power2.out", stagger: 0.1 }, "-=0.5");
+  }
+
+  /* --- pinned drill sequence --------------------------------------------- */
+
+  // Well-path centreline, normalised to the render frame (from the Blender
+  // wellpath export). Kept normalised so the SVG viewBox can change without
+  // touching these numbers.
+  var WELL = [
+    [0.06556, 0.11965], [0.07974, 0.27552], [0.08966, 0.38457], [0.0982, 0.4784],
+    [0.10459, 0.54873], [0.10943, 0.58711], [0.11543, 0.60946], [0.1237, 0.6299],
+    [0.13397, 0.64784], [0.1459, 0.66281], [0.15912, 0.67442], [0.17323, 0.68238],
+    [0.18784, 0.68651], [0.20251, 0.68673], [0.26171, 0.67971], [0.34881, 0.66937],
+    [0.43393, 0.65927], [0.51714, 0.6494]
+  ];
+  var VW = 2560;
+  var VH = 1440;
+  var SVG_NS = "http://www.w3.org/2000/svg";
+
+  function pathD(points) {
+    return points.map(function (pt, i) {
+      return (i ? "L " : "M ") + (pt[0] * VW).toFixed(1) + " " + (pt[1] * VH).toFixed(1);
+    }).join(" ");
+  }
+
+  // Six benefits surface one at a time across this window, each fading in and
+  // back out inside its own slot.
+  function benefitViz(p, i, n) {
+    var start = 0.12;
+    var end = 0.66;
+    var slot = (end - start) / n;
+    var s = start + i * slot;
+    if (p <= s || p >= s + slot) return 0;
+    var local = (p - s) / slot;
+    var edge = 0.26;
+    if (local < edge) return clamp01(local / edge);
+    if (local > 1 - edge) return clamp01((1 - local) / edge);
+    return 1;
+  }
+
+  function svgEl(name, attrs) {
+    var node = document.createElementNS(SVG_NS, name);
+    Object.keys(attrs || {}).forEach(function (key) { node.setAttribute(key, attrs[key]); });
+    return node;
+  }
+
+  function buildDrill(gsap) {
+    var section = document.querySelector("[data-drill]");
+    if (!section) return;
+
+    var fallback = section.querySelector("[data-drill-fallback]");
+    var list = section.querySelector("[data-drill-benefits]");
+    if (!fallback || !list) return;
+
+    // The pinned treatment needs room, a pointer, and a real viewport. Touch
+    // and narrow screens keep the static grid, which is the same content.
+    var eligible = !reduceMotion &&
+      window.matchMedia("(pointer: fine)").matches &&
+      window.innerWidth >= 900 &&
+      window.innerHeight >= 560;
+    if (!eligible) return;
+
+    var benefits = Array.prototype.slice.call(list.querySelectorAll("li")).map(function (li) {
+      return {
+        icon: li.getAttribute("data-icon") || "ph-circle",
+        label: li.querySelector("h3") ? li.querySelector("h3").textContent : "",
+        detail: li.querySelector("p") ? li.querySelector("p").textContent : ""
+      };
+    });
+    if (benefits.length < 2) return;
+
+    var heading = section.querySelector("h2");
+    var headingText = heading ? heading.textContent : "Benefits of WellFi";
+    var eyebrow = section.querySelector(".eyebrow");
+    var eyebrowText = eyebrow ? eyebrow.textContent : "";
+    // The id moves with the heading rather than being copied — the section's
+    // aria-labelledby must resolve to exactly one element.
+    var headingId = heading ? heading.id : "";
+    if (heading && headingId) heading.removeAttribute("id");
+
+    var formation = section.getAttribute("data-formation");
+    var casing = section.getAttribute("data-casing");
+
+    /* ---- build the pinned stage ---- */
+    var sticky = document.createElement("div");
+    sticky.className = "drill-sticky";
+
+    var stage = document.createElement("div");
+    stage.className = "drill-stage";
+
+    var formationImg = document.createElement("img");
+    formationImg.className = "drill-formation";
+    formationImg.src = formation;
+    formationImg.alt = "";
+    formationImg.setAttribute("aria-hidden", "true");
+    formationImg.decoding = "async";
+    stage.appendChild(formationImg);
+
+    var svg = svgEl("svg", {
+      viewBox: "0 0 " + VW + " " + VH,
+      preserveAspectRatio: "xMidYMid meet",
+      "aria-hidden": "true",
+      focusable: "false"
+    });
+
+    var defs = svgEl("defs", {});
+    var mask = svgEl("mask", { id: "yotin-drill-mask" });
+    var drillPath = svgEl("path", {
+      d: pathD(WELL),
+      fill: "none",
+      stroke: "white",
+      "stroke-width": 120,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      pathLength: 1,
+      "stroke-dasharray": 1,
+      "stroke-dashoffset": 1
+    });
+    mask.appendChild(drillPath);
+    defs.appendChild(mask);
+
+    var filter = svgEl("filter", { id: "yotin-signal-glow", x: "-40%", y: "-40%", width: "180%", height: "180%" });
+    filter.appendChild(svgEl("feGaussianBlur", { stdDeviation: 6, result: "b" }));
+    var merge = svgEl("feMerge", {});
+    merge.appendChild(svgEl("feMergeNode", { in: "b" }));
+    merge.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    filter.appendChild(merge);
+    defs.appendChild(filter);
+    svg.appendChild(defs);
+
+    // The casing image is revealed through the mask, so the bore appears to
+    // be drilled in rather than faded in.
+    var casingImage = svgEl("image", { width: VW, height: VH, mask: "url(#yotin-drill-mask)" });
+    casingImage.setAttribute("href", casing);
+    svg.appendChild(casingImage);
+
+    var signalPath = svgEl("path", {
+      d: pathD(WELL.slice().reverse()),
+      fill: "none",
+      stroke: "rgb(34,211,238)",
+      "stroke-width": 7,
+      "stroke-linecap": "round",
+      pathLength: 1,
+      "stroke-dasharray": 1,
+      "stroke-dashoffset": 1,
+      filter: "url(#yotin-signal-glow)",
+      opacity: 0.9
+    });
+    svg.appendChild(signalPath);
+    stage.appendChild(svg);
+
+    var veil = document.createElement("div");
+    veil.className = "drill-veil";
+    veil.setAttribute("aria-hidden", "true");
+    stage.appendChild(veil);
+
+    var toe = WELL[WELL.length - 1];
+    var glow = document.createElement("div");
+    glow.className = "drill-glow";
+    glow.setAttribute("aria-hidden", "true");
+    glow.style.left = (toe[0] * 100) + "%";
+    glow.style.top = (toe[1] * 100) + "%";
+    glow.appendChild(document.createElement("span"));
+    stage.appendChild(glow);
+
+    sticky.appendChild(stage);
+
+    var intro = document.createElement("div");
+    intro.className = "drill-intro";
+    if (eyebrowText) {
+      var introEyebrow = document.createElement("p");
+      introEyebrow.className = "eyebrow";
+      introEyebrow.textContent = eyebrowText;
+      intro.appendChild(introEyebrow);
+    }
+    var introHeading = document.createElement("h2");
+    introHeading.textContent = headingText;
+    if (headingId) introHeading.id = headingId;
+    intro.appendChild(introHeading);
+    sticky.appendChild(intro);
+
+    var cards = benefits.map(function (b) {
+      var card = document.createElement("div");
+      card.className = "drill-benefit";
+      var icon = document.createElement("i");
+      icon.className = "ph " + b.icon;
+      icon.setAttribute("aria-hidden", "true");
+      var h3 = document.createElement("h3");
+      h3.textContent = b.label;
+      var p = document.createElement("p");
+      p.textContent = b.detail;
+      card.appendChild(icon);
+      card.appendChild(h3);
+      card.appendChild(p);
+      sticky.appendChild(card);
+      return card;
+    });
+
+    var progress = document.createElement("div");
+    progress.className = "drill-progress";
+    progress.setAttribute("aria-hidden", "true");
+    var dots = benefits.map(function () {
+      var dot = document.createElement("span");
+      progress.appendChild(dot);
+      return dot;
+    });
+    sticky.appendChild(progress);
+
+    /* ---- swap the static grid for the pinned stage ----
+       The fallback content stays in the DOM but is taken out of the visual
+       and accessibility trees, so the benefits are still announced once and
+       only once — by the pinned cards. */
+    fallback.hidden = true;
+    section.appendChild(sticky);
+    section.style.height = "380vh";
+
+    var lastDot = -1;
+
+    gsap.registerPlugin(window.ScrollTrigger);
+    window.ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+      onUpdate: function (self) {
+        var p = self.progress;
+
+        // Drill the bore in, surface to toe.
+        drillPath.setAttribute("stroke-dashoffset", String(1 - seg(p, 0.05, 0.50)));
+        // The opening line clears as the first benefit arrives.
+        intro.style.opacity = String(1 - seg(p, 0.03, 0.12));
+
+        var active = -1;
+        cards.forEach(function (card, i) {
+          var v = benefitViz(p, i, cards.length);
+          card.style.opacity = String(v);
+          card.style.transform = "translate(-50%, " + ((1 - v) * 14).toFixed(1) + "px)";
+          if (v > 0.5) active = i;
+        });
+        // Past the last benefit the cards are all cleared, but the progress
+        // track should read "complete" rather than snapping back to empty.
+        if (p >= 0.66) active = cards.length - 1;
+
+        if (active !== lastDot) {
+          dots.forEach(function (dot, i) { dot.classList.toggle("is-on", i <= active); });
+          lastDot = active;
+        }
+
+        // Once the casing is set, the EM transmission blooms at the toe.
+        glow.style.opacity = String(seg(p, 0.52, 0.74));
+        // Finale: the telemetry signal climbs back to surface.
+        signalPath.setAttribute("stroke-dashoffset", String(1 - seg(p, 0.66, 0.92)));
+      }
+    });
+  }
+
+  /* --- device banner parallax -------------------------------------------- */
+
+  function buildDeviceParallax(gsap) {
+    var img = document.querySelector("[data-device-img]");
+    if (!img) return;
+    gsap.to(img, {
+      y: -20,
+      ease: "none",
+      scrollTrigger: { trigger: img, start: "top bottom", end: "bottom top", scrub: true }
+    });
+  }
+
+  /* --- boot -------------------------------------------------------------- */
+
+  function startMotion() {
+    var gsap = window.gsap;
+    if (!gsap || !window.ScrollTrigger) {
+      abandonMotion();
+      return;
+    }
+    gsap.registerPlugin(window.ScrollTrigger);
+
+    buildHeroIntro(gsap);
+    buildReveals(gsap);
+    buildChannels(gsap);
+    buildCounters(gsap);
+    buildDeviceParallax(gsap);
+    buildDrill(gsap);
+
+    window.ScrollTrigger.refresh();
+  }
+
+  if (root.classList.contains("motion-ready")) {
+    loadScript(GSAP_SRC, GSAP_SRI)
+      .then(function () { return loadScript(ST_SRC, ST_SRI); })
+      .then(startMotion)
+      .catch(function (error) {
+        console.warn("Motion layer unavailable; falling back to static page.", error);
+        abandonMotion();
+      });
+  }
+
+  /* ======================================================================
+     ChatFi
+     ====================================================================== */
+
   var panel = document.querySelector("[data-chatfi-panel]");
   var openButtons = Array.prototype.slice.call(document.querySelectorAll("[data-chatfi-open]"));
   var closeButton = document.querySelector("[data-chatfi-close]");
@@ -265,7 +697,7 @@
     chat.remarkable = { html: false, breaks: true, linkTarget: "_blank" };
     chat.hiddenMessages = {
       clickScroll: "last",
-      smoothScroll: !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      smoothScroll: !reduceMotion
     };
     chat.errorMessages = {
       displayServiceErrorMessages: false,
@@ -273,22 +705,22 @@
     };
     chat.inputAreaStyle = {
       backgroundColor: "#09131b",
-      borderTop: "1px solid rgba(255, 255, 255, 0.12)",
+      borderTop: "1px solid rgba(232, 220, 200, 0.13)",
       padding: "12px 14px 14px"
     };
     chat.textInput = {
       characterLimit: 4000,
-      placeholder: { text: "Ask about WellFi…", style: { color: "#718087" } },
+      placeholder: { text: "Ask about WellFi…", style: { color: "#7e8b92" } },
       styles: {
-        text: { color: "#f3f6f7", fontSize: "14px", lineHeight: "1.45" },
+        text: { color: "#f3f6f7", fontSize: "16px", lineHeight: "1.45" },
         container: {
           minHeight: "48px",
           maxHeight: "130px",
           backgroundColor: "#03070b",
-          border: "1px solid rgba(255, 255, 255, 0.16)",
+          border: "1px solid rgba(232, 220, 200, 0.18)",
           borderRadius: "14px"
         },
-        focus: { border: "1px solid #68c8dc", boxShadow: "0 0 0 3px rgba(104, 200, 220, 0.12)" }
+        focus: { border: "1px solid #f27622", boxShadow: "0 0 0 3px rgba(242, 118, 34, 0.16)" }
       }
     };
     chat.messageStyles = {
@@ -303,29 +735,29 @@
             lineHeight: "1.55"
           }
         },
-        ai: { bubble: { backgroundColor: "#132631", borderBottomLeftRadius: "4px" } },
-        user: { bubble: { backgroundColor: "#e47d3d", color: "#03070b", borderBottomRightRadius: "4px" } }
+        ai: { bubble: { backgroundColor: "#15242e", borderBottomLeftRadius: "4px" } },
+        user: { bubble: { backgroundColor: "#f27622", color: "#03070b", borderBottomRightRadius: "4px" } }
       },
-      intro: { bubble: { backgroundColor: "#132631", color: "#dfe6e9", borderBottomLeftRadius: "4px" } },
+      intro: { bubble: { backgroundColor: "#15242e", color: "#dfe6e9", borderBottomLeftRadius: "4px" } },
       error: { bubble: { backgroundColor: "#391a17", color: "#ffd7cf" } },
       loading: {
-        message: { styles: { bubble: { backgroundColor: "#132631", color: "#8c9ba2" } } }
+        message: { styles: { bubble: { backgroundColor: "#15242e", color: "#8c9ba2" } } }
       }
     };
     chat.submitButtonStyles = {
       submit: {
         container: {
-          default: { width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#68c8dc" },
-          hover: { backgroundColor: "#8bd7e6" },
-          click: { backgroundColor: "#4fb5c9" }
+          default: { width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#f27622" },
+          hover: { backgroundColor: "#ff9147" },
+          click: { backgroundColor: "#d85a10" }
         },
         svg: { styles: { default: { filter: "brightness(0) saturate(100%)" } } }
       },
-      stop: { container: { default: { backgroundColor: "#e47d3d" } } },
+      stop: { container: { default: { backgroundColor: "#b3aa9a" } } },
       position: "inside-end",
       tooltip: { text: "Send message" }
     };
-    chat.auxiliaryStyle = "a { color: #68c8dc; } ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: #203846; border-radius: 999px; }";
+    chat.auxiliaryStyle = "a { color: #ff9147; } ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: #2c3a44; border-radius: 999px; }";
 
     chat.connect = {
       stream: true,
