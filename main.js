@@ -164,10 +164,19 @@
 
   /* ======================================================================
      Motion layer
-     GSAP is an enhancement, never a dependency. `motion-ready` (set by the
-     inline head script) is what hides elements; if GSAP fails to arrive we
-     drop that class and the page is simply static and fully visible.
+
+     Reveals are handled natively by `animation-timeline: view()` wherever it
+     exists — no library, no main-thread scroll work, and progress is bound to
+     scroll position instead of firing once and finishing off-screen.
+
+     GSAP is therefore only fetched for the two jobs CSS can't do here: the
+     scrubbed drill sequence, and the reveal fallback on browsers without
+     native scroll-driven animation. On a phone, neither applies, so GSAP is
+     never downloaded at all.
      ====================================================================== */
+
+  var NATIVE_SCROLL = !!(window.CSS && window.CSS.supports &&
+    window.CSS.supports("animation-timeline", "view()"));
 
   var GSAP_SRC = "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js";
   var GSAP_SRI = "sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly";
@@ -223,40 +232,48 @@
     return out + (node.getAttribute("data-count-suffix") || "");
   }
 
-  function buildCounters(gsap) {
-    document.querySelectorAll("[data-count]").forEach(function (node) {
-      var target = parseFloat(node.getAttribute("data-count"));
-      if (!isFinite(target)) return;
-      var state = { v: 0 };
-      gsap.to(state, {
-        v: target,
-        duration: 1.4,
-        ease: "power1.inOut",
-        scrollTrigger: { trigger: node, start: "top 88%", once: true },
-        onStart: function () { node.textContent = formatCount(0, node); },
-        onUpdate: function () { node.textContent = formatCount(state.v, node); },
-        onComplete: function () { node.textContent = formatCount(target, node); }
+  /* Counters run on plain rAF + IntersectionObserver, so the spec numbers
+     animate on every browser regardless of whether GSAP is ever fetched. */
+  function runCounter(node) {
+    var target = parseFloat(node.getAttribute("data-count"));
+    if (!isFinite(target)) return;
+    if (reduceMotion) {
+      node.textContent = formatCount(target, node);
+      return;
+    }
+    var duration = 1300;
+    var started = 0;
+    function frame(now) {
+      if (!started) started = now;
+      var p = Math.min(1, (now - started) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      node.textContent = formatCount(target * eased, node);
+      if (p < 1) window.requestAnimationFrame(frame);
+      else node.textContent = formatCount(target, node);
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  function buildCounters() {
+    var nodes = document.querySelectorAll("[data-count]");
+    if (!nodes.length) return;
+    if (!("IntersectionObserver" in window)) {
+      nodes.forEach(function (node) {
+        node.textContent = formatCount(parseFloat(node.getAttribute("data-count")), node);
       });
-    });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        runCounter(entry.target);
+      });
+    }, { rootMargin: "0px 0px -12% 0px" });
+    nodes.forEach(function (node) { observer.observe(node); });
   }
 
-  /* --- hero load-in ------------------------------------------------------ */
-
-  function buildHeroIntro(gsap) {
-    var steps = document.querySelectorAll("[data-hero-step]");
-    if (!steps.length) return;
-    gsap.to(steps, {
-      opacity: 1,
-      y: 0,
-      duration: 0.75,
-      ease: "power2.out",
-      stagger: 0.11,
-      delay: 0.12,
-      clearProps: "transform"
-    });
-  }
-
-  /* --- generic reveal ---------------------------------------------------- */
+  /* --- generic reveal (legacy browsers only) ----------------------------- */
 
   function buildReveals(gsap) {
     document.querySelectorAll("[data-motion]").forEach(function (node) {
@@ -310,11 +327,22 @@
     }).join(" ");
   }
 
+  /* Beat map for the pinned sequence, as fractions of section progress.
+     Named so the benefit window can't drift out of sync with the progress
+     dots, which also need to know when the last card has passed. */
+  var BEAT = {
+    introOut:    [0.02, 0.10],
+    bore:        [0.04, 0.44],
+    benefits:    [0.10, 0.70],
+    glow:        [0.48, 0.68],
+    signal:      [0.66, 0.94]
+  };
+
   // Six benefits surface one at a time across this window, each fading in and
   // back out inside its own slot.
   function benefitViz(p, i, n) {
-    var start = 0.12;
-    var end = 0.66;
+    var start = BEAT.benefits[0];
+    var end = BEAT.benefits[1];
     var slot = (end - start) / n;
     var s = start + i * slot;
     if (p <= s || p >= s + slot) return 0;
@@ -339,13 +367,7 @@
     var list = section.querySelector("[data-drill-benefits]");
     if (!fallback || !list) return;
 
-    // The pinned treatment needs room, a pointer, and a real viewport. Touch
-    // and narrow screens keep the static grid, which is the same content.
-    var eligible = !reduceMotion &&
-      window.matchMedia("(pointer: fine)").matches &&
-      window.innerWidth >= 900 &&
-      window.innerHeight >= 560;
-    if (!eligible) return;
+    if (!drillIsEligible()) return;
 
     var benefits = Array.prototype.slice.call(list.querySelectorAll("li")).map(function (li) {
       return {
@@ -499,7 +521,10 @@
        only once — by the pinned cards. */
     fallback.hidden = true;
     section.appendChild(sticky);
-    section.style.height = "380vh";
+    /* 380vh made this section 42% of the entire page — long enough that
+       scrolling through it read as the page being stuck. 260vh keeps every
+       beat legible while cutting the pinned distance by a third. */
+    section.style.height = "260vh";
 
     var lastDot = -1;
 
@@ -513,47 +538,46 @@
         var p = self.progress;
 
         // Drill the bore in, surface to toe.
-        drillPath.setAttribute("stroke-dashoffset", String(1 - seg(p, 0.05, 0.50)));
+        drillPath.setAttribute("stroke-dashoffset", String(1 - seg(p, BEAT.bore[0], BEAT.bore[1])));
         // The opening line clears as the first benefit arrives.
-        intro.style.opacity = String(1 - seg(p, 0.03, 0.12));
+        intro.style.opacity = String(1 - seg(p, BEAT.introOut[0], BEAT.introOut[1]));
 
-        var active = -1;
         cards.forEach(function (card, i) {
           var v = benefitViz(p, i, cards.length);
           card.style.opacity = String(v);
           card.style.transform = "translate(-50%, " + ((1 - v) * 14).toFixed(1) + "px)";
-          if (v > 0.5) active = i;
         });
-        // Past the last benefit the cards are all cleared, but the progress
-        // track should read "complete" rather than snapping back to empty.
-        if (p >= 0.66) active = cards.length - 1;
 
-        if (active !== lastDot) {
-          dots.forEach(function (dot, i) { dot.classList.toggle("is-on", i <= active); });
-          lastDot = active;
+        /* Dots are derived from progress, not from which card happens to be
+           visible. Keying them off card opacity made the track blink back to
+           empty in the cross-fade gaps between cards, and again after the last
+           one. Progress only moves forward, so the track only fills forward. */
+        var through = seg(p, BEAT.benefits[0], BEAT.benefits[1]);
+        var lit = through <= 0 ? 0 : Math.min(cards.length, Math.floor(through * cards.length) + 1);
+        if (lit !== lastDot) {
+          dots.forEach(function (dot, i) { dot.classList.toggle("is-on", i < lit); });
+          lastDot = lit;
         }
 
         // Once the casing is set, the EM transmission blooms at the toe.
-        glow.style.opacity = String(seg(p, 0.52, 0.74));
+        glow.style.opacity = String(seg(p, BEAT.glow[0], BEAT.glow[1]));
         // Finale: the telemetry signal climbs back to surface.
-        signalPath.setAttribute("stroke-dashoffset", String(1 - seg(p, 0.66, 0.92)));
+        signalPath.setAttribute("stroke-dashoffset", String(1 - seg(p, BEAT.signal[0], BEAT.signal[1])));
       }
     });
   }
 
-  /* --- device banner parallax -------------------------------------------- */
-
-  function buildDeviceParallax(gsap) {
-    var img = document.querySelector("[data-device-img]");
-    if (!img) return;
-    gsap.to(img, {
-      y: -20,
-      ease: "none",
-      scrollTrigger: { trigger: img, start: "top bottom", end: "bottom top", scrub: true }
-    });
-  }
-
   /* --- boot -------------------------------------------------------------- */
+
+  /* The pinned treatment needs room, a pointer, and a real viewport. Touch and
+     narrow screens keep the static grid, which carries the same content. */
+  function drillIsEligible() {
+    if (reduceMotion) return false;
+    if (!document.querySelector("[data-drill]")) return false;
+    return window.matchMedia("(pointer: fine)").matches &&
+      window.innerWidth >= 900 &&
+      window.innerHeight >= 560;
+  }
 
   function startMotion() {
     var gsap = window.gsap;
@@ -563,17 +587,22 @@
     }
     gsap.registerPlugin(window.ScrollTrigger);
 
-    buildHeroIntro(gsap);
-    buildReveals(gsap);
-    buildChannels(gsap);
-    buildCounters(gsap);
-    buildDeviceParallax(gsap);
+    // Native scroll-driven CSS already owns these wherever it is supported.
+    if (!NATIVE_SCROLL) {
+      buildReveals(gsap);
+      buildChannels(gsap);
+    }
     buildDrill(gsap);
 
     window.ScrollTrigger.refresh();
   }
 
-  if (root.classList.contains("motion-ready")) {
+  // Counters never depended on GSAP, so start them immediately.
+  buildCounters();
+
+  var needsGsap = drillIsEligible() || (!NATIVE_SCROLL && root.classList.contains("motion-ready"));
+
+  if (needsGsap) {
     loadScript(GSAP_SRC, GSAP_SRI)
       .then(function () { return loadScript(ST_SRC, ST_SRI); })
       .then(startMotion)

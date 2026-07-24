@@ -53,7 +53,13 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  /* MUST be clip, not hidden. `overflow-x: hidden` computes overflow-y to
+     `auto`, which makes <body> a scroll container — and a view() timeline
+     binds to its nearest scroll-container ancestor. That silently freezes
+     every scroll-driven animation on the page. `clip` clips without creating
+     one. The `hidden` line is the fallback for browsers without `clip`. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 body.chatfi-open { overflow: hidden; }
 img { display: block; max-width: 100%; }
@@ -210,17 +216,24 @@ a { color: inherit; text-decoration: none; }
   padding-top: var(--header-h);
   background: var(--void);
   border-bottom: 1px solid var(--line);
+  /* clip, not hidden — the signal strip lives in here and needs its view()
+     timeline to resolve against the document. See the note on body. */
   overflow: hidden;
+  overflow: clip;
 }
 .hero-grid {
-  min-height: calc(100svh - var(--header-h));
+  /* Capped, not just 100svh. On a tall monitor an uncapped hero opened a ~390px
+     void between the CTAs and the signal strip, because the copy is top-anchored
+     and cannot grow to fill it. The cap also lets the signal strip peek above
+     the fold, which reads as an invitation to scroll rather than a dead end. */
+  min-height: min(calc(100svh - var(--header-h)), 800px);
   display: flex;
   align-items: flex-start;
   /* The copy is lifted into the upper-left of the frame, which is where the
      island render is empty sky. Bottom-aligning it (the previous behaviour)
      left that corner as dead space and detached the copy from the art. */
-  padding-top: clamp(34px, 7.5vh, 84px);
-  padding-bottom: clamp(96px, 14vh, 150px);
+  padding-top: clamp(28px, 5vh, 64px);
+  padding-bottom: clamp(84px, 10vh, 116px);
   position: relative;
 }
 .hero-copy { position: relative; z-index: 2; width: min(620px, 52vw); }
@@ -491,7 +504,9 @@ a { color: inherit; text-decoration: none; }
 .channel-card {
   position: relative;
   min-height: 186px;
+  /* clip so the enclosed .channel-sweep keeps a working view() timeline */
   overflow: hidden;
+  overflow: clip;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -789,7 +804,9 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--line);
   border-radius: 26px;
   background: radial-gradient(circle at 50% 50%, rgba(242, 118, 34, 0.09), transparent 64%);
+  /* clip so the enclosed device image keeps a working view() timeline */
   overflow: hidden;
+  overflow: clip;
 }
 .device-glow {
   position: absolute;
@@ -839,8 +856,36 @@ a { color: inherit; text-decoration: none; }
   line-height: 0.98;
   letter-spacing: -0.06em;
 }
+.company-section h2 em { color: var(--ember-ink); font-style: italic; }
+
+/* Ownership badge sits directly under the name, where it carries most. */
+.company-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0 0;
+  padding: 11px 20px;
+  border: 1px solid rgba(159, 71, 13, 0.3);
+  border-radius: 999px;
+  background: rgba(242, 118, 34, 0.09);
+  color: var(--ember-ink);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.company-badge i { font-size: 19px; }
+
 .company-copy { padding-top: 30px; }
 .company-copy > p { margin: 0 0 22px; color: #46545d; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.72; }
+/* The name's meaning is the lead thought now, so it carries more weight. */
+.company-copy > p.company-lede {
+  color: var(--ink);
+  font-size: clamp(19px, 1.7vw, 24px);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
 .company-copy em { color: var(--ink); font-style: italic; }
 .company-copy .location { display: flex; align-items: center; gap: 10px; margin-top: 34px; color: var(--ember-ink); font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; }
 .company-copy .location i { font-size: 21px; }
@@ -984,17 +1029,98 @@ a { color: inherit; text-decoration: none; }
 
 /* ==========================================================================
    Motion primitives
-   Content is fully visible by default. The motion layer opts elements INTO
-   a hidden start state only once it has confirmed it can animate them, so a
-   JS or CDN failure can never leave the page blank.
+
+   Reveals are scroll-LINKED, not scroll-triggered. A fire-and-forget tween
+   starts when an element clips the viewport edge and is done ~0.7s later,
+   while it is still in the corner of your eye — so nothing appears to respond
+   to scrolling. `animation-timeline: view()` binds progress directly to the
+   element's travel through the viewport, so it genuinely brightens as you pass
+   it, and it runs on the compositor rather than the main thread.
+
+   Content is fully visible by default. Elements are only put into a hidden
+   start state by a mechanism that has already proven it can animate them back.
    ========================================================================== */
 
 [data-motion], [data-hero-step] { opacity: 1; transform: none; }
-.motion-ready [data-motion] { opacity: 0; }
-.motion-ready [data-motion="rise"] { transform: translateY(26px); }
-.motion-ready [data-motion="fade"] { transform: none; }
-/* Hero copy is staged on load rather than on scroll, so it gets its own hook. */
-.motion-ready [data-hero-step] { opacity: 0; transform: translateY(22px); }
+
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes sweep-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+@keyframes drift-up {
+  from { transform: translateY(24px); }
+  to   { transform: translateY(-24px); }
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Hero load-in: pure CSS. No JS, no library, works with both off. ---- */
+@media (prefers-reduced-motion: no-preference) {
+  [data-hero-step] { animation: hero-in 0.8s var(--ease) both; }
+  .hero-message > [data-hero-step]:nth-child(1) { animation-delay: 0.10s; }
+  .hero-message > [data-hero-step]:nth-child(2) { animation-delay: 0.20s; }
+  .hero-message > [data-hero-step]:nth-child(3) { animation-delay: 0.31s; }
+  .hero-message > [data-hero-step]:nth-child(4) { animation-delay: 0.42s; }
+  .hero-message > [data-hero-step]:nth-child(5) { animation-delay: 0.53s; }
+  .scroll-cue[data-hero-step] { animation-delay: 0.80s; }
+}
+
+/* --- Modern path: native scroll-driven animation ------------------------ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-motion] {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      /* Begins as the element enters and resolves by the time it is ~30% up
+         the viewport — the span you are actually looking at. */
+      animation-range: entry 4% cover 30%;
+    }
+    [data-motion="fade"] { animation-name: reveal-fade; }
+
+    /* The signal strip sits at the very bottom of the hero. It needs a later,
+       longer range or it resolves before it is properly on screen — which is
+       exactly why these three read as "never brightening". */
+    .signal-step[data-motion] { animation-range: entry 16% cover 46%; }
+
+    .channel-card[data-channel] {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 6% cover 34%;
+    }
+    .channel-sweep {
+      animation: sweep-in linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 48%;
+    }
+
+    /* Parallax, compositor-side. Replaces a scrubbed JS tween. */
+    .device-banner img {
+      animation: drift-up linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* --- Legacy path: JS opt-in hidden state -------------------------------- */
+/* Only browsers WITHOUT native scroll-driven animation get `motion-ready`,
+   and only after the inline head script confirms motion is wanted. main.js
+   removes it if GSAP never arrives, so this can never strand the page blank. */
+@supports not (animation-timeline: view()) {
+  .motion-ready [data-motion] { opacity: 0; }
+  .motion-ready [data-motion="rise"] { transform: translateY(26px); }
+  .motion-ready [data-motion="fade"] { transform: none; }
+}
 
 /* ==========================================================================
    Responsive

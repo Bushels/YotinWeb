@@ -36,15 +36,20 @@
   <link rel="stylesheet" href="styles.css?v=20260724-1">
 
   <!--
-    Opt the page into the animated start state before first paint. CSS alone
-    can't do this safely: if it hid elements unconditionally and the motion
-    layer then failed to load, the page would render blank. Setting the class
-    here — and removing it in main.js on any failure — fails open instead.
+    Modern browsers animate reveals natively via `animation-timeline: view()`,
+    which needs no JS at all. Only browsers WITHOUT it fall back to GSAP, and
+    only those get `motion-ready` — the class that puts elements into a hidden
+    start state. CSS alone can't do that safely: if it hid elements
+    unconditionally and the fallback then failed to load, the page would render
+    blank. Setting the class here, and removing it in main.js on any failure,
+    fails open instead.
   -->
   <script>
     (function () {
       try {
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        var wantsMotion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var native = window.CSS && CSS.supports && CSS.supports("animation-timeline", "view()");
+        if (wantsMotion && !native) {
           document.documentElement.classList.add("motion-ready");
         }
       } catch (e) { /* no motion, no problem — content stays visible */ }
@@ -381,11 +386,12 @@
       <div class="shell company-grid">
         <div>
           <p class="eyebrow eyebrow-ink" data-motion="rise">ABOUT YOTIN</p>
-          <h2 id="company-title" data-motion="rise">Indigenous-owned.<br>Built from the ground up.</h2>
+          <h2 id="company-title" data-motion="rise">The name comes<br>from <em>yôtin</em>.</h2>
+          <p class="company-badge" data-motion="rise"><i class="ph ph-feather" aria-hidden="true"></i> Proudly Indigenous Owned</p>
         </div>
         <div class="company-copy">
+          <p class="company-lede" data-motion="rise">The Cree word for wind — a force that crosses the land without being seen. WellFi works on the same useful truth: what cannot be seen can still be measured.</p>
           <p data-motion="rise">Yotin is an Indigenous energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada.</p>
-          <p data-motion="rise">The name comes from <em>yôtin</em>, the Cree word for wind—a force that crosses the land without being seen. WellFi works on the same useful truth: what cannot be seen can still be measured.</p>
           <p class="location" data-motion="rise"><i class="ph ph-map-pin" aria-hidden="true"></i> Pierceland, Saskatchewan, Canada</p>
 
           <div class="company-marks">
