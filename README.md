@@ -89,6 +89,31 @@ at `top 88%` meant the 0.7s animation finished while the element was still in
 the bottom 13% of the screen, so nothing ever appeared to respond to scrolling.
 Scroll-*linked* beats scroll-*triggered* for anything the reader is looking at.
 
+## Candidate-well qualifier
+
+Five questions in `#contact`, built entirely by `main.js` from the
+`QUALIFIER_STEPS` config. Selecting an answer auto-advances — five clicks, no
+Next buttons. The verdict is computed client-side and shown **before** any
+contact details are requested.
+
+**It can return "outside current spec", and that is the point.** A qualifier
+that always says yes is a lead form with extra steps, and this audience spots
+that immediately. Above 150 °C it disqualifies outright, because 150 °C is the
+tool's real rating. Every threshold in the config traces to a spec published
+elsewhere on the page — nothing is invented.
+
+Three outcomes: **Strong fit** (nothing flagged), **Likely fit — worth a
+review** (flags raised, each with a plain-language reason), **Outside current
+spec** (hard limit hit).
+
+Submission is a prefilled `mailto:` carrying the full well summary, plus a
+**Copy summary** button. The copy button is the real fallback: corporate
+machines often have no mail client bound, and a dead `mailto:` is a dead lead.
+The direct address stays visible above the widget regardless.
+
+Without JavaScript the widget stays `hidden` and the direct email remains the
+contact path.
+
 ## Cache keys — read before editing CSS or JS
 
 `vercel.json` serves `styles.css` and `main.js` with

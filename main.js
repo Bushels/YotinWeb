@@ -617,6 +617,321 @@
   }
 
   /* ======================================================================
+     Candidate-well qualifier
+
+     Five questions, verdict shown before any contact details are asked for.
+     It can and does return "outside current spec" — the 150 °C ceiling is a
+     real product limit, and a qualifier that always says yes is a lead form
+     with extra steps, which this audience recognises instantly.
+
+     Every threshold below traces to a published spec on this page. Nothing
+     here is invented.
+     ====================================================================== */
+
+  var QUALIFIER_EMAIL = "info@yotinenergy.com";
+
+  var QUALIFIER_STEPS = [
+    {
+      key: "lift",
+      label: "Artificial lift",
+      question: "What lifts the well?",
+      options: [
+        { value: "Progressing cavity pump (PCP)", tag: "Best fit" },
+        { value: "Electric submersible pump (ESP)" },
+        { value: "Rod pump" },
+        { value: "Natural flow or other", flag: "lift" }
+      ]
+    },
+    {
+      key: "type",
+      label: "Well type",
+      question: "What is it producing?",
+      options: [
+        { value: "Heavy oil" },
+        { value: "Light oil" },
+        { value: "Gas" },
+        { value: "Thermal / SAGD", flag: "thermal" }
+      ]
+    },
+    {
+      key: "temp",
+      label: "Bottomhole temperature",
+      question: "How hot does it get downhole?",
+      options: [
+        { value: "Under 100 °C" },
+        { value: "100 – 150 °C", tag: "At spec" },
+        { value: "Above 150 °C", disqualify: true },
+        { value: "Not sure", flag: "temp" }
+      ]
+    },
+    {
+      key: "depth",
+      label: "Measured depth",
+      question: "Roughly how deep is it?",
+      options: [
+        { value: "Under 1,000 m" },
+        { value: "1,000 – 2,000 m" },
+        { value: "2,000 – 3,000 m" },
+        { value: "Deeper than 3,000 m", flag: "depth" },
+        { value: "Not sure", flag: "depth" }
+      ]
+    },
+    {
+      key: "timing",
+      label: "Next planned intervention",
+      question: "When is the next pump change or planned intervention?",
+      options: [
+        { value: "Within 3 months", tag: "Ideal timing" },
+        { value: "3 – 12 months" },
+        { value: "Nothing scheduled", flag: "timing" },
+        { value: "Not sure", flag: "timing" }
+      ]
+    }
+  ];
+
+  // Each note explains WHY something needs review, in the engineer's terms.
+  var QUALIFIER_NOTES = {
+    temp: "Bottomhole temperature decides it outright — WellFi is rated to 150 °C, so that number is worth confirming before anything else.",
+    depth: "Depth affects the electromagnetic path to surface. Deeper or highly conductive intervals may need a feasibility check first.",
+    timing: "The economics are strongest when WellFi goes in on work that is already scheduled. Without a planned intervention it needs its own trip.",
+    lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
+    thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."
+  };
+
+  function buildQualifier() {
+    var host = document.querySelector("[data-qualifier]");
+    var stage = document.querySelector("[data-qualifier-stage]");
+    if (!host || !stage) return;
+
+    host.hidden = false;
+    var answers = {};
+    var index = 0;
+
+    function clear(node) {
+      while (node.firstChild) node.removeChild(node.firstChild);
+    }
+
+    function el(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    function icon(name) {
+      var i = document.createElement("i");
+      i.className = "ph " + name;
+      i.setAttribute("aria-hidden", "true");
+      return i;
+    }
+
+    function renderProgress() {
+      var bar = el("div", "qualifier-progress");
+      bar.setAttribute("aria-hidden", "true");
+      QUALIFIER_STEPS.forEach(function (step, i) {
+        var seg = el("span");
+        if (i < index) seg.className = "is-done";
+        else if (i === index) seg.className = "is-current";
+        bar.appendChild(seg);
+      });
+      return bar;
+    }
+
+    function renderStep() {
+      var step = QUALIFIER_STEPS[index];
+      clear(stage);
+      stage.appendChild(renderProgress());
+
+      var wrap = el("div", "qualifier-step");
+      wrap.appendChild(el("p", "qualifier-count", "Question " + (index + 1) + " of " + QUALIFIER_STEPS.length));
+
+      var heading = el("h4", "qualifier-question", step.question);
+      heading.id = "qualifier-q";
+      wrap.appendChild(heading);
+
+      var group = el("div", "qualifier-options");
+      group.setAttribute("role", "group");
+      group.setAttribute("aria-labelledby", "qualifier-q");
+
+      step.options.forEach(function (opt) {
+        var button = el("button", "qualifier-option");
+        button.type = "button";
+        button.appendChild(el("span", null, opt.value));
+        if (opt.tag) button.appendChild(el("span", "tag", opt.tag));
+        button.addEventListener("click", function () {
+          answers[step.key] = opt;
+          if (index < QUALIFIER_STEPS.length - 1) {
+            index += 1;
+            renderStep();
+          } else {
+            renderVerdict();
+          }
+        });
+        group.appendChild(button);
+      });
+      wrap.appendChild(group);
+
+      if (index > 0) {
+        var back = el("button", "qualifier-back", "← Back");
+        back.type = "button";
+        back.addEventListener("click", function () {
+          index -= 1;
+          renderStep();
+        });
+        wrap.appendChild(back);
+      }
+
+      stage.appendChild(wrap);
+      // Move focus to the new question so keyboard and screen-reader users
+      // aren't stranded on a button that no longer exists.
+      heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+    }
+
+    function assess() {
+      var flags = [];
+      var blocked = false;
+      QUALIFIER_STEPS.forEach(function (step) {
+        var a = answers[step.key];
+        if (!a) return;
+        if (a.disqualify) blocked = true;
+        if (a.flag) flags.push(a.flag);
+      });
+      if (blocked) return { fit: "out", flags: flags };
+      return { fit: flags.length ? "review" : "strong", flags: flags };
+    }
+
+    function summaryLines() {
+      return QUALIFIER_STEPS.map(function (step) {
+        return { label: step.label, value: answers[step.key] ? answers[step.key].value : "—" };
+      });
+    }
+
+    function plainSummary(result) {
+      var lines = ["Candidate well review — WellFi", ""];
+      summaryLines().forEach(function (row) { lines.push(row.label + ": " + row.value); });
+      lines.push("");
+      lines.push("Self-check result: " + (
+        result.fit === "strong" ? "Strong fit" :
+        result.fit === "review" ? "Likely fit — worth a review" :
+        "Outside current spec"
+      ));
+      result.flags.forEach(function (f) { if (QUALIFIER_NOTES[f]) lines.push("- " + QUALIFIER_NOTES[f]); });
+      lines.push("");
+      lines.push("Sent from yotinenergy.com");
+      return lines.join("\n");
+    }
+
+    function renderVerdict() {
+      var result = assess();
+      clear(stage);
+
+      var wrap = el("div", "qualifier-verdict");
+      wrap.setAttribute("data-fit", result.fit);
+      wrap.setAttribute("role", "status");
+
+      var badge = el("p", "qualifier-badge");
+      var headline;
+      var detail;
+
+      if (result.fit === "strong") {
+        badge.appendChild(icon("ph-check-circle"));
+        badge.appendChild(el("span", null, "Strong fit"));
+        headline = "This well looks like a straightforward deployment.";
+        detail = "Everything you entered sits inside WellFi's operating envelope, and there is already work scheduled to install it on. The next step is confirming tubing configuration and what data you want out of it.";
+      } else if (result.fit === "review") {
+        badge.appendChild(icon("ph-magnifying-glass"));
+        badge.appendChild(el("span", null, "Likely fit — worth a review"));
+        headline = "Probably workable, with a couple of things to confirm.";
+        detail = "Nothing you entered rules it out. These are the points our team would want to walk through before committing to a deployment date.";
+      } else {
+        badge.appendChild(icon("ph-warning-circle"));
+        badge.appendChild(el("span", null, "Outside current spec"));
+        headline = "Above 150 °C, this one is outside WellFi's rating.";
+        detail = "WellFi is rated to 150 °C, so we would rather tell you now than after a failed run. If the temperature figure is an estimate, or you have other wells in the fleet, those are still worth a look.";
+      }
+
+      wrap.appendChild(badge);
+      wrap.appendChild(el("p", "qualifier-headline", headline));
+      wrap.appendChild(el("p", "qualifier-detail", detail));
+
+      if (result.flags.length) {
+        var notes = el("ul", "qualifier-notes");
+        result.flags.forEach(function (f) {
+          if (!QUALIFIER_NOTES[f]) return;
+          var li = document.createElement("li");
+          li.appendChild(icon("ph-arrow-elbow-down-right"));
+          li.appendChild(el("span", null, QUALIFIER_NOTES[f]));
+          notes.appendChild(li);
+        });
+        if (notes.childNodes.length) wrap.appendChild(notes);
+      }
+
+      var summary = el("dl", "qualifier-summary");
+      summaryLines().forEach(function (row) {
+        var line = el("div");
+        line.appendChild(el("dt", null, row.label));
+        line.appendChild(el("dd", null, row.value));
+        summary.appendChild(line);
+      });
+      wrap.appendChild(summary);
+
+      var body = plainSummary(result);
+      var actions = el("div", "qualifier-actions");
+
+      var send = el("a", "button button-primary");
+      send.href = "mailto:" + QUALIFIER_EMAIL +
+        "?subject=" + encodeURIComponent("Candidate well review — WellFi") +
+        "&body=" + encodeURIComponent(body);
+      send.appendChild(el("span", null, "Send this to Yotin"));
+      send.appendChild(icon("ph-arrow-right"));
+      actions.appendChild(send);
+
+      // The copy button is the real fallback: plenty of corporate machines
+      // have no mail client bound, and a dead mailto is a dead lead.
+      var copy = el("button", "button button-secondary");
+      copy.type = "button";
+      copy.appendChild(icon("ph-copy"));
+      copy.appendChild(el("span", null, "Copy summary"));
+      actions.appendChild(copy);
+
+      wrap.appendChild(actions);
+
+      var state = el("p", "qualifier-copy-state");
+      state.setAttribute("role", "status");
+      wrap.appendChild(state);
+
+      copy.addEventListener("click", function () {
+        function done(ok) {
+          state.textContent = ok
+            ? "Copied — paste it into an email to " + QUALIFIER_EMAIL
+            : "Copy failed. The address is " + QUALIFIER_EMAIL;
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(body).then(function () { done(true); }, function () { done(false); });
+        } else {
+          done(false);
+        }
+      });
+
+      var restart = el("button", "qualifier-back", "Start over");
+      restart.type = "button";
+      restart.addEventListener("click", function () {
+        answers = {};
+        index = 0;
+        renderStep();
+      });
+      wrap.appendChild(restart);
+
+      stage.appendChild(wrap);
+    }
+
+    renderStep();
+  }
+
+  buildQualifier();
+
+  /* ======================================================================
      ChatFi
      ====================================================================== */
 

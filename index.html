@@ -34,7 +34,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260724-3">
+  <link rel="stylesheet" href="styles.css?v=20260725-1">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -266,9 +266,11 @@
               <li><i class="ph ph-plugs" aria-hidden="true"></i> MODBUS Ready</li>
               <li><i class="ph ph-lightning" aria-hidden="true"></i> Rapid Deployment</li>
             </ul>
+            <!-- Primary CTA points at the qualifier, not at a scroll anchor:
+                 a hero button that only scrolls 400px converts nothing. -->
             <div class="hero-actions" data-hero-step>
-              <a class="button button-primary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-              <button class="button button-secondary" type="button" data-chatfi-open>Ask ChatFi <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+              <a class="button button-primary" href="#contact">Check your well fit <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
+              <a class="button button-secondary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
             </div>
           </div>
         </div>
@@ -538,13 +540,34 @@
           <h2 id="contact-title" data-motion="rise">Know the Unknown.<br><span>One Changeout Away.</span></h2>
         </div>
         <div class="contact-actions">
-          <p data-motion="rise">Well type, changeout timing, and required data establish deployment fit.</p>
-          <a class="button button-primary" href="mailto:info@yotinenergy.com" data-motion="rise">Email Yotin <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-          <!-- Visible address: if no mail client is configured the button is a
-               dead end, so the address has to be readable and copyable here. -->
-          <p class="contact-email" data-motion="rise">or reach us directly at <a href="mailto:info@yotinenergy.com">info@yotinenergy.com</a></p>
-          <button class="text-button" type="button" data-chatfi-open data-motion="rise">Or ask ChatFi about WellFi</button>
+          <p data-motion="rise">Well type, changeout timing, and required data establish deployment fit. Check yours in about a minute.</p>
+          <!-- Visible address: if no mail client is configured the qualifier's
+               send button is a dead end, so the address stays readable and
+               copyable here, and the qualifier offers a copy-to-clipboard
+               summary as its own fallback. -->
+          <p class="contact-email" data-motion="rise">Or reach us directly at <a href="mailto:info@yotinenergy.com">info@yotinenergy.com</a></p>
+          <button class="text-button" type="button" data-chatfi-open data-motion="rise">Ask ChatFi about WellFi</button>
         </div>
+      </div>
+
+      <!--
+        Candidate-well qualifier. Built entirely by main.js from the config in
+        that file; without JavaScript this stays empty and the direct email
+        above remains the contact path.
+
+        It is deliberately able to return "outside current spec" — a qualifier
+        that always says yes is a lead form with extra steps, and this audience
+        spots that immediately. The 150 °C ceiling is a real product limit.
+      -->
+      <div class="shell">
+        <section class="qualifier" aria-labelledby="qualifier-title" data-qualifier hidden>
+          <div class="qualifier-intro">
+            <p class="eyebrow">60-second check</p>
+            <h3 id="qualifier-title">Will WellFi fit your well?</h3>
+            <p>Five questions, no contact details required to see the answer — including when the answer is no.</p>
+          </div>
+          <div class="qualifier-stage" data-qualifier-stage></div>
+        </section>
       </div>
     </section>
   </main>
@@ -589,6 +612,6 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260724-3"></script>
+  <script defer src="main.js?v=20260725-1"></script>
 </body>
 </html>

@@ -950,6 +950,184 @@ a { color: inherit; text-decoration: none; }
 .text-button:hover { color: var(--ember-lit); }
 
 /* ==========================================================================
+   Candidate-well qualifier
+   ========================================================================== */
+
+.qualifier {
+  max-width: 780px;
+  margin: clamp(52px, 6vw, 84px) auto 0;
+  padding: clamp(26px, 3.5vw, 42px);
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(16, 30, 42, 0.7), rgba(5, 12, 18, 0.86));
+  box-shadow: 0 26px 80px -34px rgba(0, 0, 0, 0.9);
+}
+.qualifier-intro { text-align: center; margin-bottom: 26px; }
+.qualifier-intro .eyebrow { margin-bottom: 10px; }
+.qualifier-intro h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.6vw, 34px);
+  letter-spacing: -0.035em;
+}
+.qualifier-intro > p { margin: 12px auto 0; max-width: 30rem; color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+.qualifier-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.qualifier-progress span {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(232, 220, 200, 0.14);
+  transition: background-color 260ms var(--ease);
+}
+.qualifier-progress span.is-done { background: var(--ember); }
+.qualifier-progress span.is-current { background: rgba(242, 118, 34, 0.5); }
+
+.qualifier-step { text-align: center; }
+.qualifier-count {
+  color: var(--sand-mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.qualifier-question {
+  margin: 10px 0 22px;
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2vw, 25px);
+  letter-spacing: -0.02em;
+}
+/* Focus is moved here programmatically so the new question is announced, but
+   it is a heading rather than a control — a visible ring just reads as a bug.
+   Focus still moves, so screen readers still announce it. */
+.qualifier-question:focus { outline: none; }
+.qualifier-options { display: grid; gap: 10px; }
+.qualifier-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--white);
+  font-size: 15.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 140ms ease;
+}
+.qualifier-option:hover {
+  border-color: var(--ember);
+  background: rgba(242, 118, 34, 0.08);
+  transform: translateY(-1px);
+}
+.qualifier-option .tag {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(242, 118, 34, 0.14);
+  color: var(--ember);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.qualifier-back {
+  margin-top: 18px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--sand-mute);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.qualifier-back:hover { color: var(--white); }
+
+/* --- verdict --- */
+.qualifier-verdict { text-align: center; }
+.qualifier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.qualifier-badge i { font-size: 19px; }
+.qualifier-verdict[data-fit="strong"] .qualifier-badge { border: 1px solid rgba(125, 216, 106, 0.4); background: rgba(125, 216, 106, 0.1); color: #8fe07a; }
+.qualifier-verdict[data-fit="review"] .qualifier-badge { border: 1px solid rgba(242, 118, 34, 0.4); background: rgba(242, 118, 34, 0.1); color: var(--ember-lit); }
+.qualifier-verdict[data-fit="out"] .qualifier-badge { border: 1px solid rgba(232, 220, 200, 0.28); background: rgba(232, 220, 200, 0.06); color: var(--sand); }
+
+.qualifier-headline {
+  margin: 18px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(21px, 2.3vw, 29px);
+  letter-spacing: -0.03em;
+}
+.qualifier-detail { margin: 12px auto 0; max-width: 32rem; color: #b6c0c5; font-size: 15.5px; line-height: 1.65; }
+.qualifier-notes { margin: 18px auto 0; max-width: 32rem; padding: 0; list-style: none; text-align: left; }
+.qualifier-notes li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  padding: 7px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.qualifier-notes i { color: var(--ember); font-size: 16px; margin-top: 2px; }
+
+.qualifier-summary {
+  margin: 24px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+.qualifier-summary div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.qualifier-summary div:last-child { border-bottom: 0; }
+.qualifier-summary dt { color: var(--muted); }
+.qualifier-summary dd { margin: 0; color: var(--white); font-family: var(--font-mono); font-size: 13px; text-align: right; }
+
+.qualifier-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 26px; }
+.qualifier-actions .button { min-height: 54px; font-size: 15px; }
+.qualifier-copy-state {
+  margin: 14px 0 0;
+  min-height: 18px;
+  color: var(--sand-mute);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .qualifier { padding: 22px 18px; border-radius: 18px; }
+  .qualifier-option { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .qualifier-actions { flex-direction: column; }
+  .qualifier-actions .button { width: 100%; }
+  .qualifier-summary div { grid-template-columns: 1fr; gap: 2px; }
+  .qualifier-summary dd { text-align: left; }
+}
+
+/* ==========================================================================
    Footer
    ========================================================================== */
 
