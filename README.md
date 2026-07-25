@@ -65,6 +65,20 @@ motion is allowed, `main.js` promotes that same content into a 260 vh pinned
 cutaway and **removes** the fallback. Mobile, touch, reduced-motion, and no-JS
 all keep the static grid.
 
+### Travelling spotlight pattern
+
+Several groups (signal strip, telemetry channels, spec tiles, company marks)
+use a sweep rather than a plain reveal: each item rises out of a dim rest
+state, peaks, then settles back as the next takes over. The keyframe floor is
+~0.3 and the settle is ~0.75 — **never 0** — because an item on screen has to
+stay readable whether or not it currently holds the highlight.
+
+Items that share a grid row get identical `view()` progress, so the cascade
+only exists because each item's `animation-range` is offset by 5–9% of the
+cover phase. Those offsets are scoped to the breakpoint whose layout needs
+them: once a grid wraps, rows stagger naturally and keeping the offsets would
+leave the last item dim well after it is on screen.
+
 ### Three traps in scroll-driven animation (all hit on this site)
 
 1. **`overflow: hidden` creates a scroll container.** A `view()` timeline binds

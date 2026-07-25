@@ -92,6 +92,19 @@ a { color: inherit; text-decoration: none; }
 }
 .skip-link:focus { transform: translateY(0); }
 
+/* Page-progress rail. Inert without scroll-driven animation support — it just
+   sits at scaleX(0) and is invisible, which is the correct no-op. */
+.scroll-rail {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 90;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ember-deep), var(--ember), var(--ember-lit));
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
 :focus-visible {
   outline: 2px solid var(--ember-lit);
   outline-offset: 4px;
@@ -1277,25 +1290,56 @@ a { color: inherit; text-decoration: none; }
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-/* Starts at 0.16 rather than 0 so the cards read as instruments powering up
-   rather than content appearing from nothing. */
-@keyframes signal-lightup {
-  from { opacity: 0.16; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Traveling spotlight: each card rises out of a dim rest state, peaks, then
+   settles back down as the next one takes over. The floor is 0.34 and the
+   settle is 0.74 — never 0 — because a card that is on screen must stay
+   readable whether or not it currently holds the highlight. */
+@keyframes signal-sweep {
+  0%   { opacity: 0.34; transform: translateY(18px); }
+  40%  { opacity: 1; transform: translateY(0); }
+  58%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.74; transform: translateY(0); }
 }
-@keyframes signal-icon-on {
-  from {
-    border-color: rgba(232, 220, 200, 0.16);
+@keyframes signal-icon-sweep {
+  0% {
+    border-color: rgba(232, 220, 200, 0.14);
     background-color: rgba(232, 220, 200, 0.03);
     box-shadow: 0 0 0 0 rgba(242, 118, 34, 0);
     color: var(--sand-mute);
   }
-  to {
-    border-color: rgba(242, 118, 34, 0.5);
-    background-color: rgba(242, 118, 34, 0.1);
-    box-shadow: 0 0 22px -4px rgba(242, 118, 34, 0.6);
+  40%, 58% {
+    border-color: rgba(242, 118, 34, 0.7);
+    background-color: rgba(242, 118, 34, 0.17);
+    box-shadow: 0 0 28px -2px rgba(242, 118, 34, 0.8);
+    color: var(--ember-lit);
+  }
+  100% {
+    border-color: rgba(242, 118, 34, 0.3);
+    background-color: rgba(242, 118, 34, 0.07);
+    box-shadow: 0 0 0 0 rgba(242, 118, 34, 0);
     color: var(--ember);
   }
+}
+
+/* Same idea for the five telemetry channels — reads as each channel being
+   swept and acquired in turn. */
+@keyframes channel-sweep-in {
+  0%   { opacity: 0.3; transform: translateY(26px); }
+  42%  { opacity: 1; transform: translateY(0); }
+  60%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.78; transform: translateY(0); }
+}
+
+/* The hero scene recedes as the page scrolls off it, so the hero feels like a
+   layer being left behind rather than a block scrolling away. */
+@keyframes hero-recede {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-7%); opacity: 0.42; }
+}
+
+@keyframes rail-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 
 /* --- Hero load-in: pure CSS. No JS, no library, works with both off. ---- */
@@ -1329,34 +1373,51 @@ a { color: inherit; text-decoration: none; }
     }
     [data-motion="fade"] { animation-name: reveal-fade; }
 
-    /* The three signal cards share a row, so a view() timeline hands them all
-       identical progress and they resolve as one block. Offsetting each card's
-       range by ~7% of the cover phase makes them power up left to right as you
-       scroll. Ends stay under 40% so each still completes while comfortably in
-       view — the constraint that broke this section the first time. */
-    .signal-step[data-motion] { animation-name: signal-lightup; }
-    .signal-step:nth-child(1)[data-motion] { animation-range: cover 2% cover 24%; }
-    .signal-step:nth-child(2)[data-motion] { animation-range: cover 9% cover 31%; }
-    .signal-step:nth-child(3)[data-motion] { animation-range: cover 16% cover 38%; }
+    /* The three signal cards share a grid row, so a view() timeline hands them
+       identical progress and they resolve as one block. Staggering each card's
+       range makes the highlight travel left to right: card 1 peaks and is
+       already settling as card 2 peaks. The ranges overlap on purpose — a
+       clean hand-off reads better than three separate blinks. */
+    .signal-step[data-motion] { animation-name: signal-sweep; }
+    .signal-step:nth-child(1)[data-motion] { animation-range: cover 0% cover 30%; }
+    .signal-step:nth-child(2)[data-motion] { animation-range: cover 9% cover 39%; }
+    .signal-step:nth-child(3)[data-motion] { animation-range: cover 18% cover 48%; }
 
     .signal-icon {
-      animation: signal-icon-on linear both;
+      animation: signal-icon-sweep linear both;
       animation-timeline: view();
     }
-    .signal-step:nth-child(1) .signal-icon { animation-range: cover 2% cover 24%; }
-    .signal-step:nth-child(2) .signal-icon { animation-range: cover 9% cover 31%; }
-    .signal-step:nth-child(3) .signal-icon { animation-range: cover 16% cover 38%; }
+    .signal-step:nth-child(1) .signal-icon { animation-range: cover 0% cover 30%; }
+    .signal-step:nth-child(2) .signal-icon { animation-range: cover 9% cover 39%; }
+    .signal-step:nth-child(3) .signal-icon { animation-range: cover 18% cover 48%; }
 
+    /* Five channels, same travelling highlight. */
     .channel-card[data-channel] {
-      animation: reveal-rise linear both;
+      animation: channel-sweep-in linear both;
       animation-timeline: view();
-      animation-range: cover 0% cover 32%;
+      animation-range: cover 0% cover 34%;
     }
     /* Sweeps just behind its card so it reads as the channel locking on. */
     .channel-sweep {
       animation: sweep-in linear both;
       animation-timeline: view();
-      animation-range: cover 8% cover 40%;
+      animation-range: cover 8% cover 42%;
+    }
+
+    /* The hero layer recedes as it scrolls away. No will-change: measured with
+       and without, it made no difference to frame pacing, and it would keep a
+       full-viewport iframe permanently promoted to its own layer for nothing. */
+    .hero-visual {
+      animation: hero-recede linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* Page-progress rail. scroll() rather than view() — it tracks the document,
+       not an element's travel through it. */
+    .scroll-rail {
+      animation: rail-grow linear both;
+      animation-timeline: scroll(root block);
     }
 
     /* Parallax, compositor-side. Replaces a scrubbed JS tween. */
@@ -1364,6 +1425,50 @@ a { color: inherit; text-decoration: none; }
       animation: drift-up linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* --- Per-item cascades, only where items actually share a row ------------
+   These offsets exist to break the tie when several elements sit at the same
+   height. Where the grid wraps, the rows already stagger naturally and adding
+   offsets on top would leave the last item dim long after it is on screen, so
+   each cascade is scoped to the breakpoint whose layout needs it. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* Channels are 5-across only above 1180px. */
+    @media (min-width: 1181px) {
+      .channel-card:nth-child(1)[data-channel] { animation-range: cover 0% cover 30%; }
+      .channel-card:nth-child(2)[data-channel] { animation-range: cover 5% cover 35%; }
+      .channel-card:nth-child(3)[data-channel] { animation-range: cover 10% cover 40%; }
+      .channel-card:nth-child(4)[data-channel] { animation-range: cover 15% cover 45%; }
+      .channel-card:nth-child(5)[data-channel] { animation-range: cover 20% cover 50%; }
+      .channel-card:nth-child(1) .channel-sweep { animation-range: cover 6% cover 34%; }
+      .channel-card:nth-child(2) .channel-sweep { animation-range: cover 11% cover 39%; }
+      .channel-card:nth-child(3) .channel-sweep { animation-range: cover 16% cover 44%; }
+      .channel-card:nth-child(4) .channel-sweep { animation-range: cover 21% cover 49%; }
+      .channel-card:nth-child(5) .channel-sweep { animation-range: cover 26% cover 54%; }
+    }
+
+    /* Journey is a 2x2 grid above 820px: rows already differ vertically, so
+       only the second column in each row needs an offset. */
+    @media (min-width: 821px) {
+      .journey-list li:nth-child(2)[data-motion],
+      .journey-list li:nth-child(4)[data-motion] { animation-range: cover 7% cover 37%; }
+    }
+
+    /* Spec tiles are 3-across above 820px — cascade within each row. */
+    @media (min-width: 821px) {
+      .spec-grid > div:nth-child(3n + 2)[data-motion] { animation-range: cover 5% cover 35%; }
+      .spec-grid > div:nth-child(3n + 3)[data-motion] { animation-range: cover 10% cover 40%; }
+    }
+
+    /* Company marks are 3-across above 900px. */
+    @media (min-width: 901px) {
+      .company-mark:nth-child(2)[data-motion] { animation-range: cover 5% cover 35%; }
+      .company-mark:nth-child(3)[data-motion] { animation-range: cover 10% cover 40%; }
     }
   }
 }
