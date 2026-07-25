@@ -120,23 +120,38 @@ Three outcomes: **Strong fit** (nothing flagged), **Likely fit — worth a
 review** (flags raised, each with a plain-language reason), **Outside current
 spec** (hard limit hit).
 
-### The pump-landing rule
+### The pump-landing rule, and the derived question
 
 The collar needs roughly **10% of the intermediate casing's length of standoff
-from the shoe** — `(shoe depth − pump depth) >= 0.10 × intermediate length`.
-Landed closer than that, WellFi runs **outside** the intermediate instead of
+above the shoe** — `(shoe depth − pump depth) >= 0.10 × intermediate length`.
+Landed deeper than that, WellFi runs **outside** the intermediate instead of
 inside the tubing.
 
 This tracks the EM physics recorded in the WellFi hero design spec: the
 formation is the antenna, and an emitter sitting at the cemented cased shoe
-couples at roughly 0.1%. So both *comfortably above* the shoe and *below it in
-open hole* are fine — **at** the shoe is the bad case. The banded options
-encode exactly that, and "below the shoe, in open hole" is deliberately not
-penalised.
+couples at roughly 0.1%.
 
-Failing the check is a **deployment-method note, not a disqualifier** — the
-well is still a candidate, the install just changes. Only the 150 °C ceiling
-hard-disqualifies.
+Rather than ask the engineer to compute a proportion, the qualifier asks for
+the **intermediate casing length as a number**, then *derives* the next
+question from it. Enter 1000 and the follow-up reads "Is the pump landed
+shallower or deeper than **900 m**?" — one tap, no arithmetic. That is why the
+length step is a numeric input and not bands: a banded answer would make the
+derived threshold meaningless.
+
+The input is `type="text"` with `inputmode="numeric"` rather than
+`type="number"`, which raises the phone keypad without inheriting number-input
+quirks (scroll-wheel value changes, locale parsing, spinners).
+
+Failing the standoff is a **deployment-method note, not a disqualifier** — the
+well is still a candidate, the install just changes.
+
+### Above 150 °C is a waitlist, not a rejection
+
+Nothing in the qualifier hard-disqualifies any more. Over 150 °C returns
+"**high-temp version in development**", explains that the higher-temperature
+build is in progress, and switches the CTA to *Have Yotin follow up*. The
+mailto subject changes to `Candidate well — awaiting 150 °C+ WellFi` so the
+team can triage the waitlist separately from live candidates.
 
 Submission is a prefilled `mailto:` carrying the full well summary, plus a
 **Copy summary** button. The copy button is the real fallback: corporate

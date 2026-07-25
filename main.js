@@ -660,21 +660,22 @@
       options: [
         { value: "Under 100 °C" },
         { value: "100 – 150 °C", tag: "At spec" },
-        { value: "Above 150 °C", disqualify: true },
+        { value: "Above 150 °C", future: true },
         { value: "Not sure", flag: "temp" }
       ]
     },
     {
-      key: "depth",
-      label: "Measured depth",
-      question: "Roughly how deep is it?",
-      options: [
-        { value: "Under 1,000 m" },
-        { value: "1,000 – 2,000 m" },
-        { value: "2,000 – 3,000 m" },
-        { value: "Deeper than 3,000 m", flag: "depth" },
-        { value: "Not sure", flag: "depth" }
-      ]
+      /* Asked as a number because the next question is derived from it. The
+         standoff rule is a proportion of this length, so a banded answer here
+         would make the follow-up threshold meaningless. */
+      key: "intermediate",
+      type: "number",
+      label: "Intermediate casing length",
+      question: "How long is your intermediate casing, approximately?",
+      unit: "m",
+      placeholder: "1000",
+      min: 50,
+      max: 6000
     },
     {
       /* Where the pump lands decides the deployment method. The collar needs
@@ -686,15 +687,35 @@
          comfortably above the shoe or below it in open hole is fine; at the
          shoe is the bad case. */
       key: "landing",
+      type: "derived",
       label: "Pump landing",
-      question: "Where does the pump land in the intermediate casing?",
-      options: [
-        { value: "Well above the shoe" },
-        { value: "Roughly mid-string" },
-        { value: "Close to the shoe", flag: "external" },
-        { value: "Below the shoe, in open hole" },
-        { value: "Not sure", flag: "landing" }
-      ]
+      /* Question and options are built from the entered casing length: the
+         collar needs ~10% of that length of standoff above the shoe, so the
+         threshold is 0.9 x length. Turning the rule into a single concrete
+         number means the engineer taps once instead of doing the arithmetic. */
+      build: function (answers) {
+        var len = answers.intermediate ? answers.intermediate.number : null;
+        if (!len) {
+          return {
+            question: "Where does the pump land in the intermediate casing?",
+            options: [
+              { value: "Well above the shoe" },
+              { value: "Close to the shoe", flag: "external" },
+              { value: "Not sure", flag: "landing" }
+            ]
+          };
+        }
+        var threshold = Math.round((len * 0.9) / 10) * 10;
+        return {
+          question: "Is the pump landed shallower or deeper than " + fmtNum(threshold) + " m?",
+          hint: "That is 10% of your intermediate above the shoe — the standoff WellFi needs to run inside the tubing.",
+          options: [
+            { value: "Shallower than " + fmtNum(threshold) + " m", tag: "< " + fmtNum(threshold) },
+            { value: "Deeper than " + fmtNum(threshold) + " m", tag: "> " + fmtNum(threshold), flag: "external" },
+            { value: "Not sure", flag: "landing" }
+          ]
+        };
+      }
     },
     {
       key: "timing",
@@ -709,13 +730,16 @@
     }
   ];
 
+  function fmtNum(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   // Each note explains WHY something needs review, in the engineer's terms.
   var QUALIFIER_NOTES = {
-    temp: "Bottomhole temperature decides it outright — WellFi is rated to 150 °C, so that number is worth confirming before anything else.",
-    depth: "Depth affects the electromagnetic path to surface. Deeper or highly conductive intervals may need a feasibility check first.",
-    external: "Landed that close to the shoe, WellFi would run outside the intermediate rather than inside the tubing — the collar wants roughly 10% of the intermediate's length of standoff from the shoe. That is a routine configuration, not a problem, but it changes the install and is worth confirming early.",
+    temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
+    external: "Landed that deep, WellFi would run outside the intermediate rather than inside the tubing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. Running it outside is routine, but it changes the install and is worth confirming early.",
     landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs inside the tubing or outside the intermediate. Worth pinning down before the changeout gets scoped.",
-    timing: "The economics are strongest when WellFi goes in on work that is already scheduled. Without a planned intervention it needs its own trip.",
+    timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
     lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
     thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."
   };
@@ -766,39 +790,52 @@
       return bar;
     }
 
+    function advance() {
+      if (index < QUALIFIER_STEPS.length - 1) {
+        index += 1;
+        renderStep();
+      } else {
+        renderVerdict();
+      }
+    }
+
     function renderStep() {
       var step = QUALIFIER_STEPS[index];
+      // Derived steps compute their question and options from earlier answers.
+      var spec = step.type === "derived" ? step.build(answers) : step;
+
       clear(stage);
       stage.appendChild(renderProgress());
 
       var wrap = el("div", "qualifier-step");
       wrap.appendChild(el("p", "qualifier-count", "Question " + (index + 1) + " of " + QUALIFIER_STEPS.length));
 
-      var heading = el("h4", "qualifier-question", step.question);
+      var heading = el("h4", "qualifier-question", spec.question);
       heading.id = "qualifier-q";
       wrap.appendChild(heading);
 
-      var group = el("div", "qualifier-options");
-      group.setAttribute("role", "group");
-      group.setAttribute("aria-labelledby", "qualifier-q");
+      if (spec.hint) wrap.appendChild(el("p", "qualifier-hint", spec.hint));
 
-      step.options.forEach(function (opt) {
-        var button = el("button", "qualifier-option");
-        button.type = "button";
-        button.appendChild(el("span", null, opt.value));
-        if (opt.tag) button.appendChild(el("span", "tag", opt.tag));
-        button.addEventListener("click", function () {
-          answers[step.key] = opt;
-          if (index < QUALIFIER_STEPS.length - 1) {
-            index += 1;
-            renderStep();
-          } else {
-            renderVerdict();
-          }
+      if (step.type === "number") {
+        wrap.appendChild(renderNumberInput(step));
+      } else {
+        var group = el("div", "qualifier-options");
+        group.setAttribute("role", "group");
+        group.setAttribute("aria-labelledby", "qualifier-q");
+
+        spec.options.forEach(function (opt) {
+          var button = el("button", "qualifier-option");
+          button.type = "button";
+          button.appendChild(el("span", null, opt.value));
+          if (opt.tag) button.appendChild(el("span", "tag", opt.tag));
+          button.addEventListener("click", function () {
+            answers[step.key] = opt;
+            advance();
+          });
+          group.appendChild(button);
         });
-        group.appendChild(button);
-      });
-      wrap.appendChild(group);
+        wrap.appendChild(group);
+      }
 
       if (index > 0) {
         var back = el("button", "qualifier-back", "← Back");
@@ -812,21 +849,85 @@
 
       stage.appendChild(wrap);
       // Move focus to the new question so keyboard and screen-reader users
-      // aren't stranded on a button that no longer exists.
+      // aren't stranded on a control that no longer exists.
       heading.setAttribute("tabindex", "-1");
       heading.focus({ preventScroll: true });
     }
 
+    function renderNumberInput(step) {
+      var box = el("div", "qualifier-number");
+
+      var field = el("div", "qualifier-field");
+      var input = document.createElement("input");
+      /* type=text + inputmode=numeric rather than type=number: it raises the
+         numeric keypad on phones without inheriting number-input quirks
+         (scroll-wheel value changes, locale-dependent parsing, spinners). */
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.setAttribute("pattern", "[0-9]*");
+      input.setAttribute("aria-labelledby", "qualifier-q");
+      input.placeholder = step.placeholder || "";
+      input.className = "qualifier-input";
+      if (answers[step.key]) input.value = String(answers[step.key].number);
+
+      field.appendChild(input);
+      field.appendChild(el("span", "qualifier-unit", step.unit || ""));
+      box.appendChild(field);
+
+      var error = el("p", "qualifier-error");
+      error.setAttribute("role", "alert");
+      box.appendChild(error);
+
+      var go = el("button", "button button-primary qualifier-go");
+      go.type = "button";
+      go.appendChild(el("span", null, "Continue"));
+      go.appendChild(icon("ph-arrow-right"));
+      box.appendChild(go);
+
+      function submit() {
+        var raw = input.value.replace(/[^\d.]/g, "");
+        var n = parseFloat(raw);
+        if (!isFinite(n) || n <= 0) {
+          error.textContent = "Enter the approximate length in metres.";
+          input.focus();
+          return;
+        }
+        if (n < step.min || n > step.max) {
+          error.textContent = "That looks outside the usual range (" +
+            fmtNum(step.min) + "–" + fmtNum(step.max) + " m). Double-check the figure.";
+          input.focus();
+          return;
+        }
+        error.textContent = "";
+        answers[step.key] = { value: fmtNum(n) + " " + (step.unit || ""), number: n };
+        advance();
+      }
+
+      go.addEventListener("click", submit);
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submit();
+        }
+      });
+      input.addEventListener("input", function () { error.textContent = ""; });
+
+      window.setTimeout(function () { input.focus({ preventScroll: true }); }, 30);
+      return box;
+    }
+
     function assess() {
       var flags = [];
-      var blocked = false;
+      var future = false;
       QUALIFIER_STEPS.forEach(function (step) {
         var a = answers[step.key];
         if (!a) return;
-        if (a.disqualify) blocked = true;
+        // Above 150 °C isn't a dead end any more — it's a waitlist.
+        if (a.future) future = true;
         if (a.flag) flags.push(a.flag);
       });
-      if (blocked) return { fit: "out", flags: flags };
+      if (future) return { fit: "future", flags: flags };
       return { fit: flags.length ? "review" : "strong", flags: flags };
     }
 
@@ -843,7 +944,7 @@
       lines.push("Self-check result: " + (
         result.fit === "strong" ? "Strong fit" :
         result.fit === "review" ? "Likely fit — worth a review" :
-        "Outside current spec"
+        "Above 150 °C — waiting on the high-temperature version"
       ));
       result.flags.forEach(function (f) { if (QUALIFIER_NOTES[f]) lines.push("- " + QUALIFIER_NOTES[f]); });
       lines.push("");
@@ -863,21 +964,24 @@
       var headline;
       var detail;
 
+      var ctaLabel = "Send this to Yotin";
+
       if (result.fit === "strong") {
         badge.appendChild(icon("ph-check-circle"));
         badge.appendChild(el("span", null, "Strong fit"));
         headline = "This well looks like a straightforward deployment.";
-        detail = "Everything you entered sits inside WellFi's operating envelope, and there is already work scheduled to install it on. The next step is confirming tubing configuration and what data you want out of it.";
+        detail = "Everything you entered sits inside WellFi's operating envelope. The next step is confirming tubing configuration and what data you want out of it.";
       } else if (result.fit === "review") {
         badge.appendChild(icon("ph-magnifying-glass"));
         badge.appendChild(el("span", null, "Likely fit — worth a review"));
         headline = "Probably workable, with a couple of things to confirm.";
         detail = "Nothing you entered rules it out. These are the points our team would want to walk through before committing to a deployment date.";
       } else {
-        badge.appendChild(icon("ph-warning-circle"));
-        badge.appendChild(el("span", null, "Outside current spec"));
-        headline = "Above 150 °C, this one is outside WellFi's rating.";
-        detail = "WellFi is rated to 150 °C, so we would rather tell you now than after a failed run. If the temperature figure is an estimate, or you have other wells in the fleet, those are still worth a look.";
+        badge.appendChild(icon("ph-wrench"));
+        badge.appendChild(el("span", null, "High-temp version in development"));
+        headline = "Above 150 °C — that build is in progress.";
+        detail = "WellFi is rated to 150 °C today, and a higher-temperature version is in development. Send this well through and we will come back to you when it is ready, rather than you starting from scratch later.";
+        ctaLabel = "Have Yotin follow up";
       }
 
       wrap.appendChild(badge);
@@ -909,10 +1013,14 @@
       var actions = el("div", "qualifier-actions");
 
       var send = el("a", "button button-primary");
+      // Distinct subject so the team can triage the waitlist separately.
+      var subject = result.fit === "future"
+        ? "Candidate well — awaiting 150 °C+ WellFi"
+        : "Candidate well review — WellFi";
       send.href = "mailto:" + QUALIFIER_EMAIL +
-        "?subject=" + encodeURIComponent("Candidate well review — WellFi") +
+        "?subject=" + encodeURIComponent(subject) +
         "&body=" + encodeURIComponent(body);
-      send.appendChild(el("span", null, "Send this to Yotin"));
+      send.appendChild(el("span", null, ctaLabel));
       send.appendChild(icon("ph-arrow-right"));
       actions.appendChild(send);
 

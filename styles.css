@@ -252,6 +252,15 @@ a { color: inherit; text-decoration: none; }
 .hero-copy { position: relative; z-index: 2; width: min(620px, 52vw); }
 
 .hero-message > .eyebrow { margin-bottom: 22px; }
+
+/* Product wordmark in place of a text eyebrow — brands the device rather than
+   labelling it. Sized off height so the 4.5:1 mark keeps its proportions. */
+.hero-wordmark {
+  height: clamp(34px, 3.6vw, 48px);
+  width: auto;
+  margin: 0 0 24px;
+  filter: drop-shadow(0 2px 10px rgba(3, 7, 11, 0.75));
+}
 .hero-message h1 {
   max-width: 720px;
   margin: 0;
@@ -1025,6 +1034,53 @@ a { color: inherit; text-decoration: none; }
    it is a heading rather than a control — a visible ring just reads as a bug.
    Focus still moves, so screen readers still announce it. */
 .qualifier-question:focus { outline: none; }
+.qualifier-hint {
+  margin: -12px auto 20px;
+  max-width: 30rem;
+  color: var(--sand-mute);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* Numeric step */
+.qualifier-number { display: grid; justify-items: center; gap: 4px; }
+.qualifier-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 18px 6px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(3, 7, 11, 0.6);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.qualifier-field:focus-within {
+  border-color: var(--ember);
+  box-shadow: 0 0 0 3px rgba(242, 118, 34, 0.16);
+}
+.qualifier-input {
+  width: 8ch;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+.qualifier-input:focus { outline: none; }
+.qualifier-input::placeholder { color: #5d6a72; font-weight: 500; }
+.qualifier-unit {
+  color: var(--ember);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+}
+.qualifier-error { min-height: 18px; margin: 6px 0 0; color: var(--ember-lit); font-size: 13px; }
+.qualifier-go { min-width: 200px; margin-top: 6px; }
+
 .qualifier-options { display: grid; gap: 10px; }
 .qualifier-option {
   display: flex;
@@ -1088,7 +1144,9 @@ a { color: inherit; text-decoration: none; }
 .qualifier-badge i { font-size: 19px; }
 .qualifier-verdict[data-fit="strong"] .qualifier-badge { border: 1px solid rgba(125, 216, 106, 0.4); background: rgba(125, 216, 106, 0.1); color: #8fe07a; }
 .qualifier-verdict[data-fit="review"] .qualifier-badge { border: 1px solid rgba(242, 118, 34, 0.4); background: rgba(242, 118, 34, 0.1); color: var(--ember-lit); }
-.qualifier-verdict[data-fit="out"] .qualifier-badge { border: 1px solid rgba(232, 220, 200, 0.28); background: rgba(232, 220, 200, 0.06); color: var(--sand); }
+/* Not a rejection — a waitlist. Styled as sand/neutral rather than a warning,
+   because "we're building that" should not read like "no". */
+.qualifier-verdict[data-fit="future"] .qualifier-badge { border: 1px solid rgba(232, 220, 200, 0.32); background: rgba(232, 220, 200, 0.07); color: var(--sand); }
 
 .qualifier-headline {
   margin: 18px 0 0;
