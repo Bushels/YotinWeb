@@ -120,6 +120,24 @@ Three outcomes: **Strong fit** (nothing flagged), **Likely fit — worth a
 review** (flags raised, each with a plain-language reason), **Outside current
 spec** (hard limit hit).
 
+### The pump-landing rule
+
+The collar needs roughly **10% of the intermediate casing's length of standoff
+from the shoe** — `(shoe depth − pump depth) >= 0.10 × intermediate length`.
+Landed closer than that, WellFi runs **outside** the intermediate instead of
+inside the tubing.
+
+This tracks the EM physics recorded in the WellFi hero design spec: the
+formation is the antenna, and an emitter sitting at the cemented cased shoe
+couples at roughly 0.1%. So both *comfortably above* the shoe and *below it in
+open hole* are fine — **at** the shoe is the bad case. The banded options
+encode exactly that, and "below the shoe, in open hole" is deliberately not
+penalised.
+
+Failing the check is a **deployment-method note, not a disqualifier** — the
+well is still a candidate, the install just changes. Only the 150 °C ceiling
+hard-disqualifies.
+
 Submission is a prefilled `mailto:` carrying the full well summary, plus a
 **Copy summary** button. The copy button is the real fallback: corporate
 machines often have no mail client bound, and a dead `mailto:` is a dead lead.

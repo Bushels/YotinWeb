@@ -34,7 +34,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260725-3">
+  <link rel="stylesheet" href="styles.css?v=20260725-4">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -565,7 +565,9 @@
           <div class="qualifier-intro">
             <p class="eyebrow">60-second check</p>
             <h3 id="qualifier-title">Will WellFi fit your well?</h3>
-            <p>Five questions, no contact details required to see the answer — including when the answer is no.</p>
+            <!-- Count is written by main.js from the step config so it can't
+                 drift when a question is added. -->
+            <p><span data-qualifier-count>Six</span> questions, no contact details required to see the answer — including when the answer is no.</p>
           </div>
           <div class="qualifier-stage" data-qualifier-stage></div>
         </section>
@@ -613,6 +615,6 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260725-3"></script>
+  <script defer src="main.js?v=20260725-4"></script>
 </body>
 </html>

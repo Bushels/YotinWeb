@@ -677,6 +677,26 @@
       ]
     },
     {
+      /* Where the pump lands decides the deployment method. The collar needs
+         roughly 10% of the intermediate's length of standoff from the shoe:
+         (shoe depth - pump depth) >= 0.10 x intermediate length. Landed closer
+         than that, WellFi runs outside the intermediate instead of inside the
+         tubing. This matches the EM physics — the formation is the antenna, and
+         an emitter sitting at the cemented shoe couples at roughly 0.1%. Either
+         comfortably above the shoe or below it in open hole is fine; at the
+         shoe is the bad case. */
+      key: "landing",
+      label: "Pump landing",
+      question: "Where does the pump land in the intermediate casing?",
+      options: [
+        { value: "Well above the shoe" },
+        { value: "Roughly mid-string" },
+        { value: "Close to the shoe", flag: "external" },
+        { value: "Below the shoe, in open hole" },
+        { value: "Not sure", flag: "landing" }
+      ]
+    },
+    {
       key: "timing",
       label: "Next planned intervention",
       question: "When is the next pump change or planned intervention?",
@@ -693,6 +713,8 @@
   var QUALIFIER_NOTES = {
     temp: "Bottomhole temperature decides it outright — WellFi is rated to 150 °C, so that number is worth confirming before anything else.",
     depth: "Depth affects the electromagnetic path to surface. Deeper or highly conductive intervals may need a feasibility check first.",
+    external: "Landed that close to the shoe, WellFi would run outside the intermediate rather than inside the tubing — the collar wants roughly 10% of the intermediate's length of standoff from the shoe. That is a routine configuration, not a problem, but it changes the install and is worth confirming early.",
+    landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs inside the tubing or outside the intermediate. Worth pinning down before the changeout gets scoped.",
     timing: "The economics are strongest when WellFi goes in on work that is already scheduled. Without a planned intervention it needs its own trip.",
     lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
     thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."
@@ -704,6 +726,13 @@
     if (!host || !stage) return;
 
     host.hidden = false;
+
+    var WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    var countLabel = document.querySelector("[data-qualifier-count]");
+    if (countLabel) {
+      countLabel.textContent = WORDS[QUALIFIER_STEPS.length] || String(QUALIFIER_STEPS.length);
+    }
+
     var answers = {};
     var index = 0;
 
