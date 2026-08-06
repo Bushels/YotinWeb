@@ -1,12 +1,14 @@
 # WellFi Field Review — Current Handover
 
-Updated: 2026-08-05
+Updated: 2026-08-06 — **status: parked, see the end of this document first**
 
 ## Decision
 
-Keep the public Yotin marketing root static. The Flutter project is a strong
-**app-grade Field Review companion** at `/field-review/`, not a public-home
-replacement or a deployment-ready route.
+Keep the public Yotin marketing root static. The Flutter project is a
+technically sound **app-grade Field Review companion** at `/field-review/`, and
+is neither a public-home replacement nor a deployment-ready route. As of
+2026-08-06 it is parked pending a capability that justifies it; the sections
+below describe what was built and remain accurate as a reference.
 
 ```text
 Static Yotin root
@@ -104,10 +106,56 @@ master rather than stable 3.44.7, adds another WebGL/build pipeline, and does
 not solve the static-root SEO or first-visit payload problem. Revisit only as
 an isolated spike with a performance and visual-composition acceptance test.
 
-## Safe next task
+## Status: parked - 2026-08-06
 
-The next useful vertical slice is a deployment-planning task, not another UI
-rewrite: specify how the exact `build/field-review/` artifact gets built and
-served at `/field-review/`, then run origin/header/CORS/payload tests against a
-non-public preview. No deploy, package addition, or static-root change is
-authorized by this handover.
+**This prototype is parked. Do not resume deployment planning.**
+
+It was built to evaluate Flutter Web and the agent workflow, and it answered
+both questions. It was never given a job that the static page cannot already
+do, and on review it does not have one:
+
+```text
+                       static root      Flutter /field-review/
+code, first visit      39 KB            ~2,300 KB compressed
+                       (html+css+js)    (main.dart.wasm 835 + skwasm 1,496)
+indexed                canonical        noindex,nofollow,noarchive
+six-step qualifier     live             a port of it
+ChatFi                 live             a reimplementation
+deployed               yes              no - production 404
+```
+
+Everything the route currently does, `..\main.js` already does in 16 KB. Its
+only genuinely new material is presentation (the drill explorer and the
+animated well canvas), and it is hidden from search by design. Deploying it
+would ship a heavier duplicate of a page that is already live.
+
+What the exploration actually produced, and what is worth keeping:
+
+- A measured cost for a Flutter Wasm route on this project: ~60x the static
+  core for the code alone, before fonts, assets, and the R3F scene.
+- A characterisation of how the agent workflow fails here. It does not produce
+  bad Dart - `flutter analyze` was clean throughout. It drifts on *copy and
+  design tokens*, because those are cross-references to another repository's
+  CSS and JS that no compiler checks. Four such drifts were found and fixed in
+  one review pass (see `quality-gates.md`, static-parity pass).
+- `test/public_copy_contract_test.dart`, which pins the approved strings,
+  typeface roles, bundled font weights, metre formatting, and the header
+  breakpoint contract. This is what makes the prototype cheap to revive: parity
+  is asserted rather than remembered.
+
+### Reviving it
+
+Only revive against a capability the web page structurally cannot provide -
+offline capture at a wellsite, persisted multi-well workflows, or an
+authenticated customer view. If one of those becomes real:
+
+1. Delete the marketing mirror first. The hero, WellFi, benefits, insight and
+   company sections belong to the static root; carrying them is what created
+   the parity burden and the payload problem.
+2. Re-run the gates below, then the preview contract. Most SEO, no-JavaScript
+   and crawlability gates fall away once the route stops imitating the
+   homepage - they exist because it currently does.
+
+Until then: no deploy, no routing, no package additions, no static-root change,
+and no further parity maintenance. `.vercelignore` excludes `yotin_flutter/`,
+so a merge to master cannot push this into the public deployment.
