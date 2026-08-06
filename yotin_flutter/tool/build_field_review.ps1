@@ -256,4 +256,13 @@ if ($forbiddenEngineFiles) {
     throw "Field Review package contains an unused engine artifact: $($forbiddenEngineFiles.FullName -join ', ')"
 }
 
+$payloadVerifier = Join-Path $PSScriptRoot 'verify_first_visit_payload.mjs'
+if (-not (Test-Path $payloadVerifier -PathType Leaf)) {
+    throw "Field Review first-visit payload verifier is missing: $payloadVerifier"
+}
+& node $payloadVerifier $outputPath
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
 Write-Output "Field Review build verified: $outputPath"

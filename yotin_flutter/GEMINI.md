@@ -64,6 +64,12 @@
    broad global allow rule, or make a model response a merge gate. Use the
    Flutter compiler, tests, browser evidence, and Codex review as the release
    authority.
+   Before recommending a Flutter CLI flag, renderer setting, or CDN switch,
+   verify it against `flutter build web --help` from the installed SDK. Older
+   examples are not authority: Flutter 3.44.7 exposes `--wasm` and
+   `--static-assets-url`, not `--static-assets-user-base-url`, and exposes
+   no legacy HTML-renderer selection. Record an invented or stale flag as a
+   Gemini miss rather than turning it into a build experiment.
 4. Read the relevant files and state the narrow files and observable
    acceptance criteria before editing.
 5. Make one bounded change. Do not opportunistically rewrite unrelated UI.
@@ -114,7 +120,11 @@ hand-written `--output` command:
 ```
 
 It stages Flutter's static asset bundle into `build/field-review/` and verifies
-the files that a successful compiler exit alone does not prove.
+the files that a successful compiler exit alone does not prove. It also runs
+`tool/verify_first_visit_payload.mjs`, which holds the known
+Chromium/Skwasm startup path below a 2.5 MiB Brotli estimate. That is an
+anti-regression gate, not a claim about a Vercel visitor transfer or repeat
+visit; those remain browser-measured release gates.
 
 For UI changes, also capture the local app at 1600, 1280, 820, and 390 px wide
 and compare it with the static baseline. A passing build is necessary but not a

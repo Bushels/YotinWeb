@@ -172,3 +172,22 @@ release checkpoint: advance, rework, or keep isolated
   missing `read_file` permit. The project agreement now requires either an
   interactive narrow allow rule or prompt-provided source excerpts; it forbids
   `--dangerously-skip-permissions` as a shortcut.
+
+## First-visit payload budget - 2026-08-06
+
+- A fresh 390 px browser run against the current public static site measured
+  202,368 bytes of known same-origin transfer (document plus six resources).
+  Its deliberate cross-origin R3F iframe has no Timing-Allow-Origin data, so
+  this is a baseline observation, not a total-page claim.
+- A fresh local 390 px run of the compiled Flutter route measured 6,771,905
+  bytes of known same-origin transfer with the uncompressed local test server.
+  The critical Chromium/Skwasm path contains the Dart Wasm payload, Skwasm
+  renderer, local fonts, fallback document, and six packaged images.
+- `tool/verify_first_visit_payload.mjs` now Brotli-compresses that explicit
+  startup set at quality 11. The current estimate is 2,368,895 bytes against
+  a 2,621,440-byte (2.5 MiB) app-route ceiling; a new startup resource that
+  exceeds the ceiling fails the release build wrapper.
+- This gate limits regression for the interactive field-review route. It does
+  **not** show that Flutter wins the static marketing homepage's cold-load
+  budget, and it does not waive the required preview first-/repeat-visit
+  browser trace or the separate R3F transfer measurement.
