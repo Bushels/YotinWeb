@@ -619,7 +619,7 @@
   /* ======================================================================
      Candidate-well qualifier
 
-     Five questions, verdict shown before any contact details are asked for.
+     Six questions, verdict shown before any contact details are asked for.
      It can and does return "outside current spec" — the 150 °C ceiling is a
      real product limit, and a qualifier that always says yes is a lead form
      with extra steps, which this audience recognises instantly.
@@ -629,6 +629,48 @@
      ====================================================================== */
 
   var QUALIFIER_EMAIL = "info@yotinenergy.com";
+
+  /* ----------------------------------------------------------------------
+     Funnel instrumentation.
+
+     The qualifier is the conversion mechanism of this page and its only
+     outcome is a mailto:, so without events there is no way to know how many
+     people reach it, which question they abandon, how the verdict splits
+     between strong / review / high-temp, or how many actually send. The
+     verdict split is a product signal as much as a marketing one: a page full
+     of "above 150 °C" results is roadmap information.
+
+     `track` is a no-op until GA_MEASUREMENT_ID in index.html is set to a real
+     property, because gtag is never defined before then. That is deliberate —
+     the events can ship and be reviewed now, and start recording when the
+     property and its privacy notice are ready, without a second edit here.
+
+     Two rules for anything added below:
+       - Never send free text. Every value must come from a fixed vocabulary
+         defined on this page, or be bucketed. The one number a visitor types
+         is a well parameter, and exact figures are customer data.
+       - Never let analytics break the qualifier. Failures are swallowed.
+     ---------------------------------------------------------------------- */
+  function track(eventName, params) {
+    try {
+      if (typeof window.gtag !== "function") return;
+      window.gtag("event", eventName, params || {});
+    } catch (err) {
+      /* Analytics must never take the funnel down with it. */
+    }
+  }
+
+  /* Coarse buckets so the distribution is visible without transmitting the
+     exact casing length a visitor entered. */
+  function casingBucket(metres) {
+    if (!isFinite(metres)) return "unknown";
+    if (metres < 500) return "under_500";
+    if (metres < 1000) return "500_999";
+    if (metres < 1500) return "1000_1499";
+    if (metres < 2000) return "1500_1999";
+    if (metres < 3000) return "2000_2999";
+    return "3000_plus";
+  }
 
   var QUALIFIER_STEPS = [
     {
@@ -759,6 +801,46 @@
 
     var answers = {};
     var index = 0;
+    var started = false;
+
+    /* The funnel denominator: how many people actually reach the qualifier,
+       as opposed to landing on the page. Fires once.
+
+       Deliberately rootMargin rather than a visibility ratio. The qualifier is
+       ~1440 px tall on desktop and taller once it stacks on a phone, so a
+       `threshold: 0.4` can be unsatisfiable on short viewports — 40% of the
+       element is simply never on screen at once, and the event never fires for
+       exactly the mobile visitors it most needs to count. Shrinking the
+       observation box by 25% of the viewport instead means "scrolled far
+       enough that this is the thing you are looking at", independent of how
+       tall either the element or the screen is. */
+    if (typeof IntersectionObserver === "function") {
+      var seen = false;
+      var viewObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting || seen) return;
+          seen = true;
+          viewObserver.disconnect();
+          track("qualifier_view");
+        });
+      }, { threshold: 0, rootMargin: "0px 0px -25% 0px" });
+      viewObserver.observe(host);
+    }
+
+    /* Single path for recording an answer so the option steps and the number
+       step cannot drift apart in what they report. */
+    function recordAnswer(step, answer, reportedValue) {
+      answers[step.key] = answer;
+      if (!started) {
+        started = true;
+        track("qualifier_start");
+      }
+      track("qualifier_step", {
+        step_index: index + 1,
+        step_key: step.key,
+        answer: reportedValue
+      });
+    }
 
     function clear(node) {
       while (node.firstChild) node.removeChild(node.firstChild);
@@ -829,7 +911,9 @@
           button.appendChild(el("span", null, opt.value));
           if (opt.tag) button.appendChild(el("span", "tag", opt.tag));
           button.addEventListener("click", function () {
-            answers[step.key] = opt;
+            // opt.value is a fixed string defined in QUALIFIER_STEPS above,
+            // never anything the visitor typed.
+            recordAnswer(step, opt, opt.value);
             advance();
           });
           group.appendChild(button);
@@ -841,6 +925,10 @@
         var back = el("button", "qualifier-back", "← Back");
         back.type = "button";
         back.addEventListener("click", function () {
+          track("qualifier_back", {
+            step_index: index + 1,
+            step_key: QUALIFIER_STEPS[index].key
+          });
           index -= 1;
           renderStep();
         });
@@ -890,17 +978,26 @@
         var n = parseFloat(raw);
         if (!isFinite(n) || n <= 0) {
           error.textContent = "Enter the approximate length in metres.";
+          // A validation stall is a usability signal: it means the field is
+          // asking for something the visitor doesn't have to hand.
+          track("qualifier_input_error", { step_key: step.key, reason: "not_a_number" });
           input.focus();
           return;
         }
         if (n < step.min || n > step.max) {
           error.textContent = "That looks outside the usual range (" +
             fmtNum(step.min) + "–" + fmtNum(step.max) + " m). Double-check the figure.";
+          track("qualifier_input_error", { step_key: step.key, reason: "out_of_range" });
           input.focus();
           return;
         }
         error.textContent = "";
-        answers[step.key] = { value: fmtNum(n) + " " + (step.unit || ""), number: n };
+        // Bucketed, not the exact figure the visitor typed.
+        recordAnswer(
+          step,
+          { value: fmtNum(n) + " " + (step.unit || ""), number: n },
+          casingBucket(n)
+        );
         advance();
       }
 
@@ -954,6 +1051,13 @@
 
     function renderVerdict() {
       var result = assess();
+      // The verdict split is the most useful single number this page can
+      // report. `flags` is a fixed vocabulary defined above, not free text.
+      track("qualifier_result", {
+        fit: result.fit,
+        flag_count: result.flags.length,
+        flags: result.flags.length ? result.flags.join(",") : "none"
+      });
       clear(stage);
 
       var wrap = el("div", "qualifier-verdict");
@@ -1022,6 +1126,11 @@
         "&body=" + encodeURIComponent(body);
       send.appendChild(el("span", null, ctaLabel));
       send.appendChild(icon("ph-arrow-right"));
+      // The closest thing this page has to a conversion. It cannot confirm the
+      // mail was actually sent — only that the client was invoked.
+      send.addEventListener("click", function () {
+        track("qualifier_send", { fit: result.fit });
+      });
       actions.appendChild(send);
 
       // The copy button is the real fallback: plenty of corporate machines
@@ -1043,6 +1152,10 @@
           state.textContent = ok
             ? "Copied — paste it into an email to " + QUALIFIER_EMAIL
             : "Copy failed. The address is " + QUALIFIER_EMAIL;
+          // Worth separating from qualifier_send: a high copy rate means the
+          // mailto path is failing for this audience, which is a fixable
+          // conversion problem rather than a lost lead.
+          track("qualifier_copy", { fit: result.fit, ok: ok ? "yes" : "no" });
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(body).then(function () { done(true); }, function () { done(false); });
@@ -1054,8 +1167,10 @@
       var restart = el("button", "qualifier-back", "Start over");
       restart.type = "button";
       restart.addEventListener("click", function () {
+        track("qualifier_restart", { fit: result.fit });
         answers = {};
         index = 0;
+        started = false;
         renderStep();
       });
       wrap.appendChild(restart);

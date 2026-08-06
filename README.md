@@ -211,6 +211,36 @@ Two things to settle before switching it on:
   and no consent plumbing. If the goal is just traffic shape rather than
   Google-ecosystem reporting, it is materially less work.
 
+### Qualifier funnel events
+
+The candidate-well qualifier is the conversion mechanism of this page and its
+only outcome is a `mailto:`, so `main.js` emits a funnel. These are custom GA4
+events; they are **already in the code and already inert** — `track()` returns
+immediately while `gtag` is undefined, which is the case until the Measurement
+ID above is set. Nothing further needs editing in `main.js` to switch them on.
+
+| Event | Parameters | Answers |
+| --- | --- | --- |
+| `qualifier_view` | — | How many people reach the qualifier at all. The funnel denominator. |
+| `qualifier_start` | — | How many begin, once, per attempt. `view → start` is the hook's conversion. |
+| `qualifier_step` | `step_index`, `step_key`, `answer` | Which question loses people, and the distribution of answers. |
+| `qualifier_input_error` | `step_key`, `reason` | Whether the casing-length field is asking for a figure visitors don't have to hand. |
+| `qualifier_back` | `step_index`, `step_key` | Hesitation — a question that gets reconsidered is a question worth rewording. |
+| `qualifier_result` | `fit`, `flag_count`, `flags` | The verdict split. This is a **product** signal: a page full of `future` results is roadmap information, not a marketing problem. |
+| `qualifier_send` | `fit` | Mail client invoked. The closest thing to a conversion; it cannot confirm the mail was sent. |
+| `qualifier_copy` | `fit`, `ok` | The mailto fallback. A high copy rate — or `ok:no` — means the primary path is failing for this audience. |
+| `qualifier_restart` | `fit` | Re-runs, usually a second well. |
+
+Two rules if you extend this, both enforced by convention rather than by code:
+
+- **Never send free text.** Every value above is either a fixed string from
+  `QUALIFIER_STEPS` or a bucket. The one number a visitor types — intermediate
+  casing length — is transmitted as a range (`1500_1999`), never the exact
+  figure, because a specific length plus a temperature and a lift type starts
+  to describe an identifiable well.
+- **Never let analytics break the funnel.** `track()` swallows its own errors.
+  A qualifier that fails because a tag manager is blocked is a lost lead.
+
 ## SEO
 
 Implemented on-page:
