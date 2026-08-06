@@ -165,6 +165,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('hero conversion lands on the first qualifier decision', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(const YotinFlutterApp());
+    final scrollView = tester.widget<SingleChildScrollView>(
+      find.byType(SingleChildScrollView).first,
+    );
+
+    await tester.tap(find.text('CHECK YOUR WELL FIT'));
+    await tester.pumpAndSettle();
+
+    expect(scrollView.controller!.offset, greaterThan(0));
+    final question = find.text('What lifts the well?');
+    expect(question, findsOneWidget);
+    final firstChoice = find.text('Progressing cavity pump (PCP)');
+    expect(firstChoice, findsOneWidget);
+    expect(
+      tester.getTopLeft(question).dy,
+      inInclusiveRange(72.0, 260.0),
+      reason:
+          'The conversion CTA must place the first question under the navigation bar.',
+    );
+    expect(
+      tester.getBottomRight(firstChoice).dy,
+      lessThan(844.0),
+      reason: 'The conversion CTA must expose the first answer on a phone.',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('qualifier labels casing input and announces validation error', (
     WidgetTester tester,
   ) async {
@@ -236,9 +269,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: SingleChildScrollView(
-              child: CandidateWellQualifierWidget(),
-            ),
+            body: SingleChildScrollView(child: CandidateWellQualifierWidget()),
           ),
         ),
       );
@@ -263,10 +294,7 @@ void main() {
       await tester.tap(find.text('Within 3 months'));
       await tester.pump();
 
-      expect(
-        find.text('HIGH-TEMP VERSION IN DEVELOPMENT'),
-        findsOneWidget,
-      );
+      expect(find.text('HIGH-TEMP VERSION IN DEVELOPMENT'), findsOneWidget);
       expect(
         find.text('Above 150 °C — that build is in progress.'),
         findsOneWidget,

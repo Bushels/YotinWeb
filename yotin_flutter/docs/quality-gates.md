@@ -213,3 +213,18 @@ release checkpoint: advance, rework, or keep isolated
   or copying the summary. Its semantic tree exposed `HIGH-TEMP VERSION IN
   DEVELOPMENT`, `HAVE YOTIN FOLLOW UP`, and `COPY SUMMARY`, along with the
   complete selected-well summary.
+
+## Conversion landing proof - 2026-08-06
+
+- The primary `CHECK YOUR WELL FIT` CTA now targets `What lifts the well?`,
+  rather than the broad contact section or the top edge of the longer
+  qualifier card. It re-measures after the initial scroll animation, covering
+  the small post-scroll canvas/font layout settlement that otherwise could
+  leave the decision beneath the fixed header.
+- A 390 x 844 widget regression gate requires both the first question and its
+  PCP option to be visible after the CTA completes. The full strict analyzer
+  and 28-test suite passed after this change.
+- The compiled local route was visually inspected at 390 x 844, 820 x 900,
+  and 1280 x 720. Each viewport reached the first question and displayed its
+  choices without clipping; this is local conversion evidence only and does
+  not waive the separate protected-preview, CORS, or production gates.

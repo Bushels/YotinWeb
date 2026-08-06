@@ -5,9 +5,14 @@ import '../theme/yotin_theme.dart';
 import '../widgets/candidate_well_qualifier.dart';
 
 class ContactQualifierSection extends StatelessWidget {
-  const ContactQualifierSection({super.key, required this.onOpenChatFi});
+  const ContactQualifierSection({
+    super.key,
+    required this.onOpenChatFi,
+    required this.qualifierQuestionKey,
+  });
 
   final VoidCallback onOpenChatFi;
+  final GlobalKey qualifierQuestionKey;
 
   Future<void> _emailYotin() async {
     await launchUrl(
@@ -130,7 +135,9 @@ class ContactQualifierSection extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 42),
-              const CandidateWellQualifierWidget(),
+              CandidateWellQualifierWidget(
+                firstDecisionKey: qualifierQuestionKey,
+              ),
             ],
           ),
         ),

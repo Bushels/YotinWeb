@@ -52,6 +52,7 @@ class _YotinHomePageState extends State<YotinHomePage> {
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _drillScrollProgress = ValueNotifier(0.0);
   final ValueNotifier<bool> _heroVisible = ValueNotifier(true);
+  final GlobalKey _scrollViewportKey = GlobalKey();
 
   // GlobalKeys to scroll to sections
   final GlobalKey _heroKey = GlobalKey();
@@ -60,6 +61,10 @@ class _YotinHomePageState extends State<YotinHomePage> {
   final GlobalKey _insightKey = GlobalKey();
   final GlobalKey _companyKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
+  // The primary hero CTA promises an immediate self-check. Target the first
+  // decision itself—not the wider contact introduction or qualifier card—so
+  // phone visitors can act as soon as the scroll settles.
+  final GlobalKey _qualifierQuestionKey = GlobalKey();
 
   @override
   void initState() {
@@ -101,7 +106,48 @@ class _YotinHomePageState extends State<YotinHomePage> {
     if (_heroVisible.value != visible) _heroVisible.value = visible;
   }
 
+  double? _qualifierTargetOffset() {
+    if (!_scrollController.hasClients) return null;
+
+    final targetBox =
+        _qualifierQuestionKey.currentContext?.findRenderObject() as RenderBox?;
+    final viewportBox =
+        _scrollViewportKey.currentContext?.findRenderObject() as RenderBox?;
+    if (targetBox == null || viewportBox == null) return null;
+    if (!targetBox.attached || !viewportBox.attached) return null;
+
+    final desiredTop = viewportBox.localToGlobal(Offset.zero).dy + 28.0;
+    final delta = targetBox.localToGlobal(Offset.zero).dy - desiredTop;
+    return (_scrollController.offset + delta)
+        .clamp(0.0, _scrollController.position.maxScrollExtent)
+        .toDouble();
+  }
+
+  Future<void> _scrollToQualifierDecision() async {
+    // The canvas/font pipeline may settle the mobile layout after scrolling
+    // begins. Re-measure once the first animation has painted so the target
+    // cannot finish behind the fixed navigation.
+    for (var pass = 0; pass < 2; pass++) {
+      final targetOffset = _qualifierTargetOffset();
+      if (targetOffset == null) return;
+
+      await _scrollController.animateTo(
+        targetOffset,
+        duration: Duration(milliseconds: pass == 0 ? 600 : 180),
+        curve: Curves.easeInOutCubic,
+      );
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+  }
+
   Future<void> _scrollToSection(String section) async {
+    if (section == 'qualifier') {
+      await _scrollToQualifierDecision();
+      return;
+    }
+
     GlobalKey? key;
     switch (section) {
       case 'hero':
@@ -186,47 +232,51 @@ class _YotinHomePageState extends State<YotinHomePage> {
             onOpenChatFi: _openChatFi,
           ),
           Expanded(
-            child: Semantics(
-              container: true,
-              label: 'Field review information',
-              role: SemanticsRole.main,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: Column(
-                  children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _heroVisible,
-                      builder: (context, visible, child) => HeroSection(
-                        key: _heroKey,
-                        heroVisible: visible,
-                        onEvaluate: () {
-                          _scrollToSection('contact');
-                        },
-                        onExplore: () {
-                          _scrollToSection('wellfi');
+            child: Container(
+              key: _scrollViewportKey,
+              child: Semantics(
+                container: true,
+                label: 'Field review information',
+                role: SemanticsRole.main,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Column(
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: _heroVisible,
+                        builder: (context, visible, child) => HeroSection(
+                          key: _heroKey,
+                          heroVisible: visible,
+                          onEvaluate: () {
+                            _scrollToSection('qualifier');
+                          },
+                          onExplore: () {
+                            _scrollToSection('wellfi');
+                          },
+                        ),
+                      ),
+                      const SignalStripWidget(),
+                      WellFiSection(key: _wellfiKey),
+                      ValueListenableBuilder<double>(
+                        valueListenable: _drillScrollProgress,
+                        builder: (context, progress, child) =>
+                            DrillBenefitsSection(
+                              key: _benefitsKey,
+                              scrollProgress: progress,
+                            ),
+                      ),
+                      InsightSection(key: _insightKey),
+                      CompanySection(key: _companyKey),
+                      ContactQualifierSection(
+                        key: _contactKey,
+                        qualifierQuestionKey: _qualifierQuestionKey,
+                        onOpenChatFi: () {
+                          _openChatFi();
                         },
                       ),
-                    ),
-                    const SignalStripWidget(),
-                    WellFiSection(key: _wellfiKey),
-                    ValueListenableBuilder<double>(
-                      valueListenable: _drillScrollProgress,
-                      builder: (context, progress, child) =>
-                          DrillBenefitsSection(
-                            key: _benefitsKey,
-                            scrollProgress: progress,
-                          ),
-                    ),
-                    InsightSection(key: _insightKey),
-                    CompanySection(key: _companyKey),
-                    ContactQualifierSection(
-                      key: _contactKey,
-                      onOpenChatFi: () {
-                        _openChatFi();
-                      },
-                    ),
-                    YotinFooterWidget(onNavigate: _scrollToSection),
-                  ],
+                      YotinFooterWidget(onNavigate: _scrollToSection),
+                    ],
+                  ),
                 ),
               ),
             ),

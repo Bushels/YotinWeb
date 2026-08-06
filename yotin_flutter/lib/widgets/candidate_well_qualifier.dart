@@ -6,7 +6,11 @@ import '../models/qualifier_model.dart';
 import '../theme/yotin_theme.dart';
 
 class CandidateWellQualifierWidget extends StatefulWidget {
-  const CandidateWellQualifierWidget({super.key});
+  const CandidateWellQualifierWidget({super.key, this.firstDecisionKey});
+
+  // Allows a page-level conversion CTA to land on the actual first choice,
+  // rather than merely the top edge of this longer self-check card.
+  final GlobalKey? firstDecisionKey;
 
   @override
   State<CandidateWellQualifierWidget> createState() =>
@@ -390,6 +394,7 @@ class _CandidateWellQualifierWidgetState
         return _buildOptionsStep(
           label: 'Artificial lift',
           question: 'What lifts the well?',
+          questionKey: widget.firstDecisionKey,
           selectedValue: _state.lift,
           options: const [
             _OptionData('Progressing cavity pump (PCP)', tag: 'Best fit'),
@@ -478,6 +483,7 @@ class _CandidateWellQualifierWidgetState
   Widget _buildOptionsStep({
     required String label,
     required String question,
+    GlobalKey? questionKey,
     String? hint,
     required String? selectedValue,
     required List<_OptionData> options,
@@ -501,11 +507,14 @@ class _CandidateWellQualifierWidgetState
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            question,
-            style: YotinTheme.fontHero.copyWith(
-              fontSize: 18,
-              color: YotinTheme.textWhite,
+          KeyedSubtree(
+            key: questionKey,
+            child: Text(
+              question,
+              style: YotinTheme.fontHero.copyWith(
+                fontSize: 18,
+                color: YotinTheme.textWhite,
+              ),
             ),
           ),
           if (hint != null) ...[
