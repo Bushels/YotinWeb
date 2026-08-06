@@ -30,6 +30,9 @@ state matter more than crawlability.
   no hand-drawn substitute is used for brand visualizations.
 - `flutter analyze`, `flutter test`, and `tool/build_field_review.ps1 -NoPub`
   pass on Flutter 3.44.8 / Dart 3.12.2.
+- An operator can explicitly prepare the same-origin Field Review package for
+  offline use. That cache supports the local qualifier and packaged copy only;
+  the live R3F scene and ChatFi still require a connection.
 - The release artifact self-hosts its renderer, the four Yotin typefaces,
   and Flutter's engine Roboto fallback. A clean browser trace has no
   third-party Flutter or font request.
@@ -38,8 +41,9 @@ state matter more than crawlability.
   assets. A contract test protects its public facts, one-H1 outline, direct
   email fallback, and hand-off to Flutter after first paint.
 - The runtime asset allowlist excludes seven unused static-site media files;
-  the current release artifact is 43 files / 28.10 MiB raw. This is a bundle
-  measure, not a first-visit performance claim.
+  the current release artifact is 45 files / 28.15 MiB raw, including the
+  small custom worker and generated cache manifest. This is a bundle measure,
+  not a first-visit performance claim.
 
 ## Run the proof loop
 
@@ -76,6 +80,9 @@ and tests—not a model's self-assessment—the release gate.
    Wasm threads.
 4. Keep the static homepage in front until the Flutter public story, SEO,
    accessibility, payload, and live 3D fidelity are independently proven.
+5. On the approved final origin, prepare the explicit offline package while
+   online, then reload the route offline and complete a qualifier step. Verify
+   the honest R3F and ChatFi connection boundary at the same time.
 
 The approval-gated Vercel preview requirements are in
 [`docs/vercel-preview-contract.md`](docs/vercel-preview-contract.md).

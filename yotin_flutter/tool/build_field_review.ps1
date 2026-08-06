@@ -124,6 +124,7 @@ $requiredOutputs = @(
     'canvaskit\chromium\canvaskit.wasm',
     'canvaskit\skwasm.wasm',
     'canvaskit\skwasm_heavy.wasm',
+    'field_review_service_worker.js',
     'icons\Icon-192.png',
     'favicon.png',
     'manifest.json'
@@ -245,6 +246,79 @@ if ($missingFallbackFragments) {
 }
 if ($indexDocument -match 'src="/assets/' -or $indexDocument -match "src='/assets/") {
     throw 'Field Review no-JavaScript shell incorrectly relies on root-only asset paths.'
+}
+
+# Flutter's generated `flutter_service_worker.js` intentionally unregisters
+# itself in 3.44. The Field Review uses a separate custom worker, and only
+# downloads its full same-origin package after an explicit operator action.
+# Build a content-versioned list from the actual compiled output so a renderer,
+# deferred runtime, font, or image cannot silently be missed by offline mode.
+$offlineWorkerPath = Join-Path $outputPath 'field_review_service_worker.js'
+if (-not (Test-Path -LiteralPath $offlineWorkerPath -PathType Leaf)) {
+    throw 'Field Review offline service worker was not copied into the compiled artifact.'
+}
+$offlineManifestPath = Join-Path $outputPath 'field-review-cache-manifest.json'
+$offlineCacheExcludedFiles = @(
+    '.last_build_id',
+    'flutter_service_worker.js',
+    'field_review_service_worker.js',
+    'field-review-cache-manifest.json'
+)
+$offlineCacheFiles = Get-ChildItem -LiteralPath $outputPath -File -Recurse |
+    ForEach-Object {
+        $relativePath = $_.FullName.Substring($resolvedOutputPath.Length + 1).Replace('\', '/')
+        [pscustomobject]@{
+            RelativePath = $relativePath
+            FullName = $_.FullName
+        }
+    } |
+    Where-Object { $offlineCacheExcludedFiles -notcontains $_.RelativePath } |
+    Sort-Object RelativePath
+
+if ($offlineCacheFiles.Count -eq 0) {
+    throw 'Field Review offline cache manifest would contain no compiled assets.'
+}
+$offlineCacheVersionInput = ($offlineCacheFiles | ForEach-Object {
+    "$($_.RelativePath):$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash)"
+}) -join "`n"
+$offlineCacheVersionBytes = [Text.Encoding]::UTF8.GetBytes($offlineCacheVersionInput)
+$offlineCacheHasher = [Security.Cryptography.SHA256]::Create()
+try {
+    $offlineCacheVersionHash = $offlineCacheHasher.ComputeHash($offlineCacheVersionBytes)
+} finally {
+    $offlineCacheHasher.Dispose()
+}
+$offlineCacheVersion = ((($offlineCacheVersionHash | ForEach-Object {
+    $_.ToString('x2')
+}) -join '')).Substring(0, 20)
+$offlineManifest = [ordered]@{
+    schema = 1
+    version = $offlineCacheVersion
+    urls = @($offlineCacheFiles | ForEach-Object { "./$($_.RelativePath)" })
+}
+[IO.File]::WriteAllText(
+    $offlineManifestPath,
+    ($offlineManifest | ConvertTo-Json -Depth 4),
+    [Text.UTF8Encoding]::new($false)
+)
+
+$generatedOfflineManifest = Get-Content -Raw -LiteralPath $offlineManifestPath | ConvertFrom-Json
+if ($generatedOfflineManifest.schema -ne 1 -or
+    $generatedOfflineManifest.version -ne $offlineCacheVersion -or
+    $generatedOfflineManifest.urls.Count -ne $offlineCacheFiles.Count) {
+    throw 'Field Review offline cache manifest did not preserve its generated version or complete asset list.'
+}
+$forbiddenOfflineCacheUrls = @(
+    './.last_build_id',
+    './flutter_service_worker.js',
+    './field_review_service_worker.js',
+    './field-review-cache-manifest.json'
+)
+$includedForbiddenOfflineUrls = $forbiddenOfflineCacheUrls | Where-Object {
+    $generatedOfflineManifest.urls -contains $_
+}
+if ($includedForbiddenOfflineUrls) {
+    throw "Field Review offline cache manifest includes a self-updating artifact: $($includedForbiddenOfflineUrls -join ', ')"
 }
 
 $forbiddenEngineFiles = Get-ChildItem $outputPath -File -Recurse | Where-Object {

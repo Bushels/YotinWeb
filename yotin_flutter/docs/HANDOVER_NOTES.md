@@ -38,6 +38,13 @@ Flutter /field-review/
 - ChatFi retains the newest 24 non-empty messages, 4,000-character input cap,
   stop control, completed-response live announcement, partial-stream
   preservation, and an explicit email fallback.
+- The Field Review includes an explicit, operator-started offline package. Its
+  custom route-scoped worker derives a content-versioned file list from the
+  release artifact and caches only same-origin Flutter files. The local
+  qualifier remains available offline; canonical R3F and ChatFi remain
+  connection-bound and are never placed in that cache. While connected, the
+  worker uses the network first and only falls back to the package offline, so
+  an old downloaded review cannot mask a newer release.
 - The built Flutter route exposes a `main` landmark and an H1 after startup.
   The no-JavaScript fallback is independently usable; its skip link is hidden
   after the fallback becomes inert, avoiding a live link into hidden content.
@@ -46,9 +53,10 @@ Flutter /field-review/
 
 ```text
 flutter analyze                         PASS
-flutter test --concurrency=1            PASS (28 tests)
+flutter test --concurrency=1            PASS (35 tests)
 .\tool\build_field_review.ps1 -NoPub   PASS
 packaged 1280 / 390 browser checks      PASS
+explicit offline reload + qualifier      PASS (local only)
 ```
 
 The wrapper creates `build/field-review/`, stages the static asset bundle that
@@ -61,7 +69,8 @@ manifest, icons, poster, and R3F assets.
    currently returns a route 404. Add a deliberate build-artifact, rewrite,
    header, and one-canonical-path plan before any deploy request.
 2. Prove Wasm MIME type, compression, cache policy, direct route loading,
-   PWA scope, R3F production origin, and ChatFi CORS on the approved domain.
+   PWA scope, explicit offline reload, R3F production origin, and ChatFi CORS
+   on the approved domain.
 3. The Flutter first visit is materially heavier than the static root. The
    Wasm app plus renderer is roughly multi-megabyte before common R3F/font
    traffic, while the static marketing core is far smaller. Set real

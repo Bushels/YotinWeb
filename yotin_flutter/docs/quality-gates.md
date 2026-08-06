@@ -29,6 +29,7 @@ release checkpoint: advance, rework, or keep isolated
 | Qualifier | Immutable state; published six-step result logic; unit-tested strong, review, and high-temperature paths. |
 | Responsive layout | No overflow at 390, 820, 1280, and 1600 px; navigation and ChatFi remain operable. |
 | ChatFi | Newest 24-message context, 4,000-character cap, explicit stop, accurate availability state, and transparent email fallback. |
+| Offline field review | An operator explicitly starts the download; the custom worker caches only a complete, content-versioned same-origin route package. An offline reload and local qualifier interaction pass, while R3F and ChatFi remain honestly connection-bound. |
 | Public web | The static root retains canonical metadata, JSON-LD, semantic HTML, no-JavaScript contact fallback, and R3F poster/failure behavior. |
 | Motion | Reduced-motion mode and off-screen widgets do not keep high-cost animation running. |
 | Release | A build, diagnostics, tests, screenshots, and an approved hosting/header plan exist before any public routing or deployment decision. Build with `tool/build_field_review.ps1`, which enforces an absolute Flutter output path, self-hosts the renderer/font fallback contract, and verifies the complete artifact. |
@@ -110,10 +111,12 @@ release checkpoint: advance, rework, or keep isolated
 ## V1 hardening evidence - 2026-08-06
 
 - The first hardened `tool/build_field_review.ps1 -NoPub` artifact had 50
-  files and 30.34 MiB raw. The current explicit runtime-asset allowlist has
-  43 files and 28.10 MiB raw, removing 2.23 MiB of unused static-site media.
-  Neither number is a first-visit transfer claim; both are release-artifact
-  measures. The earlier unpruned bundle was 45.47 MiB raw.
+  files and 30.34 MiB raw. Before explicit offline support, the runtime
+  allowlist had 43 files and 28.10 MiB raw. The current 45-file artifact is
+  28.15 MiB raw, adding only the custom worker and generated cache manifest;
+  it still excludes the unused static-site media. These are release-artifact
+  measures, not first-visit transfer claims. The earlier unpruned bundle was
+  45.47 MiB raw.
 - The release wrapper now rejects a missing local renderer, a missing local
   Google Font, a missing `FontManifest` Roboto family, or a missing
   engine-fallback mirror. It also rejects unneeded renderer symbols,
@@ -242,3 +245,27 @@ release checkpoint: advance, rework, or keep isolated
   `cupertino_icons 1.0.9`, `google_fonts 8.2.1`, `http 1.6.0`,
   `url_launcher 6.3.2`, and `web 1.1.1`. No package was added merely to chase
   a trend; FScene remains a separate Flutter-main-channel R&D spike.
+
+## Explicit offline field-use proof - 2026-08-06
+
+- Flutter 3.44's generated worker is intentionally only an unregistration
+  shim, so Field Review uses a separate route-scoped worker. It has no
+  install-time cache: an operator must select `PREPARE FOR OFFLINE FIELD USE`.
+- The release wrapper generated a content-versioned 41-file cache manifest
+  from the real compiled artifact. It excludes the generated Flutter
+  unregistration worker, its own worker, and its manifest so a new release can
+  replace the package safely.
+- On an isolated local origin, the browser first completed that explicit
+  download. With network requests disabled, `/field-review/` then reloaded
+  from cache and advanced the Candidate-Well Qualifier from its lift question
+  to its well-type question. The external R3F iframe correctly reported no
+  internet rather than being included in the package.
+- The browser harness's offline switch does not change `navigator.onLine`, so
+  it cannot prove the visual offline-state label. The cached route reload and
+  local qualifier interaction are the acceptance evidence; final device and
+  protected-preview testing must still confirm the platform online/offline
+  event presentation.
+- With network available, a simulated obsolete active-cache pointer changed
+  the control back from `READY` to `PREPARE`. A new explicit download restored
+  the content-versioned active cache. This protects release updates from
+  silently presenting an old offline package as current.

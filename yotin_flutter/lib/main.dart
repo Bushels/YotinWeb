@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'platform/offline_field_review_cache.dart';
 import 'platform/public_shell.dart';
 import 'theme/yotin_theme.dart';
 import 'widgets/navigation_bar.dart';
@@ -65,10 +66,26 @@ class _YotinHomePageState extends State<YotinHomePage> {
   // decision itself—not the wider contact introduction or qualifier card—so
   // phone visitors can act as soon as the scroll settles.
   final GlobalKey _qualifierQuestionKey = GlobalKey();
+  late final OfflineFieldReviewCacheController _offlineFieldReviewCache;
+  OfflineFieldReviewCacheState _offlineCacheState =
+      OfflineFieldReviewCacheState.unavailable;
+  bool _networkAvailable = true;
 
   @override
   void initState() {
     super.initState();
+    _offlineFieldReviewCache = OfflineFieldReviewCacheController(
+      onStateChanged: (state) {
+        if (!mounted) return;
+        setState(() => _offlineCacheState = state);
+      },
+      onNetworkChanged: (available) {
+        if (!mounted) return;
+        setState(() => _networkAvailable = available);
+      },
+    );
+    _offlineCacheState = _offlineFieldReviewCache.state;
+    _networkAvailable = _offlineFieldReviewCache.networkAvailable;
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       markFlutterPublicShellReady();
@@ -219,6 +236,7 @@ class _YotinHomePageState extends State<YotinHomePage> {
     _scrollController.dispose();
     _drillScrollProgress.dispose();
     _heroVisible.dispose();
+    _offlineFieldReviewCache.dispose();
     super.dispose();
   }
 
@@ -253,6 +271,10 @@ class _YotinHomePageState extends State<YotinHomePage> {
                           onExplore: () {
                             _scrollToSection('wellfi');
                           },
+                          offlineCacheState: _offlineCacheState,
+                          networkAvailable: _networkAvailable,
+                          onPrepareOffline:
+                              _offlineFieldReviewCache.cacheFieldReview,
                         ),
                       ),
                       const SignalStripWidget(),

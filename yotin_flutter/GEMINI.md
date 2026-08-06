@@ -42,6 +42,15 @@
 - Respect reduced motion and avoid continuously animating off-screen content.
 - Treat all output text as public-facing engineering copy: specific, honest,
   and no unsupported reliability, deployment, or performance claims.
+- Flutter 3.44 no longer provides an active generated service worker. The
+  Field Review custom `field_review_service_worker.js` must retain its `./`
+  scope, cache only same-origin route files after an explicit operator action,
+  and never cache or promise offline R3F or ChatFi availability.
+- For a PWA-cache review, trace both the producer and consumer of a manifest.
+  Here the release wrapper creates only `./` URLs from the compiled route and
+  the worker resolves them under its scope with an exact-origin guard. Do not
+  label a hypothetical filename or unused version metadata as a release
+  blocker without showing that it crosses that build-and-origin boundary.
 
 ## Gemini task protocol
 
@@ -152,6 +161,11 @@ the files that a successful compiler exit alone does not prove. It also runs
 Chromium/Skwasm startup path below a 2.5 MiB Brotli estimate. That is an
 anti-regression gate, not a claim about a Vercel visitor transfer or repeat
 visit; those remain browser-measured release gates.
+
+The wrapper derives `field-review-cache-manifest.json` from the exact compiled
+artifact. The custom offline worker downloads that package only after an
+operator requests it; it must be browser-tested with an offline reload before
+being described as field-ready.
 
 For UI changes, also capture the local app at 1600, 1280, 820, and 390 px wide
 and compare it with the static baseline. A passing build is necessary but not a

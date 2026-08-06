@@ -81,6 +81,8 @@ Get-ChildItem -LiteralPath $flutterArtifact -Force | ForEach-Object {
 $requiredRouteFiles = @(
     'index.html',
     'flutter_bootstrap.js',
+    'field_review_service_worker.js',
+    'field-review-cache-manifest.json',
     'main.dart.wasm',
     'assets\FontManifest.json',
     'assets\assets\yotin-icon.png',

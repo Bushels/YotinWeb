@@ -43,7 +43,7 @@ The approved preview must demonstrate all of the following:
 | `/field-review/canvaskit/skwasm.wasm` | `200`, real Wasm bytes, and `Content-Type: application/wasm`. |
 | `/field-review/assets/FontManifest.json` | `200` JSON containing the local Roboto fallback. |
 | `/field-review/assets/assets/fonts/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2` | `200`; this is the engine's configured local fallback location. |
-| Flutter HTML / bootstrap / worker | Revalidated on deploy; do not mark un-hashed files immutable. |
+| Flutter HTML / bootstrap / custom offline worker / cache manifest | Revalidated on deploy; do not mark un-hashed files immutable. The worker and manifest must preserve the route-scoped, same-origin cache contract. |
 | Large renderer and static assets | Cache only after a repeat-visit measurement proves the invalidation strategy works. |
 
 The release build already carries a local renderer base, local Google Fonts,
@@ -69,6 +69,10 @@ Run this on the actual preview hostname, not localhost:
 6. Inspect the response headers and first-/repeat-visit transfer sizes. The
    Flutter route is allowed only when it meets its app-use budget; it does not
    inherit the static homepage's marketing-page budget.
+7. While online, explicitly prepare the offline Field Review package. Then
+   disable network access, reload the route, and advance one qualifier answer.
+   The local qualifier may work; the canonical R3F scene and ChatFi must remain
+   visibly connection-bound rather than being implied to work offline.
 
 ## Protected preview evidence - 2026-08-06
 
@@ -102,6 +106,11 @@ Run this on the actual preview hostname, not localhost:
   intentionally omitted `field-review/assets/assets/yotin-wellfi-og-2026.png`.
   The runtime bundle uses an explicit six-image allowlist instead of copying
   the static site’s entire asset directory.
+
+- The newer explicit offline worker and generated cache manifest have local
+  browser proof only. They have not been injected into or validated on this
+  protected preview yet; the next preview build must carry both files and run
+  the browser release-gate step above.
 
 ## Next authorization gate
 

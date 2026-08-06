@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../platform/offline_field_review_cache.dart';
 import '../theme/yotin_theme.dart';
+import '../widgets/offline_field_review_control.dart';
 import '../widgets/wellfi_live_hero.dart';
 
 class HeroSection extends StatelessWidget {
@@ -9,11 +11,17 @@ class HeroSection extends StatelessWidget {
     required this.onEvaluate,
     required this.onExplore,
     required this.heroVisible,
+    this.offlineCacheState = OfflineFieldReviewCacheState.unavailable,
+    this.networkAvailable = true,
+    this.onPrepareOffline,
   });
 
   final VoidCallback onEvaluate;
   final VoidCallback onExplore;
   final bool heroVisible;
+  final OfflineFieldReviewCacheState offlineCacheState;
+  final bool networkAvailable;
+  final VoidCallback? onPrepareOffline;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,9 @@ class HeroSection extends StatelessWidget {
           isDesktop: isDesktop,
           onEvaluate: onEvaluate,
           onExplore: onExplore,
+          offlineCacheState: offlineCacheState,
+          networkAvailable: networkAvailable,
+          onPrepareOffline: onPrepareOffline,
         );
         final visual = Semantics(
           image: true,
@@ -152,11 +163,17 @@ class _HeroCopy extends StatelessWidget {
     required this.isDesktop,
     required this.onEvaluate,
     required this.onExplore,
+    required this.offlineCacheState,
+    required this.networkAvailable,
+    required this.onPrepareOffline,
   });
 
   final bool isDesktop;
   final VoidCallback onEvaluate;
   final VoidCallback onExplore;
+  final OfflineFieldReviewCacheState offlineCacheState;
+  final bool networkAvailable;
+  final VoidCallback? onPrepareOffline;
 
   @override
   Widget build(BuildContext context) {
@@ -272,6 +289,14 @@ class _HeroCopy extends StatelessWidget {
             ),
           ],
         ),
+        if (onPrepareOffline != null) ...[
+          const SizedBox(height: 8),
+          OfflineFieldReviewControl(
+            cacheState: offlineCacheState,
+            networkAvailable: networkAvailable,
+            onPrepareOffline: onPrepareOffline!,
+          ),
+        ],
       ],
     );
   }
