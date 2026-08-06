@@ -132,9 +132,12 @@ release checkpoint: advance, rework, or keep isolated
   wrapper, generates Vercel's static output locally, injects only the compiled
   `/field-review/` artifact, validates its required assets, and registers the
   clean route mapping before `vercel deploy --prebuilt --yes` uploads it.
-- Protected preview deployment `dpl_FEUjyXEAT2eDGCBXyUdfNRJ35DMJ` was accepted
+- Protected preview deployment `dpl_6PcVT9KXEkqEek5hBN9rSrNq9TkY` was accepted
   by Vercel. HTTP checks confirmed the canonical route, Wasm MIME type,
   self-hosted fonts, noindex/cache headers, and a `404` for the excluded Flutter
   source path.
 - This is a preview-only integration. The static root, live R3F origin policy,
   ChatFi CORS policy, and production deployment were not changed.
+- The Dart analyzer now enforces strict casts, inference, and raw types. The
+  qualifier's numeric field has a native browser-accessible label, a live
+  validation error, and a widget test for its assertive announcement event.

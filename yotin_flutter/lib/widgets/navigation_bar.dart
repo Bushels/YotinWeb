@@ -4,7 +4,7 @@ import '../theme/yotin_theme.dart';
 class YotinNavigationBar extends StatelessWidget {
   static const _desktopNavigationMinWidth = 1120.0;
 
-  final Function(String section) onNavigate;
+  final ValueChanged<String> onNavigate;
   final VoidCallback onOpenChatFi;
 
   const YotinNavigationBar({

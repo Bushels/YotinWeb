@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/qualifier_model.dart';
@@ -56,17 +57,14 @@ class _CandidateWellQualifierWidgetState
     final val = double.tryParse(raw);
 
     if (val == null || val <= 0) {
-      setState(() {
-        _casingError = 'Enter the approximate length in metres.';
-      });
+      _showCasingError('Enter the approximate length in metres.');
       return;
     }
 
     if (val < 50 || val > 6000) {
-      setState(() {
-        _casingError =
-            'That looks outside the usual range (50–6,000 m). Double-check the figure.';
-      });
+      _showCasingError(
+        'That looks outside the usual range (50–6,000 m). Double-check the figure.',
+      );
       return;
     }
 
@@ -74,6 +72,20 @@ class _CandidateWellQualifierWidgetState
       _casingError = null;
       _state = _state.copyWith(intermediateCasingLength: val, currentStep: 4);
     });
+  }
+
+  void _showCasingError(String message) {
+    setState(() {
+      _casingError = message;
+    });
+    if (MediaQuery.supportsAnnounceOf(context)) {
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        message,
+        Directionality.of(context),
+        assertiveness: Assertiveness.assertive,
+      );
+    }
   }
 
   void _goBack() {
@@ -628,6 +640,7 @@ class _CandidateWellQualifierWidgetState
             children: [
               Expanded(
                 child: TextField(
+                  key: const ValueKey('intermediate-casing-length'),
                   controller: _casingController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
@@ -638,7 +651,10 @@ class _CandidateWellQualifierWidgetState
                     fontSize: 14,
                   ),
                   decoration: InputDecoration(
-                    hintText: '1000',
+                    // Flutter Web exposes hintText as the native input's
+                    // accessible name. Keep the visible prompt meaningful,
+                    // not merely the example value, for assistive technology.
+                    hintText: 'Intermediate casing length (m), e.g. 1000',
                     hintStyle: YotinTheme.fontMono.copyWith(
                       color: YotinTheme.textMuted,
                     ),
@@ -686,11 +702,17 @@ class _CandidateWellQualifierWidgetState
           ),
           if (_casingError != null) ...[
             const SizedBox(height: 8),
-            Text(
-              _casingError!,
-              style: YotinTheme.fontBody.copyWith(
-                fontSize: 12,
-                color: Colors.orangeAccent,
+            Semantics(
+              container: true,
+              liveRegion: true,
+              excludeSemantics: true,
+              label: _casingError!,
+              child: Text(
+                _casingError!,
+                style: YotinTheme.fontBody.copyWith(
+                  fontSize: 12,
+                  color: Colors.orangeAccent,
+                ),
               ),
             ),
           ],

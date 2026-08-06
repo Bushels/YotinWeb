@@ -72,8 +72,8 @@ Run this on the actual preview hostname, not localhost:
 
 ## Protected preview evidence - 2026-08-06
 
-- Preview deployment: `dpl_FEUjyXEAT2eDGCBXyUdfNRJ35DMJ` at
-  `https://yotin-energy-3a9lc5te2-kyles-projects-d3ab6818.vercel.app/field-review`.
+- Preview deployment: `dpl_6PcVT9KXEkqEek5hBN9rSrNq9TkY` at
+  `https://yotin-energy-9i39cgjtb-kyles-projects-d3ab6818.vercel.app/field-review`.
   It remains behind Vercel Deployment Protection.
 - The local build/copy wrapper generated Vercel output containing 50 Flutter
   route files (30.34 MiB raw). It excludes `yotin_flutter/` and `tool/` from
@@ -88,6 +88,10 @@ Run this on the actual preview hostname, not localhost:
   production R3F or ChatFi origin allowlists. The route therefore must retain
   its safe WellFi poster and honest ChatFi email fallback there. No wildcard
   origin was added merely to make a preview appear live.
+- The compiled browser exposes the intermediate-casing field through its native
+  accessible name, `Intermediate casing length (m), e.g. 1000`. Invalid input
+  has a live semantic error and emits an assertive Flutter announcement when
+  the platform advertises announcement support.
 
 ## Next authorization gate
 

@@ -2,13 +2,11 @@
 
 ## Product boundary
 
-- `C:\Users\kyle\MPS\Yotin-web` is the live static marketing site. Treat its
-  files as read-only unless a task explicitly authorizes a production-site
-  change.
-- `C:\Users\kyle\MPS\Yotin-web\yotin_flutter` is an isolated Flutter Web
-  prototype that is becoming the app-grade **WellFi Field Review** PWA. It is
-  not a replacement for the crawlable marketing page until the release gates
-  below pass.
+- The repository root is the live static marketing site. Treat root files as
+  read-only unless a task explicitly authorizes a production-site change.
+- This `yotin_flutter` directory is an isolated Flutter Web prototype that is
+  becoming the app-grade **WellFi Field Review** PWA. It is not a replacement
+  for the crawlable marketing page until the release gates below pass.
 - Do not claim that the Flutter app is deployed, connected, or production-ready
   unless the current task has verified that fact.
 
@@ -42,17 +40,51 @@
 
 ## Gemini task protocol
 
-1. Read the relevant files and set the Dart MCP workspace root before editing.
-   Use the project-local official skills in `.agents/skills/` only when their
-   task matches: responsive/layout repair, static analysis, widget or
-   integration testing, routing, or widget preview. Do not add a second
-   overlapping agent framework.
-2. State the narrow files and observable acceptance criteria for the patch.
-3. Make one bounded change. Do not opportunistically rewrite unrelated UI.
-4. Run Dart diagnostics after the patch. Report the exact command/result, any
+1. Use Gemini 3.6 Flash High for a narrow Flutter/Dart question, a bounded
+   implementation, or a second opinion. It is effective at widget APIs,
+   layout reasoning, and framework-specific accessibility patterns. It is not
+   the release authority.
+2. Use the project-local skill catalogue selectively, not as an agent swarm:
+   - `dart-run-static-analysis` for diagnostics;
+   - `flutter-build-responsive-layout` for a confirmed layout issue; and
+   - `flutter-add-widget-test` for a new user-visible behavior.
+   Do not use `flutter-add-integration-test` until its legacy Flutter Driver
+   instructions have been modernized. Do not add another agent framework.
+3. For a focused Antigravity second opinion, run from this directory:
+
+   ```powershell
+   agy --model gemini-3.6-flash-high --effort high --mode plan --sandbox --disable-slash-commands -p "<narrow question; no edits or tools>"
+   ```
+
+   If a headless session reports a permission denial or times out, record that
+   as no result. Do not blindly retry or make a model response a merge gate.
+   Use the Flutter compiler, tests, browser evidence, and Codex review as the
+   release authority.
+4. Read the relevant files and state the narrow files and observable
+   acceptance criteria before editing.
+5. Make one bounded change. Do not opportunistically rewrite unrelated UI.
+6. Run Dart diagnostics after the patch. Report the exact command/result, any
    tests not run, and assumptions needing a human release gate.
-5. Leave a small, reviewable diff. Codex independently verifies it before the
+7. Leave a small, reviewable diff. Codex independently verifies it before the
    task advances.
+
+## Non-negotiable guardrails
+
+- Do not run `dart fix --apply`, major package upgrades, or `pub upgrade
+  --major-versions` without a separately reviewed change request.
+- Preserve the static root, the exact R3F postMessage protocol, and the exact
+  ChatFi origin policy. A preview that cannot use those integrations must show
+  the working poster/email fallback rather than widening an origin wildcard.
+- For every UI change, add or update one behavioral or semantic test. A visual
+  screenshot is supporting evidence, not proof that keyboard and assistive
+  technology users can complete the flow.
+- For Flutter Web form fields, inspect the compiled browser's native input
+  semantics on a fresh origin. The widget-test semantics tree and the
+  renderer's actual `aria-label` can differ; keep that browser-facing name
+  meaningful.
+- Keep source, compiler output, and deployment proof distinct: a successful
+  Dart edit is not a successful Flutter build, and a successful Flutter build
+  is not a verified Vercel route.
 
 For the canonical WellFi R3F iframe, preserve the complete ready protocol:
 exact source identity, exact allowed origin, message type, and protocol
