@@ -1,0 +1,36 @@
+{
+  "name": "Yotin Energy Field Review",
+  "short_name": "Yotin Review",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#03070b",
+  "theme_color": "#03070b",
+  "description": "A guided WellFi candidate-well field review from Yotin Energy.",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/Icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
