@@ -37,6 +37,9 @@ state matter more than crawlability.
   document (not a decorative loading card), using only route-relative packaged
   assets. A contract test protects its public facts, one-H1 outline, direct
   email fallback, and hand-off to Flutter after first paint.
+- The runtime asset allowlist excludes seven unused static-site media files;
+  the current release artifact is 43 files / 28.10 MiB raw. This is a bundle
+  measure, not a first-visit performance claim.
 
 ## Run the proof loop
 

@@ -47,8 +47,16 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Keep this list explicit. `assets/` silently ships static-site OG artwork,
+  # unused hero media, and a video into every Flutter Web release. These are
+  # the only image assets referenced by the Flutter app or HTML fallback.
   assets:
-    - assets/
+    - assets/yotin-icon.png
+    - assets/wellfi-logo.webp
+    - assets/wellfi-island-r3f-poster.webp
+    - assets/wellfi-internal-ghost.webp
+    - assets/drill-formation.webp
+    - assets/drill-casing.webp
     # google_fonts discovers these package-exact filenames directly from the
     # asset manifest; do not rename individual font files.
     - assets/fonts/Archivo-Bold.ttf

@@ -109,10 +109,11 @@ release checkpoint: advance, rework, or keep isolated
 
 ## V1 hardening evidence - 2026-08-06
 
-- `tool/build_field_review.ps1 -NoPub` produced a self-contained
-  `build/field-review/` artifact with 50 files and 30.34 MiB raw. This is not
-  a first-visit transfer claim; it is a release-artifact measure. The earlier
-  unpruned bundle was 45.47 MiB raw.
+- The first hardened `tool/build_field_review.ps1 -NoPub` artifact had 50
+  files and 30.34 MiB raw. The current explicit runtime-asset allowlist has
+  43 files and 28.10 MiB raw, removing 2.23 MiB of unused static-site media.
+  Neither number is a first-visit transfer claim; both are release-artifact
+  measures. The earlier unpruned bundle was 45.47 MiB raw.
 - The release wrapper now rejects a missing local renderer, a missing local
   Google Font, a missing `FontManifest` Roboto family, or a missing
   engine-fallback mirror. It also rejects unneeded renderer symbols,
@@ -157,11 +158,16 @@ release checkpoint: advance, rework, or keep isolated
   hand-off, and route-relative fallback assets. `flutter test
   --concurrency=1 --reporter expanded` passed all 23 tests; strict analysis
   also passed.
-- Protected deployment `dpl_F9QmTPBCdo2q3jSRx69p12Ue4fie` served the complete
+- Protected deployment `dpl_6tfjrcYyBwzcpR8v7qMZaDiwqQBZ` served the complete
   fallback document at `/field-review`, its Wasm at `application/wasm`, and
   its packaged WellFi logo at `image/webp`; the excluded Flutter source path
-  returned `404`. The 50-file artifact remains 30.34 MiB raw, so this proof
-  does not waive the first-/repeat-visit payload gate.
+  and intentionally unbundled OG artwork both returned `404`. The 43-file
+  artifact is 28.10 MiB raw, so this proof does not waive the first-/repeat-
+  visit payload gate.
+- The explicit asset allowlist keeps the six images used by Flutter or the
+  fallback and rejects seven unused static-site assets in both a source test
+  and the compiled `AssetManifest`. `flutter test --concurrency=1 --reporter
+  expanded` passed all 24 tests after the change.
 - A sandboxed headless Gemini/Antigravity source audit correctly stopped on a
   missing `read_file` permit. The project agreement now requires either an
   interactive narrow allow rule or prompt-provided source excerpts; it forbids

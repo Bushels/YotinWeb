@@ -157,6 +157,40 @@ if ($missingFontManifestEntries) {
     throw "Field Review AssetManifest omits a local font: $($missingFontManifestEntries -join ', ')"
 }
 
+# The Flutter route intentionally packages only assets that are referenced by
+# the app or its no-JavaScript fallback. A wildcard `assets/` declaration
+# would add static-site OG artwork and unused hero media to the service-worker
+# cache without improving the Flutter experience.
+$expectedImageAssetEntries = @(
+    'assets/yotin-icon.png',
+    'assets/wellfi-logo.webp',
+    'assets/wellfi-island-r3f-poster.webp',
+    'assets/wellfi-internal-ghost.webp',
+    'assets/drill-formation.webp',
+    'assets/drill-casing.webp'
+)
+$missingImageAssetEntries = $expectedImageAssetEntries | Where-Object {
+    -not $decodedAssetManifest.Contains($_)
+}
+if ($missingImageAssetEntries) {
+    throw "Field Review AssetManifest omits a required image: $($missingImageAssetEntries -join ', ')"
+}
+$forbiddenUnusedAssetEntries = @(
+    'assets/hero-multilateral.webp',
+    'assets/hero-sagd-island.webp',
+    'assets/og-card-2.jpg',
+    'assets/slotted-liner.png',
+    'assets/wellfi-island-hero-12s.mp4',
+    'assets/wellfi-island-live.webp',
+    'assets/yotin-wellfi-og-2026.png'
+)
+$unexpectedUnusedAssetEntries = $forbiddenUnusedAssetEntries | Where-Object {
+    $decodedAssetManifest.Contains($_)
+}
+if ($unexpectedUnusedAssetEntries) {
+    throw "Field Review AssetManifest contains unused static-site media: $($unexpectedUnusedAssetEntries -join ', ')"
+}
+
 # The Flutter engine's Roboto fallback is separate from google_fonts' asset
 # lookup. Without a declared FontManifest family, Skwasm and CanvasKit fetch
 # Roboto from fonts.gstatic.com even when an identically-named asset exists.

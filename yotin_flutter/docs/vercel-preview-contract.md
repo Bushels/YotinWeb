@@ -72,11 +72,11 @@ Run this on the actual preview hostname, not localhost:
 
 ## Protected preview evidence - 2026-08-06
 
-- Preview deployment: `dpl_F9QmTPBCdo2q3jSRx69p12Ue4fie` at
-  `https://yotin-energy-hzsohmtmq-kyles-projects-d3ab6818.vercel.app/field-review`.
+- Preview deployment: `dpl_6tfjrcYyBwzcpR8v7qMZaDiwqQBZ` at
+  `https://yotin-energy-o08y3h1fl-kyles-projects-d3ab6818.vercel.app/field-review`.
   It remains behind Vercel Deployment Protection.
-- The local build/copy wrapper generated Vercel output containing 50 Flutter
-  route files (30.34 MiB raw). It excludes `yotin_flutter/` and `tool/` from
+- The local build/copy wrapper generated Vercel output containing 43 Flutter
+  route files (28.10 MiB raw). It excludes `yotin_flutter/` and `tool/` from
   Vercel's source upload, then injects only the verified compiled artifact
   below `/field-review/`.
 - Vercel HTTP verification confirmed `/field-review` returns `200`,
@@ -98,6 +98,10 @@ Run this on the actual preview hostname, not localhost:
   `assets/assets/yotin-icon.png`, `wellfi-logo.webp`, the poster, and the
   internal-tool image all resolve from the compiled route rather than the
   static-root `/assets/` path. The build and widget contract reject drift.
+- The preview correctly returns `404` for both Flutter source and the
+  intentionally omitted `field-review/assets/assets/yotin-wellfi-og-2026.png`.
+  The runtime bundle uses an explicit six-image allowlist instead of copying
+  the static site’s entire asset directory.
 
 ## Next authorization gate
 
