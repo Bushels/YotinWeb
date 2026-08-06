@@ -53,7 +53,7 @@ Flutter /field-review/
 
 ```text
 flutter analyze                         PASS
-flutter test --concurrency=1            PASS (35 tests)
+flutter test --concurrency=1            PASS (36 tests)
 .\tool\build_field_review.ps1 -NoPub   PASS
 packaged 1280 / 390 browser checks      PASS
 explicit offline reload + qualifier      PASS (local only)

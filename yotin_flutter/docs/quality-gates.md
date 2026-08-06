@@ -30,6 +30,7 @@ release checkpoint: advance, rework, or keep isolated
 | Responsive layout | No overflow at 390, 820, 1280, and 1600 px; navigation and ChatFi remain operable. |
 | ChatFi | Newest 24-message context, 4,000-character cap, explicit stop, accurate availability state, and transparent email fallback. |
 | Offline field review | An operator explicitly starts the download; the custom worker caches only a complete, content-versioned same-origin route package. An offline reload and local qualifier interaction pass, while R3F and ChatFi remain honestly connection-bound. |
+| PWA installability | The route manifest keeps route-relative start/scope, standalone display, and local icons. Verify the active worker and actual install affordance on an HTTPS preview or device; a headless browser may suppress the install event. |
 | Public web | The static root retains canonical metadata, JSON-LD, semantic HTML, no-JavaScript contact fallback, and R3F poster/failure behavior. |
 | Motion | Reduced-motion mode and off-screen widgets do not keep high-cost animation running. |
 | Release | A build, diagnostics, tests, screenshots, and an approved hosting/header plan exist before any public routing or deployment decision. Build with `tool/build_field_review.ps1`, which enforces an absolute Flutter output path, self-hosts the renderer/font fallback contract, and verifies the complete artifact. |

@@ -51,6 +51,10 @@
   the worker resolves them under its scope with an exact-origin guard. Do not
   label a hypothetical filename or unused version metadata as a release
   blocker without showing that it crosses that build-and-origin boundary.
+- When editing `web/manifest.json`, update `test/pwa_manifest_contract_test.dart`
+  in the same change. A manifest/worker structure test protects regression;
+  the browser install prompt itself still needs a real HTTPS preview or device,
+  because an automated browser may suppress `beforeinstallprompt`.
 
 ## Gemini task protocol
 

@@ -16,6 +16,13 @@ Installed project-local skills live in `.agents/skills/`:
 - `flutter-add-widget-preview` is retained as an experimental visual-review
   tool, not a release dependency.
 
+`flutter-add-integration-test` also carries the project's Flutter Web PWA
+route workflow: test the compiled route, explicit cache preparation, offline
+reload, a local workflow action, and the honest external-integration boundary.
+This is deliberately browser automation rather than a Flutter Driver extension
+or a service-worker mock. Use a disposable browser profile and a test-only
+host because the journey intentionally writes Cache Storage.
+
 ## Operating rule
 
 Use the skills through the existing Antigravity Dart MCP / Agentic Hot Reload

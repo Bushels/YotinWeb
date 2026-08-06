@@ -52,6 +52,32 @@ description: Add focused modern Flutter integration coverage for a real end-to-e
 - Run `flutter analyze lib test --fatal-infos` and report the actual target and
   command used.
 
+## Flutter Web PWA route workflow
+
+For a user-triggered offline capability, exercise the compiled route artifact
+in a browser; a widget test cannot prove service-worker scope, cache content,
+or an offline navigation.
+
+1. Serve the exact route-shaped release artifact from its intended base path
+   using a disposable browser profile/test host. Verify the worker URL,
+   manifest URL, and cache scope are route-relative.
+2. Capture the initial `Prepare for offline` state. Trigger the download and
+   wait for the explicit `Ready` state; inspect Cache Storage only as supporting
+   evidence, not as a substitute for a reload.
+3. Disable browser network access, reload the route, and complete one local
+   user action. Assert the app shell and its local workflow remain usable.
+4. Check that cross-origin 3D, chat, analytics, or API dependencies were not
+   cached or implied to work offline. Exercise the visible failure path where
+   feasible; it must remain honest.
+5. After a new compiled manifest is available, verify an older package is
+   offered for explicit refresh rather than being labelled current. Preserve an
+   old complete package until the new package finishes successfully.
+
+Use browser automation for this workflow. Do not rely on a generated
+`flutter_service_worker.js` to supply offline behavior in Flutter 3.44; if a
+custom worker exists, keep its scope exact and its cache list derived from the
+compiled artifact.
+
 ## Guardrails
 
 - Do not import `flutter_driver` or call `enableFlutterDriverExtension()` in a
@@ -64,3 +90,5 @@ description: Add focused modern Flutter integration coverage for a real end-to-e
   unless that scope is explicitly requested.
 - A passing local test is not proof that an externally hosted R3F or ChatFi
   integration works; retain a browser validation for that boundary.
+- Do not pre-cache an external iframe, a ChatFi endpoint, credentials, or a
+  broad root-site path merely to make an offline demo look complete.
