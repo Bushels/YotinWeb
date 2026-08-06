@@ -71,7 +71,7 @@
    authority.
    Before recommending a Flutter CLI flag, renderer setting, or CDN switch,
    verify it against `flutter build web --help` from the installed SDK. Older
-   examples are not authority: Flutter 3.44.7 exposes `--wasm` and
+   examples are not authority: Flutter 3.44.8 exposes `--wasm` and
    `--static-assets-url`, not `--static-assets-user-base-url`, and exposes
    no legacy HTML-renderer selection. Record an invented or stale flag as a
    Gemini miss rather than turning it into a build experiment.
@@ -82,6 +82,17 @@
    tests not run, and assumptions needing a human release gate.
 7. Leave a small, reviewable diff. Codex independently verifies it before the
    task advances.
+
+### Geometry-review calibration
+
+- For a Flutter scroll or fixed-header review, include the actual widget
+  hierarchy, which widgets are inside the scrollable, and the measured target
+  viewport position. A header that is a sibling above an `Expanded`
+  scrollable is not an overlay inside that scrollable.
+- Require Gemini to state the coordinate-space assumption behind any proposed
+  offset. Treat an unsupported geometry claim as a hypothesis until a widget
+  test and compiled-browser screenshot confirm it. This avoids turning a
+  plausible generic mobile fix into a regression in the real layout.
 
 ## Non-negotiable guardrails
 

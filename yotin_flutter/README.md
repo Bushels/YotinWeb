@@ -29,7 +29,7 @@ state matter more than crawlability.
 - The Flutter hero and drill explorer use provided Yotin/WellFi image assets;
   no hand-drawn substitute is used for brand visualizations.
 - `flutter analyze`, `flutter test`, and `tool/build_field_review.ps1 -NoPub`
-  pass on Flutter 3.44.7 / Dart 3.12.2.
+  pass on Flutter 3.44.8 / Dart 3.12.2.
 - The release artifact self-hosts its renderer, the four Yotin typefaces,
   and Flutter's engine Roboto fallback. A clean browser trace has no
   third-party Flutter or font request.

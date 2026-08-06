@@ -228,3 +228,17 @@ release checkpoint: advance, rework, or keep isolated
   and 1280 x 720. Each viewport reached the first question and displayed its
   choices without clipping; this is local conversion evidence only and does
   not waive the separate protected-preview, CORS, or production gates.
+
+## Stable SDK and package refresh - 2026-08-06
+
+- The official Flutter Windows stable manifest lists Flutter `3.44.8` with
+  Dart `3.12.2`. The local stable SDK was upgraded from Flutter `3.44.7` to
+  `3.44.8`; its SDK worktree is clean after the upgrade.
+- Strict analysis, all 28 Flutter tests, and `tool/build_field_review.ps1`
+  passed under Flutter `3.44.8`. The packaged Chromium/Skwasm startup estimate
+  remains 2.26 MiB Brotli against the 2.50 MiB route budget.
+- `flutter pub outdated --no-dev-dependencies --no-transitive --show-all`
+  reports every direct dependency at its newest resolvable version:
+  `cupertino_icons 1.0.9`, `google_fonts 8.2.1`, `http 1.6.0`,
+  `url_launcher 6.3.2`, and `web 1.1.1`. No package was added merely to chase
+  a trend; FScene remains a separate Flutter-main-channel R&D spike.

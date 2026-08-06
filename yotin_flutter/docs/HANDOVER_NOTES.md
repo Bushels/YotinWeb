@@ -1,6 +1,6 @@
 # WellFi Field Review — Current Handover
 
-Updated: 2026-08-05
+Updated: 2026-08-06
 
 ## Decision
 
@@ -20,7 +20,7 @@ Flutter /field-review/
 
 ## Current implementation
 
-- Flutter `3.44.7`, Dart `3.12.2`, DevTools `2.57.0`.
+- Flutter `3.44.8`, Dart `3.12.2`, DevTools `2.57.0`.
 - Direct dependencies are current. Keep the lean set: `google_fonts ^8.2.1`,
   `http ^1.4.0`, `url_launcher ^6.3.1`, and first-party `web ^1.1.1`.
 - The hero uses the canonical R3F scene through a strict iframe protocol:
@@ -100,7 +100,7 @@ renderer failure.
 
 `flutter_scene` / FScene is a genuine R&D candidate for a future Flutter-native
 3D application, but do not install it here now: it is pre-1.0, requires Flutter
-master rather than stable 3.44.7, adds another WebGL/build pipeline, and does
+master rather than stable 3.44.8, adds another WebGL/build pipeline, and does
 not solve the static-root SEO or first-visit payload problem. Revisit only as
 an isolated spike with a performance and visual-composition acceptance test.
 
