@@ -105,20 +105,22 @@ Scroll-*linked* beats scroll-*triggered* for anything the reader is looking at.
 
 ## Candidate-well qualifier
 
-Five questions in `#contact`, built entirely by `main.js` from the
-`QUALIFIER_STEPS` config. Selecting an answer auto-advances — five clicks, no
-Next buttons. The verdict is computed client-side and shown **before** any
-contact details are requested.
+Six questions in `#contact`. The decision logic — question set, thresholds,
+flags and verdict — lives in **`qualifier-logic.js`**; `main.js` renders it and
+owns nothing about the outcome. Selecting an answer auto-advances, no Next
+buttons. The verdict is computed client-side and shown **before** any contact
+details are requested.
 
-**It can return "outside current spec", and that is the point.** A qualifier
-that always says yes is a lead form with extra steps, and this audience spots
-that immediately. Above 150 °C it disqualifies outright, because 150 °C is the
-tool's real rating. Every threshold in the config traces to a spec published
-elsewhere on the page — nothing is invented.
+**It can decline to say yes, and that is the point.** A qualifier that always
+says yes is a lead form with extra steps, and this audience spots that
+immediately. Every threshold traces to a spec published elsewhere on the page —
+nothing is invented.
 
 Three outcomes: **Strong fit** (nothing flagged), **Likely fit — worth a
-review** (flags raised, each with a plain-language reason), **Outside current
-spec** (hard limit hit).
+review** (flags raised, each with a plain-language reason), and **above 150 °C**,
+which is a *waitlist, not a rejection* — 150 °C is the tool's current rating and
+a higher-temperature version is in development, so that answer routes to a
+follow-up rather than a dead end. It outranks every other flag.
 
 ### The pump-landing rule, and the derived question
 
@@ -240,6 +242,39 @@ Two rules if you extend this, both enforced by convention rather than by code:
   to describe an identifiable well.
 - **Never let analytics break the funnel.** `track()` swallows its own errors.
   A qualifier that fails because a tag manager is blocked is a lost lead.
+
+## Tests
+
+```bash
+node --test test/qualifier-logic.test.js test/faq-parity.test.js
+```
+
+Node's built-in runner. No dependencies, no `package.json`, no build step — the
+site keeps its plain HTML/CSS/JS property, and `test/` is excluded from the
+deploy. (Pass the files explicitly; `node --test test/` does not resolve the
+directory reliably on Windows.)
+
+Two things are covered, and the choice is deliberate. Layout bugs are visible
+the moment you look at the page; **wrong numbers are not**. The qualifier
+decides what an operator is told about their own well, and its constants are
+real product limits — the 150 °C rating, the ~10% standoff rule. A wrong
+threshold does not throw or look broken. It returns a confident, wrong answer.
+
+- `qualifier-logic.test.js` — thresholds and rounding, casing-length bounds and
+  their error text, flag-to-note coverage, and all three verdict paths
+  including that above-150 °C outranks everything else.
+- `faq-parity.test.js` — the FAQ exists twice in `index.html`, as JSON-LD for
+  crawlers and as rendered `<details>` for people. This fails if they drift.
+
+Both suites exist because of a Flutter port that was later abandoned (see the
+`archive/flutter-*` tags). Rewriting the qualifier in another language forced
+every implicit rule to become explicit, and the exercise showed the failure
+mode was never bad code — it was *two copies of the same sentences and numbers
+that no compiler checks*. Extracting the logic here found a real bug on the
+first run: at the minimum 50 m casing, rounding `0.9 × 50 = 45` to the nearest
+10 m put the landing threshold **on the shoe itself**, so the question offered
+an impossible "deeper" option and an unflagged "shallower" option that included
+landing at the shoe — the exact case the rule exists to catch.
 
 ## SEO
 

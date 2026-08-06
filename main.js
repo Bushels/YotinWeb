@@ -628,7 +628,6 @@
      here is invented.
      ====================================================================== */
 
-  var QUALIFIER_EMAIL = "info@yotinenergy.com";
 
   /* ----------------------------------------------------------------------
      Funnel instrumentation.
@@ -672,124 +671,28 @@
     return "3000_plus";
   }
 
-  var QUALIFIER_STEPS = [
-    {
-      key: "lift",
-      label: "Artificial lift",
-      question: "What lifts the well?",
-      options: [
-        { value: "Progressing cavity pump (PCP)", tag: "Best fit" },
-        { value: "Electric submersible pump (ESP)" },
-        { value: "Rod pump" },
-        { value: "Natural flow or other", flag: "lift" }
-      ]
-    },
-    {
-      key: "type",
-      label: "Well type",
-      question: "What is it producing?",
-      options: [
-        { value: "Heavy oil" },
-        { value: "Light oil" },
-        { value: "Gas" },
-        { value: "Thermal / SAGD", flag: "thermal" }
-      ]
-    },
-    {
-      key: "temp",
-      label: "Bottomhole temperature",
-      question: "How hot does it get downhole?",
-      options: [
-        { value: "Under 100 °C" },
-        { value: "100 – 150 °C", tag: "At spec" },
-        { value: "Above 150 °C", future: true },
-        { value: "Not sure", flag: "temp" }
-      ]
-    },
-    {
-      /* Asked as a number because the next question is derived from it. The
-         standoff rule is a proportion of this length, so a banded answer here
-         would make the follow-up threshold meaningless. */
-      key: "intermediate",
-      type: "number",
-      label: "Intermediate casing length",
-      question: "How long is your intermediate casing, approximately?",
-      unit: "m",
-      placeholder: "1000",
-      min: 50,
-      max: 6000
-    },
-    {
-      /* Where the pump lands decides the deployment method. The collar needs
-         roughly 10% of the intermediate's length of standoff from the shoe:
-         (shoe depth - pump depth) >= 0.10 x intermediate length. Landed closer
-         than that, WellFi runs outside the intermediate instead of inside the
-         tubing. This matches the EM physics — the formation is the antenna, and
-         an emitter sitting at the cemented shoe couples at roughly 0.1%. Either
-         comfortably above the shoe or below it in open hole is fine; at the
-         shoe is the bad case. */
-      key: "landing",
-      type: "derived",
-      label: "Pump landing",
-      /* Question and options are built from the entered casing length: the
-         collar needs ~10% of that length of standoff above the shoe, so the
-         threshold is 0.9 x length. Turning the rule into a single concrete
-         number means the engineer taps once instead of doing the arithmetic. */
-      build: function (answers) {
-        var len = answers.intermediate ? answers.intermediate.number : null;
-        if (!len) {
-          return {
-            question: "Where does the pump land in the intermediate casing?",
-            options: [
-              { value: "Well above the shoe" },
-              { value: "Close to the shoe", flag: "external" },
-              { value: "Not sure", flag: "landing" }
-            ]
-          };
-        }
-        var threshold = Math.round((len * 0.9) / 10) * 10;
-        return {
-          question: "Is the pump landed shallower or deeper than " + fmtNum(threshold) + " m?",
-          hint: "That is 10% of your intermediate above the shoe — the standoff WellFi needs to run inside the tubing.",
-          options: [
-            { value: "Shallower than " + fmtNum(threshold) + " m", tag: "< " + fmtNum(threshold) },
-            { value: "Deeper than " + fmtNum(threshold) + " m", tag: "> " + fmtNum(threshold), flag: "external" },
-            { value: "Not sure", flag: "landing" }
-          ]
-        };
-      }
-    },
-    {
-      key: "timing",
-      label: "Next planned intervention",
-      question: "When is the next pump change or planned intervention?",
-      options: [
-        { value: "Within 3 months", tag: "Ideal timing" },
-        { value: "3 – 12 months" },
-        { value: "Nothing scheduled", flag: "timing" },
-        { value: "Not sure", flag: "timing" }
-      ]
-    }
-  ];
-
-  function fmtNum(n) {
-    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  // Each note explains WHY something needs review, in the engineer's terms.
-  var QUALIFIER_NOTES = {
-    temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
-    external: "Landed that deep, WellFi would run outside the intermediate rather than inside the tubing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. Running it outside is routine, but it changes the install and is worth confirming early.",
-    landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs inside the tubing or outside the intermediate. Worth pinning down before the changeout gets scoped.",
-    timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
-    lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
-    thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."
-  };
+  /* Question set, notes, thresholds and verdict logic live in
+     qualifier-logic.js so they can be unit-tested without a DOM. That file is
+     loaded by a deferred <script> immediately before this one, so it is always
+     present by the time anything here runs. main.js owns rendering, focus
+     management, analytics and the mailto; it owns none of the decisions. */
+  // NB: `root` in this file is document.documentElement, not the global.
+  var Q = window.YotinQualifier;
+  var QUALIFIER_STEPS = Q ? Q.STEPS : [];
+  var QUALIFIER_NOTES = Q ? Q.NOTES : {};
+  var QUALIFIER_EMAIL = Q ? Q.EMAIL : "info@yotinenergy.com";
+  var fmtNum = Q ? Q.fmtNum : function (n) { return String(Math.round(n)); };
 
   function buildQualifier() {
     var host = document.querySelector("[data-qualifier]");
     var stage = document.querySelector("[data-qualifier-stage]");
     if (!host || !stage) return;
+
+    /* If qualifier-logic.js failed to load there are no questions to ask.
+       Leave the host hidden so the section falls back to its static contact
+       copy and the direct email path, rather than rendering an empty shell
+       that looks broken. */
+    if (!Q || !QUALIFIER_STEPS.length) return;
 
     host.hidden = false;
 
@@ -974,23 +877,16 @@
       box.appendChild(go);
 
       function submit() {
-        var raw = input.value.replace(/[^\d.]/g, "");
-        var n = parseFloat(raw);
-        if (!isFinite(n) || n <= 0) {
-          error.textContent = "Enter the approximate length in metres.";
+        var parsed = Q.parseCasingLength(input.value, step);
+        if (!parsed.ok) {
+          error.textContent = parsed.error;
           // A validation stall is a usability signal: it means the field is
           // asking for something the visitor doesn't have to hand.
-          track("qualifier_input_error", { step_key: step.key, reason: "not_a_number" });
+          track("qualifier_input_error", { step_key: step.key, reason: parsed.reason });
           input.focus();
           return;
         }
-        if (n < step.min || n > step.max) {
-          error.textContent = "That looks outside the usual range (" +
-            fmtNum(step.min) + "–" + fmtNum(step.max) + " m). Double-check the figure.";
-          track("qualifier_input_error", { step_key: step.key, reason: "out_of_range" });
-          input.focus();
-          return;
-        }
+        var n = parsed.number;
         error.textContent = "";
         // Bucketed, not the exact figure the visitor typed.
         recordAnswer(
@@ -1015,17 +911,7 @@
     }
 
     function assess() {
-      var flags = [];
-      var future = false;
-      QUALIFIER_STEPS.forEach(function (step) {
-        var a = answers[step.key];
-        if (!a) return;
-        // Above 150 °C isn't a dead end any more — it's a waitlist.
-        if (a.future) future = true;
-        if (a.flag) flags.push(a.flag);
-      });
-      if (future) return { fit: "future", flags: flags };
-      return { fit: flags.length ? "review" : "strong", flags: flags };
+      return Q.assess(answers);
     }
 
     function summaryLines() {
@@ -1038,11 +924,7 @@
       var lines = ["Candidate well review — WellFi", ""];
       summaryLines().forEach(function (row) { lines.push(row.label + ": " + row.value); });
       lines.push("");
-      lines.push("Self-check result: " + (
-        result.fit === "strong" ? "Strong fit" :
-        result.fit === "review" ? "Likely fit — worth a review" :
-        "Above 150 °C — waiting on the high-temperature version"
-      ));
+      lines.push("Self-check result: " + Q.resultLabel(result.fit));
       result.flags.forEach(function (f) { if (QUALIFIER_NOTES[f]) lines.push("- " + QUALIFIER_NOTES[f]); });
       lines.push("");
       lines.push("Sent from yotinenergy.com");
