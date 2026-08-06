@@ -183,35 +183,44 @@ curl -s "https://yotinenergy.com/styles.css?v=20260724-3" | grep -c animation-ti
 
 ## Analytics
 
-Google Analytics 4 is wired but **inert**. `index.html` contains a gated
-snippet that makes no request and defines no globals until
-`GA_MEASUREMENT_ID` is a real `G-XXXXXXXXXX` value. A placeholder id would fire
-hits at a non-existent property and quietly poison the data, so the guard is a
-regex rather than a comment.
+Google Analytics 4 is **live** on property `G-9VQJHQ1L59` as of 2026-08-06.
+The snippet in `index.html` keeps its regex guard on the Measurement ID, so
+blanking the id disables everything cleanly rather than firing hits at a
+property that does not exist.
 
-To turn it on:
+`anonymize_ip` is set explicitly. GA4 truncates IPs by default; the flag is
+there so an audit can see the intent in the source rather than trusting a
+default.
 
-1. Sign in to <https://analytics.google.com> as **kyle@bushelsenergy.com**.
-2. Admin → Create → Property. Name `Yotin Energy`, timezone
-   `(GMT-07:00) Edmonton`, currency `CAD`.
-3. Create a **Web** data stream for `https://yotinenergy.com`. Leave Enhanced
-   Measurement on — it gives scroll depth, outbound clicks and site search for
-   free, which matters on a one-page site.
-4. Copy the **Measurement ID** (`G-…`) into `GA_MEASUREMENT_ID` in
-   `index.html`, bump the `?v=` keys, commit, push.
-5. Add `www.yotinenergy.com` and `yotin-energy.vercel.app` as additional
-   stream domains if you want them counted.
-6. In Admin → Data Settings → Data Retention, raise event retention from the
-   2-month default to 14 months.
+**Local development never reaches the property.** The snippet sets
+`window["ga-disable-G-9VQJHQ1L59"] = true` on `localhost`, `127.0.0.1` and
+`[::1]`. GA4 reads that flag before transmitting, so the tag still loads and
+the whole code path runs — it just sends nothing. This is deliberate in
+preference to filtering internal traffic by IP after the fact: a developer
+cannot skew the numbers by forgetting, and the funnel stays testable locally.
 
-Two things to settle before switching it on:
+### Outstanding — now user-facing, not theoretical
 
-- **Privacy notice.** GA sets cookies and sends visitor data to Google. The
-  README release gates already list a privacy link as outstanding; that should
-  land first, and under PIPEDA a short plain-language notice is the minimum.
-- **Vercel Web Analytics** is a cookie-free alternative that needs no banner
-  and no consent plumbing. If the goal is just traffic shape rather than
-  Google-ecosystem reporting, it is materially less work.
+- **Privacy notice.** The site now sets Google cookies and sends visitor data
+  on every page view. Under PIPEDA a short plain-language notice is the
+  minimum, and there is currently no privacy link on the page. This was
+  acceptable to defer while the tag was inert; it is not any more.
+- **Consider Vercel Web Analytics** alongside or instead. It is cookie-free and
+  needs no banner. It will not give the custom qualifier funnel below, so it is
+  a complement rather than a swap if the verdict split matters.
+
+### Property settings still worth doing
+
+1. Add `www.yotinenergy.com` and `yotin-energy.vercel.app` as additional stream
+   domains if you want them counted.
+2. Admin → Data Settings → Data Retention: raise event retention from the
+   2-month default to **14 months**. The default silently discards history.
+3. Mark `qualifier_send` as a **key event** (formerly "conversion") so it
+   appears in reporting as the outcome rather than as one custom event among
+   nine.
+4. Register `fit`, `step_key` and `answer` as **custom dimensions**. GA4 will
+   not let you segment by an event parameter until you do, so the verdict split
+   is collected but unreportable without this step.
 
 ### Qualifier funnel events
 
