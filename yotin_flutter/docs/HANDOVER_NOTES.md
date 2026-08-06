@@ -4,14 +4,20 @@ Updated: 2026-08-06
 
 ## Decision
 
-Keep the public Yotin marketing root static. The Flutter project is a strong
-**app-grade Field Review companion** at `/field-review/`, not a public-home
-replacement or a deployment-ready route.
+Keep the **live** Yotin marketing root static until the new Flutter candidate
+clears its protected-preview gates. The Flutter project now has two distinct,
+locally verified artifacts: an app-grade Field Review companion at
+`/field-review/`, plus an isolated public-home candidate at `/`. Neither is a
+production replacement or a deployment authorization.
 
 ```text
-Static Yotin root
-  - canonical SEO, Organization/Product/FAQ schema, no-JavaScript document
+Live static Yotin root
+  - current production baseline and canonical public document
   - lightweight poster-first R3F product story
+
+Flutter public-home candidate (local artifact only)
+  - root SEO/schema/robots/sitemap and public fragment parity
+  - candidates must prove accessibility, live integrations, and payload traces
 
 Flutter /field-review/
   - six-step candidate-well qualifier, ChatFi interaction, mobile field flow
@@ -48,12 +54,19 @@ Flutter /field-review/
 - The built Flutter route exposes a `main` landmark and an H1 after startup.
   The no-JavaScript fallback is independently usable; its skip link is hidden
   after the fallback becomes inert, avoiding a live link into hidden content.
+- The isolated public-home build has the static root's indexable canonical
+  metadata, Organization/Product/FAQ schema, robots and sitemap contracts.
+  Its root surface never registers the Field Review worker or claims PWA
+  installability. The candidate uses browser-native `#top`, `#wellfi`,
+  `#benefits`, `#insight`, `#company`, `#contact`, and `#qualifier` fragments;
+  Flutter URL strategy is disabled so its route engine cannot rewrite those
+  public anchors.
 
 ## Verified local gates
 
 ```text
 flutter analyze                         PASS
-flutter test --concurrency=1            PASS (36 tests)
+flutter test --concurrency=1            PASS (40 tests)
 .\tool\build_field_review.ps1 -NoPub   PASS
 packaged 1280 / 390 browser checks      PASS
 explicit offline reload + qualifier      PASS (local only)
@@ -75,8 +88,9 @@ manifest, icons, poster, and R3F assets.
    Wasm app plus renderer is roughly multi-megabyte before common R3F/font
    traffic, while the static marketing core is far smaller. Set real
    first-visit and repeat-visit budgets before promotion.
-4. Preserve the static root until Flutter independently proves full public
-   crawlability, structured data, no-JavaScript content, and accessibility.
+4. Preserve the live static root until Flutter independently proves full public
+   crawlability, structured data, no-JavaScript content, keyboard/focus
+   accessibility, and payload/conversion parity.
 5. If full public-home accessibility parity is ever reopened, build and test a
    native Flutter keyboard-skip control. Do not reactivate the fallback link
    after that fallback becomes inert.
@@ -136,8 +150,16 @@ compile, renderer, and payload measurements above remain the decision evidence.
 
 ## Safe next task
 
-The next useful vertical slice is an isolated Flutter public-home release
-candidate: retain the `noindex` Field Review companion, then build a separate
-root-target artifact with public metadata, structured data, robots/sitemap, and
-fragment/deep-link navigation parity. No deploy, package addition, or external
-origin-policy change is authorized by this handover.
+The public-home candidate is now locally complete and can be staged with:
+
+```powershell
+.\tool\build_flutter_public_home_preview.ps1 -NoPub
+```
+
+It constructs only `.vercel/output`: Flutter at `/` and the noindex companion
+at `/field-review/`. It does not deploy. The next useful action needs explicit
+authorization for one stable protected preview alias and that **exact** origin
+in both the R3F and ChatFi allowlists. Then deploy the prebuilt artifact,
+measure first/repeat visits, and test the real R3F/ChatFi paths before any
+production decision. Root replacement, public promotion, broader CORS,
+COOP/COEP, and FScene adoption remain separate decisions.

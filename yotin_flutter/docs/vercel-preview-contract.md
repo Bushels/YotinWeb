@@ -124,3 +124,28 @@ integration test, authorize one of these deliberately bounded paths:
 
 Production promotion, public-home replacement, COOP/COEP, a root metadata
 change, and broad Vercel-origin allowlists remain separate decisions.
+
+## Flutter public-home candidate (local staging only)
+
+`..\..\tool\build_flutter_public_home_preview.ps1 -NoPub` builds both verified
+Flutter artifacts locally, asks Vercel only to generate its prebuilt output,
+then replaces that generated static output with:
+
+```text
+/                 indexable Flutter public-home candidate
+/field-review/    noindex Flutter Field Review companion
+```
+
+The script has no `vercel deploy` call. It does not alter the static source,
+the production deployment, an R3F origin policy, or ChatFi CORS. It is the
+only artifact eligible for the next protected-preview decision; do not use the
+field-review-only wrapper for a root candidate or mix either Flutter output
+with old static-root files.
+
+Before deploying this combined artifact, authorize one stable protected alias
+and add precisely that origin to both existing integration allowlists. Prove
+direct root fragments, R3F handshake/fallback, harmless ChatFi request/fallback,
+the companion's explicit offline reload, and first/repeat transfer traces on
+that alias. The Flutter fragment bridge intentionally uses native browser
+history with Flutter URL strategy disabled; its remaining accessibility focus
+behavior must be evaluated in that real-browser release gate.

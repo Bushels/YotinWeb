@@ -31,13 +31,13 @@ release checkpoint: advance, rework, or keep isolated
 | ChatFi | Newest 24-message context, 4,000-character cap, explicit stop, accurate availability state, and transparent email fallback. |
 | Offline field review | An operator explicitly starts the download; the custom worker caches only a complete, content-versioned same-origin route package. An offline reload and local qualifier interaction pass, while R3F and ChatFi remain honestly connection-bound. |
 | PWA installability | The route manifest keeps route-relative start/scope, standalone display, and local icons. Verify the active worker and actual install affordance on an HTTPS preview or device; a headless browser may suppress the install event. |
-| Public web | The static root retains canonical metadata, JSON-LD, semantic HTML, no-JavaScript contact fallback, and R3F poster/failure behavior. |
+| Public web | The live static root retains canonical metadata, JSON-LD, semantic HTML, no-JavaScript contact fallback, and R3F poster/failure behavior until the isolated Flutter public-home candidate clears its own preview gates. |
 | Motion | Reduced-motion mode and off-screen widgets do not keep high-cost animation running. |
 | Release | A build, diagnostics, tests, screenshots, and an approved hosting/header plan exist before any public routing or deployment decision. Build with `tool/build_field_review.ps1`, which enforces an absolute Flutter output path, self-hosts the renderer/font fallback contract, and verifies the complete artifact. |
 
 ## Current non-goals
 
-- Do not replace the public static homepage during this prototype.
+- Do not replace the live public static homepage while this prototype's preview gates remain open.
 - Do not add state-management, 3D, or animation packages merely to match a web
   implementation. Add them only after a measurable app capability requires it.
 - Do not test the live ChatFi endpoint in an automated suite or infer CORS
@@ -270,3 +270,41 @@ release checkpoint: advance, rework, or keep isolated
   the control back from `READY` to `PREPARE`. A new explicit download restored
   the content-versioned active cache. This protects release updates from
   silently presenting an old offline package as current.
+
+## Isolated Flutter public-home candidate - 2026-08-06
+
+- `tool/build_public_home_candidate.ps1 -NoPub` produces a separate
+  `build/public-home/` artifact. It never changes the static-root source,
+  Vercel configuration, deployment, R3F allowlist, or ChatFi CORS policy.
+- The candidate is indexable at `/` with the public canonical URL, title,
+  description, Organization/Product/FAQ JSON-LD, `robots.txt`, and
+  `sitemap.xml`. It stages only the two root schema assets it references.
+  `/field-review/` remains a separate noindex route with its own PWA/offline
+  contract; the public-root artifact deliberately omits that worker and
+  manifest instead of making a marketing page claim offline installability.
+- Browser verification on a fresh local origin proved `/#contact` remains in
+  the address bar and lands visibly at the candidate-well qualifier. Header
+  navigation creates `#wellfi` and `#benefits`; Back and Forward restore those
+  fragments, and Back from `#wellfi` to `/` visibly returns to the hero, with
+  no console errors.
+- Flutter URL strategy is explicitly disabled for this single-document
+  surface. The small browser bridge owns native fragment history directly;
+  the local Flutter Navigator does not report a route back to the engine.
+  This avoids Flutter route-state collisions with public `#wellfi` anchors.
+  `test/public_fragment_strategy_contract_test.dart` prevents a future route
+  strategy change from silently reopening that collision.
+- `tool/build_flutter_public_home_preview.ps1 -NoPub` has built Vercel's
+  generated output locally with Flutter at `/` and the verified Field Review
+  artifact at `/field-review/`. Root and companion HTML/Wasm requests both
+  returned `200` from that staged output. The command has no deployment step.
+- The candidate has the same `2.26 MiB` Brotli conservative startup estimate
+  as Field Review (about `248 KB` under the app-route ceiling). That is a
+  regression guard, not proof that it beats the roughly `190 KB` static
+  marketing core; protected-preview first/repeat traces remain mandatory.
+- Gemini 3.6 correctly surfaced a possible Flutter/history-engine collision.
+  Local Flutter `3.44.8` source inspection confirmed that framework-owned
+  URL strategy attaches history state. The candidate now opts out because it
+  has no Flutter route table. Gemini's remaining accessibility point is real:
+  fragment scroll does not independently move screen-reader focus, so native
+  keyboard/focus treatment is still a public-promotion gate rather than a
+  claim of complete accessibility parity.

@@ -1,8 +1,13 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'models/public_section.dart';
+import 'platform/app_surface.dart';
+import 'platform/fragment_navigation.dart';
 import 'platform/offline_field_review_cache.dart';
 import 'platform/public_shell.dart';
 import 'theme/yotin_theme.dart';
@@ -22,6 +27,11 @@ void main() {
   // assets/fonts. Refuse a silent third-party HTTP fallback if an asset is
   // accidentally removed in a future change.
   GoogleFonts.config.allowRuntimeFetching = false;
+  // This is a one-page document with browser-native public fragments, not a
+  // Flutter route table. Opt out of Flutter's URL/history engine completely
+  // so #wellfi-style anchors and their state remain exclusively owned by the
+  // small fragment bridge below.
+  setUrlStrategy(null);
   runApp(const YotinFlutterApp());
   // Flutter web semantics is opt-in. This keeps landmarks and headings
   // available to keyboard and screen-reader users.
@@ -37,7 +47,16 @@ class YotinFlutterApp extends StatelessWidget {
       title: 'Yotin Energy — Indigenous Energy Services & WellFi Telemetry',
       debugShowCheckedModeBanner: false,
       theme: YotinTheme.darkTheme,
-      home: const YotinHomePage(),
+      // This remains a single-page app, not a route table. MaterialApp's
+      // default `home` Navigator reports its initial `/` route to the web
+      // engine. Keep a local Navigator for dialogs while explicitly leaving
+      // browser fragment ownership with the native fragment bridge.
+      builder: (context, child) => Navigator(
+        reportsRouteUpdateToEngine: false,
+        onGenerateRoute: (_) => MaterialPageRoute<void>(
+          builder: (_) => const YotinHomePage(),
+        ),
+      ),
     );
   }
 }
@@ -66,31 +85,63 @@ class _YotinHomePageState extends State<YotinHomePage> {
   // decision itself—not the wider contact introduction or qualifier card—so
   // phone visitors can act as soon as the scroll settles.
   final GlobalKey _qualifierQuestionKey = GlobalKey();
-  late final OfflineFieldReviewCacheController _offlineFieldReviewCache;
+  late final bool _isFieldReviewSurface;
+  OfflineFieldReviewCacheController? _offlineFieldReviewCache;
+  late final void Function() _disposePublicFragmentListeners;
   OfflineFieldReviewCacheState _offlineCacheState =
       OfflineFieldReviewCacheState.unavailable;
   bool _networkAvailable = true;
+  String? _lastHandledPublicFragment;
 
   @override
   void initState() {
     super.initState();
-    _offlineFieldReviewCache = OfflineFieldReviewCacheController(
-      onStateChanged: (state) {
-        if (!mounted) return;
-        setState(() => _offlineCacheState = state);
-      },
-      onNetworkChanged: (available) {
-        if (!mounted) return;
-        setState(() => _networkAvailable = available);
-      },
+    _isFieldReviewSurface =
+        yotinAppSurface == YotinAppSurface.fieldReview;
+    if (_isFieldReviewSurface) {
+      _offlineFieldReviewCache = OfflineFieldReviewCacheController(
+        onStateChanged: (state) {
+          if (!mounted) return;
+          setState(() => _offlineCacheState = state);
+        },
+        onNetworkChanged: (available) {
+          if (!mounted) return;
+          setState(() => _networkAvailable = available);
+        },
+      );
+      _offlineCacheState = _offlineFieldReviewCache!.state;
+      _networkAvailable = _offlineFieldReviewCache!.networkAvailable;
+    }
+    _disposePublicFragmentListeners = listenToPublicFragmentChanges(
+      _onBrowserFragmentChange,
     );
-    _offlineCacheState = _offlineFieldReviewCache.state;
-    _networkAvailable = _offlineFieldReviewCache.networkAvailable;
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       markFlutterPublicShellReady();
       _updateHeroVisibility();
+      unawaited(_scrollToCurrentPublicFragment());
     });
+  }
+
+  void _onBrowserFragmentChange(String? fragment) {
+    // An empty browser hash is the public root, which deliberately maps to
+    // the hero. This matters when Back travels from #wellfi to `/`.
+    final section = normalizePublicSectionId(fragment ?? '');
+    if (section == null) return;
+    final canonicalFragment = publicFragmentForSection(section);
+    if (_lastHandledPublicFragment == canonicalFragment) return;
+    _lastHandledPublicFragment = canonicalFragment;
+    unawaited(_scrollToSection(section, updateFragment: false));
+  }
+
+  Future<void> _scrollToCurrentPublicFragment() async {
+    // The first Flutter frame mounts the section keys, but fonts and the
+    // renderer can still finish layout in that frame. Waiting once more makes
+    // a direct #contact-style load deterministic instead of racing a nullable
+    // GlobalKey context during startup.
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    _onBrowserFragmentChange(currentPublicFragment());
   }
 
   void _onScroll() {
@@ -159,14 +210,24 @@ class _YotinHomePageState extends State<YotinHomePage> {
     }
   }
 
-  Future<void> _scrollToSection(String section) async {
-    if (section == 'qualifier') {
+  Future<void> _scrollToSection(
+    String section, {
+    bool updateFragment = true,
+  }) async {
+    final normalizedSection = normalizePublicSectionId(section);
+    if (normalizedSection == null) return;
+    if (updateFragment) {
+      _lastHandledPublicFragment = publicFragmentForSection(normalizedSection);
+      updatePublicFragment(normalizedSection);
+    }
+
+    if (normalizedSection == 'qualifier') {
       await _scrollToQualifierDecision();
       return;
     }
 
     GlobalKey? key;
-    switch (section) {
+    switch (normalizedSection) {
       case 'hero':
         key = _heroKey;
         break;
@@ -187,13 +248,13 @@ class _YotinHomePageState extends State<YotinHomePage> {
         break;
     }
 
-    if (key?.currentContext != null) {
-      await Scrollable.ensureVisible(
-        key!.currentContext!,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOutCubic,
-      );
-    }
+    final targetContext = key?.currentContext;
+    if (targetContext == null) return;
+    await Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOutCubic,
+    );
   }
 
   Future<void> _openChatFi() {
@@ -232,11 +293,12 @@ class _YotinHomePageState extends State<YotinHomePage> {
 
   @override
   void dispose() {
+    _disposePublicFragmentListeners();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _drillScrollProgress.dispose();
     _heroVisible.dispose();
-    _offlineFieldReviewCache.dispose();
+    _offlineFieldReviewCache?.dispose();
     super.dispose();
   }
 
@@ -254,7 +316,9 @@ class _YotinHomePageState extends State<YotinHomePage> {
               key: _scrollViewportKey,
               child: Semantics(
                 container: true,
-                label: 'Field review information',
+                label: _isFieldReviewSurface
+                    ? 'Field review information'
+                    : 'Yotin Energy public information',
                 role: SemanticsRole.main,
                 child: SingleChildScrollView(
                   controller: _scrollController,
@@ -273,8 +337,14 @@ class _YotinHomePageState extends State<YotinHomePage> {
                           },
                           offlineCacheState: _offlineCacheState,
                           networkAvailable: _networkAvailable,
-                          onPrepareOffline:
-                              _offlineFieldReviewCache.cacheFieldReview,
+                          onPrepareOffline: _isFieldReviewSurface
+                              ? () {
+                                  unawaited(
+                                    _offlineFieldReviewCache!
+                                        .cacheFieldReview(),
+                                  );
+                                }
+                              : null,
                         ),
                       ),
                       const SignalStripWidget(),

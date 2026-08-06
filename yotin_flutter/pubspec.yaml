@@ -30,6 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # First-party web URL strategy API. The public one-page surface disables the
+  # framework strategy so native #wellfi fragments need no third-party router.
+  flutter_web_plugins:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   # Current web release: compressed WOFF/WOFF2 asset support and resilient
   # failed-font handling. All fonts used by the Yotin system remain available.
