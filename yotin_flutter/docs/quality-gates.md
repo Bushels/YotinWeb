@@ -191,3 +191,15 @@ release checkpoint: advance, rework, or keep isolated
   **not** show that Flutter wins the static marketing homepage's cold-load
   budget, and it does not waive the required preview first-/repeat-visit
   browser trace or the separate R3F transfer measurement.
+
+## Qualifier parity hardening - 2026-08-06
+
+- `test/static_qualifier_parity_test.dart` reads the approved static
+  `main.js` source and the Flutter qualifier source. It locks the six public
+  steps, option copy, 50–6,000 m casing range, 0.9x derived landing rule,
+  high-temperature waitlist subject, direct email hand-off, and clipboard
+  fallback against silent cross-surface drift.
+- The widget suite now completes the complete high-temperature flow at 1,000 m
+  casing length and verifies the derived 900 m choice, waitlist verdict,
+  follow-up CTA, and copy-summary action remain visible. This supplements,
+  rather than replaces, the model's strong/review/future tests.

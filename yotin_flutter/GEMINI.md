@@ -20,6 +20,11 @@
 - The derived landing threshold is the nearest 10 m to `0.9 * intermediate
   casing length`. A landing at or deeper than that threshold is an engineering
   review flag, not an automatic rejection.
+- `test/static_qualifier_parity_test.dart` is the drift guard between the
+  approved static `..\main.js` qualifier and the Flutter flow. When a
+  qualifier claim, option, threshold, or email/copy fallback changes, update
+  both implementations and the parity test in one reviewed change; never make
+  Flutter the unverified source of truth.
 - ChatFi posts `{"messages":[{"role":"user|assistant","content":"..."}]}`
   to the configured endpoint. Send only the newest 24 non-empty messages and
   cap a user message at 4,000 characters. Never fabricate a successful answer

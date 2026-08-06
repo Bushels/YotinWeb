@@ -227,6 +227,56 @@ void main() {
     }
   });
 
+  testWidgets(
+    'qualifier keeps the high-temperature waitlist and lead hand-off visible',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: CandidateWellQualifierWidget(),
+            ),
+          ),
+        ),
+      );
+
+      for (final option in const [
+        'Progressing cavity pump (PCP)',
+        'Heavy oil',
+        'Above 150 °C',
+      ]) {
+        await tester.tap(find.text(option));
+        await tester.pump();
+      }
+
+      await tester.enterText(
+        find.byKey(const ValueKey('intermediate-casing-length')),
+        '1000',
+      );
+      await tester.tap(find.text('Continue'));
+      await tester.pump();
+      await tester.tap(find.text('Shallower than 900 m'));
+      await tester.pump();
+      await tester.tap(find.text('Within 3 months'));
+      await tester.pump();
+
+      expect(
+        find.text('HIGH-TEMP VERSION IN DEVELOPMENT'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Above 150 °C — that build is in progress.'),
+        findsOneWidget,
+      );
+      expect(find.text('HAVE YOTIN FOLLOW UP'), findsOneWidget);
+      expect(find.text('COPY SUMMARY'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('app shell renders at all audited widths', (
     WidgetTester tester,
   ) async {
