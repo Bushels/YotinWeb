@@ -95,9 +95,12 @@ release checkpoint: advance, rework, or keep isolated
   `/field-review/` route.
 - Test the canonical R3F production origin and ChatFi CORS against the final
   approved Yotin origin.
-- The current root Vercel deployment does not build or serve this ignored,
-  untracked Flutter artifact. Define an explicit build/copy/rewrite pipeline
-  before treating `/field-review/` as deployable.
+- The current root Vercel deployment does not build or serve this Flutter
+  artifact. Define an explicit build/copy/rewrite pipeline before treating
+  `/field-review/` as deployable. As of `2436ba6` the project is **tracked in
+  git** (it is no longer untracked); `.vercelignore` now excludes
+  `yotin_flutter/` so merging to master cannot push Dart source into the
+  public static deployment.
 - Set and test a first-visit/repeat-visit payload budget before public use.
   The current Wasm app plus its renderer is materially heavier than the static
   marketing shell; do not replace the root based on local visual success.
@@ -106,6 +109,69 @@ release checkpoint: advance, rework, or keep isolated
   re-enable the static fallback skip link after the fallback becomes inert.
 - Keep the static root as the canonical SEO and no-JavaScript document until
   those production checks pass; this prototype does not replace it by itself.
+
+## Static-parity pass - 2026-08-06
+
+An independent diff against `..\index.html`, `..\main.js`, and `..\styles.css`
+found that the *logic* had been ported exactly while the *presentation* layer
+had drifted. The qualifier model — the part with unit coverage — was faithful
+to the published branching, thresholds, rounding, and all six engineering-note
+strings. The widget layer, which only had structural tests, had rewritten
+approved copy and swapped two typefaces. Repaired:
+
+- **Typefaces.** `styles.css` declares `--font-display` (Archivo) on 23 rules
+  and `--font-hero` (Space Grotesk) on exactly one — `.hero-message h1`. The
+  app had applied Space Grotesk to all 26 heading sites, leaving bundled
+  Archivo unreachable. The Space Grotesk role is now `fontHeroTitle`, scoped to
+  the H1; everything else is `fontDisplay`. Weights stay at the bundled
+  variants rather than the static site's exact values — one variant per family
+  ships and `allowRuntimeFetching` is false, so requesting an unbundled weight
+  risks a default-face fallback. Exact typeface parity is explicitly not a
+  goal; close and legible is.
+- **Approved copy restored.** The qualifier intro ("Six questions, no contact
+  details required to see the answer — including when the answer is no.") had
+  been replaced with new marketing copy asserting "instantly". The ChatFi
+  disclosure had dropped "Conversations may be reviewed to improve the
+  service." Verdict badges read `STRONG FIT` / `LIKELY FIT — WORTH A REVIEW`
+  again, and the header CTA is `ASK CHATFI`.
+- **Verdict colours.** `styles.css:1145` states the high-temperature badge is
+  sand/neutral rather than a warning, "because 'we're building that' should not
+  read like 'no'". The app had it on ember and put amber on review; both now
+  follow the static intent.
+- **Number formatting.** `QualifierState.formatMetres` mirrors `main.js`
+  `fmtNum`, so a derived threshold reads `1,350 m` as it does publicly rather
+  than `1350 m`.
+- **Header breakpoint.** The static site switches nav treatment once, at 820
+  px. The app switched at 1120 px and showed a hamburger *plus* an
+  `EVALUATE WELL` button between 860 and 1119 px — a state at no other width,
+  which the audited widths (390 / 820 / 1280 / 1600) stepped over. Nav links
+  now cost what the static ones cost (mono 12 px, 0.08em, uppercase, no
+  per-link padding), which is what lets one breakpoint at 860 px fit.
+- **ChatFi endpoint** moved to `--dart-define=CHATFI_ENDPOINT`, defaulting to
+  production. The static site reads the same value from `data-chatfi-api`, so
+  the preview contract's approved-origin CORS test no longer needs a recompile.
+- **Cyan removed.** `styles.css` contains no cyan: it was deliberately dropped
+  from this palette because an electric cyan reads as generic-AI rather than
+  field equipment, and the accent moved to ember with sand hairlines. The app
+  had reintroduced `#00E5FF` at 17 sites — badges, labels, borders, status
+  text and the whole well canvas. All chrome is now ember/sand. One muted
+  `signalTint` (`#4E8E99`) survives, used only for the EM wave particles in
+  `dynamic_well_canvas`, under an animated opacity, where a cool accent is the
+  only thing separating the travelling signal from the ember tool body.
+  Replacing it with `emberLit` is a one-line change if even that is too much.
+
+New gate: `test/public_copy_contract_test.dart` pins the approved strings,
+typeface roles, metre formatting, and the header contract at 390 / 820 / 860 /
+1024 / 1280 / 1600 px. A failure there means the two surfaces disagree and a
+human picks which one moves.
+
+```text
+flutter analyze                        PASS  (no issues)
+flutter test --concurrency=1           PASS  (38 tests, was 21)
+```
+
+Toolchain actually installed is Flutter **3.44.8** / Dart 3.12.2; earlier notes
+in this file and in `README.md` said 3.44.7.
 
 ## V1 hardening evidence - 2026-08-06
 

@@ -165,7 +165,7 @@ class _CandidateWellQualifierWidgetState
                   border: Border.all(color: YotinTheme.ember),
                 ),
                 child: Text(
-                  'INTERACTIVE QUALIFIER',
+                  '60-SECOND CHECK',
                   style: YotinTheme.fontMono.copyWith(
                     fontSize: 11,
                     color: YotinTheme.ember,
@@ -175,7 +175,7 @@ class _CandidateWellQualifierWidgetState
               ),
               Text(
                 _state.currentStep < 6
-                    ? 'Step ${_state.currentStep + 1} of 6'
+                    ? 'Question ${_state.currentStep + 1} of 6'
                     : 'Self-Check Verdict',
                 style: YotinTheme.fontMono.copyWith(
                   fontSize: 12,
@@ -186,12 +186,17 @@ class _CandidateWellQualifierWidgetState
           ),
           const SizedBox(height: 16),
           Text(
-            'Candidate-Well Qualifier',
-            style: YotinTheme.fontHero.copyWith(fontSize: 26),
+            'Will WellFi fit your well?',
+            style: YotinTheme.fontDisplay.copyWith(fontSize: 26),
           ),
           const SizedBox(height: 8),
+          // Approved public copy (index.html:573). The "no contact details"
+          // and "including when the answer is no" clauses are the point of the
+          // section — this qualifier is allowed to say no — so they are not
+          // paraphrasable marketing copy.
           Text(
-            'Evaluate your well parameters instantly against published WellFi electromagnetic telemetry limits.',
+            'Six questions, no contact details required to see the answer — '
+            'including when the answer is no.',
             style: YotinTheme.fontBody.copyWith(color: YotinTheme.textMuted),
           ),
           const SizedBox(height: 20),
@@ -248,7 +253,7 @@ class _CandidateWellQualifierWidgetState
     final threshold = _state.landingThreshold;
     final status = threshold == null
         ? 'Enter intermediate casing length to calculate the pump-landing reference.'
-        : 'Target a pump landing shallower than $threshold m to preserve the intermediate-casing standoff reference.';
+        : 'Target a pump landing shallower than ${QualifierState.formatMetres(threshold)} m to preserve the intermediate-casing standoff reference.';
 
     return Semantics(
       image: true,
@@ -302,7 +307,7 @@ class _CandidateWellQualifierWidgetState
                         decoration: BoxDecoration(
                           color: YotinTheme.voidBg.withValues(alpha: 0.88),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: YotinTheme.cyanSignal),
+                          border: Border.all(color: YotinTheme.sandLineStrong),
                         ),
                         child: Image.asset(
                           'assets/wellfi-internal-ghost.webp',
@@ -417,18 +422,18 @@ class _CandidateWellQualifierWidgetState
         return _buildNumberInputStep();
       case 4:
         final threshold = _state.landingThreshold;
-        final question = threshold != null
-            ? 'Is the pump landed shallower or deeper than $threshold m?'
+        final shown = threshold == null
+            ? null
+            : QualifierState.formatMetres(threshold);
+        final question = shown != null
+            ? 'Is the pump landed shallower or deeper than $shown m?'
             : 'Where does the pump land in the intermediate casing?';
         final hint =
             'That is 10% of your intermediate above the shoe — the standoff WellFi needs to run inside the tubing.';
-        final options = threshold != null
+        final options = shown != null
             ? [
-                _OptionData(
-                  'Shallower than $threshold m',
-                  tag: '< $threshold m',
-                ),
-                _OptionData('Deeper than $threshold m', tag: '> $threshold m'),
+                _OptionData('Shallower than $shown m', tag: '< $shown m'),
+                _OptionData('Deeper than $shown m', tag: '> $shown m'),
                 const _OptionData('Not sure'),
               ]
             : const [
@@ -491,7 +496,7 @@ class _CandidateWellQualifierWidgetState
           const SizedBox(height: 6),
           Text(
             question,
-            style: YotinTheme.fontHero.copyWith(
+            style: YotinTheme.fontDisplay.copyWith(
               fontSize: 18,
               color: YotinTheme.textWhite,
             ),
@@ -618,7 +623,7 @@ class _CandidateWellQualifierWidgetState
           const SizedBox(height: 6),
           Text(
             'How long is your intermediate casing, approximately?',
-            style: YotinTheme.fontHero.copyWith(
+            style: YotinTheme.fontDisplay.copyWith(
               fontSize: 18,
               color: YotinTheme.textWhite,
             ),
@@ -721,25 +726,31 @@ class _CandidateWellQualifierWidgetState
     String headline;
     String detail;
 
+    // Badge text and colour both track the static site. `.qualifier-badge` is
+    // uppercased by CSS, so these literals are the static strings in the case
+    // they render in. The colours are not decorative: styles.css:1145 states
+    // the future badge is sand/neutral rather than a warning "because 'we're
+    // building that' should not read like 'no'". Review — not future — is the
+    // ember one.
     switch (_state.outcome) {
       case QualifierOutcome.strong:
-        bannerColor = Colors.greenAccent;
+        bannerColor = const Color(0xFF8FE07A);
         icon = Icons.check_circle;
-        title = 'STRONG CANDIDATE FIT';
+        title = 'STRONG FIT';
         headline = 'This well looks like a straightforward deployment.';
         detail =
             'Everything you entered sits inside WellFi\'s operating envelope. The next step is confirming tubing configuration and what data you want out of it.';
         break;
       case QualifierOutcome.review:
-        bannerColor = Colors.amberAccent;
+        bannerColor = YotinTheme.emberLit;
         icon = Icons.warning_amber_rounded;
-        title = 'LIKELY FIT — WORTH ENGINEERING REVIEW';
+        title = 'LIKELY FIT — WORTH A REVIEW';
         headline = 'Probably workable, with a couple of things to confirm.';
         detail =
             'Nothing you entered rules it out. These are the points our team would want to walk through before committing to a deployment date.';
         break;
       case QualifierOutcome.future:
-        bannerColor = YotinTheme.emberLit;
+        bannerColor = YotinTheme.sand;
         icon = Icons.hourglass_top;
         title = 'HIGH-TEMP VERSION IN DEVELOPMENT';
         headline = 'Above 150 °C — that build is in progress.';
@@ -777,7 +788,7 @@ class _CandidateWellQualifierWidgetState
           const SizedBox(height: 10),
           Text(
             headline,
-            style: YotinTheme.fontHero.copyWith(
+            style: YotinTheme.fontDisplay.copyWith(
               fontSize: 16,
               color: YotinTheme.textWhite,
             ),
@@ -850,7 +861,7 @@ class _CandidateWellQualifierWidgetState
       MapEntry(
         'Intermediate casing length',
         _state.intermediateCasingLength != null
-            ? '${_state.intermediateCasingLength!.toStringAsFixed(0)} m'
+            ? '${QualifierState.formatMetres(_state.intermediateCasingLength!)} m'
             : '—',
       ),
       MapEntry('Pump landing', _state.pumpLanding ?? '—'),
@@ -892,8 +903,11 @@ class _CandidateWellQualifierWidgetState
 
   Widget _buildActionButtons() {
     final ctaLabel = _state.outcome == QualifierOutcome.future
+        // Static labels (main.js:967, :984). This app renders buttons in
+        // uppercase mono where the static site uses sentence case; the wording
+        // is the parity contract, the casing is this shell's own treatment.
         ? 'HAVE YOTIN FOLLOW UP'
-        : 'SUBMIT CANDIDATE WELL';
+        : 'SEND THIS TO YOTIN';
 
     return Column(
       children: [

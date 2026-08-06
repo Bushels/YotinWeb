@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import '../theme/yotin_theme.dart';
 
 class YotinNavigationBar extends StatelessWidget {
-  static const _desktopNavigationMinWidth = 1120.0;
+  // The static site switches between the four-link desktop nav and the
+  // hamburger at a single breakpoint — `max-width: 820px` (styles.css:1559).
+  // Matching it with one threshold removes the previous 860–1119 px band,
+  // where this header uniquely showed a hamburger *and* an EVALUATE WELL
+  // button that exists at no other width — a state the audited widths
+  // (390 / 820 / 1280 / 1600) stepped straight over.
+  static const _desktopNavigationMinWidth = 860.0;
 
   final Function(String section) onNavigate;
   final VoidCallback onOpenChatFi;
@@ -20,11 +26,10 @@ class YotinNavigationBar extends StatelessWidget {
         final width = constraints.maxWidth;
         // Preserve comfortable tap targets around the brand and primary
         // actions on tablet widths; the hero retains the full evaluation CTA.
-        final isCompact = width < 860;
+        final isCompact = width < _desktopNavigationMinWidth;
         // Match the public site’s four primary destinations. The qualifier is
         // already the hero’s conversion CTA, so it does not need to compete
-        // with the desktop navigation. That leaves enough room for an actual
-        // desktop header at ordinary 1280 px widths.
+        // with the desktop navigation.
         final showFullNavigation = width >= _desktopNavigationMinWidth;
         const maxContentWidth = 1536.0;
 
@@ -89,7 +94,7 @@ class YotinNavigationBar extends StatelessWidget {
                             children: [
                               Text(
                                 isCompact ? 'YOTIN' : 'YOTIN ENERGY',
-                                style: YotinTheme.fontHero.copyWith(
+                                style: YotinTheme.fontDisplay.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.2,
@@ -138,7 +143,9 @@ class YotinNavigationBar extends StatelessWidget {
                         size: 18,
                       ),
                       label: Text(
-                        'CHATFI AI',
+                        // Static header CTA is `Ask ChatFi` (index.html:218),
+                        // uppercased by `.nav-cta { text-transform: uppercase }`.
+                        'ASK CHATFI',
                         style: YotinTheme.fontMono.copyWith(
                           color: YotinTheme.sand,
                           fontSize: 12,
@@ -159,32 +166,8 @@ class YotinNavigationBar extends StatelessWidget {
                       ),
                       onPressed: onOpenChatFi,
                     ),
-                    if (!showFullNavigation) ...[
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: YotinTheme.ember,
-                          foregroundColor: YotinTheme.voidBg,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () => onNavigate('contact'),
-                        child: Text(
-                          'EVALUATE WELL',
-                          style: YotinTheme.fontMono.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _sectionMenu(),
-                    ],
+                    // No EVALUATE WELL button here. The static header carries
+                    // only `Ask ChatFi`; the well-fit CTA lives in the hero.
                   ],
                 ],
               ),
@@ -195,18 +178,29 @@ class YotinNavigationBar extends StatelessWidget {
     );
   }
 
+  /// Matches `.desktop-nav a` (styles.css:175): IBM Plex Mono, 12 px, w500,
+  /// 0.08em tracking, uppercase, #c1c9cd — spaced by a gap rather than by
+  /// per-link padding.
+  ///
+  /// The previous 14 px body-font link with 24 px of horizontal padding each
+  /// was both a token mismatch and the reason four links could not fit beside
+  /// the brand until 1120 px. Costing them correctly is what lets the header
+  /// switch at the static site's single breakpoint.
   Widget _navLink(String label, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: TextButton(
-        onPressed: onTap,
-        child: Text(
-          label,
-          style: YotinTheme.fontBody.copyWith(
-            fontSize: 14,
-            color: YotinTheme.textWhite,
-            fontWeight: FontWeight.w500,
-          ),
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: YotinTheme.fontMono.copyWith(
+          fontSize: 12,
+          color: const Color(0xFFC1C9CD),
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.08 * 12,
         ),
       ),
     );

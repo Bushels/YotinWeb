@@ -49,7 +49,7 @@ class ContactQualifierSection extends StatelessWidget {
                         header: true,
                         child: Text(
                           'Know the Unknown.\nOne Changeout Away.',
-                          style: YotinTheme.fontHero.copyWith(
+                          style: YotinTheme.fontDisplay.copyWith(
                             fontSize: 38,
                             height: 1.04,
                           ),

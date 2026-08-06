@@ -31,7 +31,7 @@ class InsightSection extends StatelessWidget {
                 header: true,
                 child: Text(
                   'Inside the string.\nOut of the way.',
-                  style: YotinTheme.fontHero.copyWith(
+                  style: YotinTheme.fontDisplay.copyWith(
                     fontSize: 42,
                     height: 1.02,
                   ),
@@ -132,7 +132,9 @@ class InsightSection extends StatelessWidget {
                         children: [
                           Text(
                             'WellFi Access Portal',
-                            style: YotinTheme.fontHero.copyWith(fontSize: 22),
+                            style: YotinTheme.fontDisplay.copyWith(
+                              fontSize: 22,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(

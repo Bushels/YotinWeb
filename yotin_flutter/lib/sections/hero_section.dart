@@ -175,10 +175,13 @@ class _HeroCopy extends StatelessWidget {
           headingLevel: 1,
           child: Text(
             'Know the\nUnknown.',
-            style: YotinTheme.fontHero.copyWith(
+            // The one Space Grotesk surface on the site. Static reference:
+            // `.hero-message h1` — line-height 1, -0.015em tracking. Weight
+            // comes from the theme and is bundle-constrained; see fontHeroTitle.
+            style: YotinTheme.fontHeroTitle.copyWith(
               fontSize: isDesktop ? 66 : 42,
-              height: 0.98,
-              fontWeight: FontWeight.bold,
+              height: 1,
+              letterSpacing: -0.015 * (isDesktop ? 66 : 42),
             ),
           ),
         ),

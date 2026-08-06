@@ -45,6 +45,22 @@ String buildChatFiUnavailableMessage({
 
 enum ChatFiAvailability { ready, connected, unavailable }
 
+/// ChatFi endpoint, overridable at build time:
+///
+/// ```text
+/// flutter build web --wasm --dart-define=CHATFI_ENDPOINT=https://staging.example/chat
+/// ```
+///
+/// The static site reads the same value from `data-chatfi-api` on `<body>`
+/// (index.html:196), so it can be retargeted per deployment without a rebuild.
+/// A hardcoded Dart literal cannot, which blocks the preview contract's
+/// "exercise ChatFi only against an approved origin" step without a recompile.
+/// The default stays the production endpoint so no existing call site changes.
+const String kChatFiEndpoint = String.fromEnvironment(
+  'CHATFI_ENDPOINT',
+  defaultValue: 'https://chatfi-server-851855129205.us-central1.run.app/chat',
+);
+
 class ChatFiPanelWidget extends StatefulWidget {
   final VoidCallback onClose;
   final String endpoint;
@@ -53,8 +69,7 @@ class ChatFiPanelWidget extends StatefulWidget {
   const ChatFiPanelWidget({
     super.key,
     required this.onClose,
-    this.endpoint =
-        'https://chatfi-server-851855129205.us-central1.run.app/chat',
+    this.endpoint = kChatFiEndpoint,
     this.createClient,
   });
 
@@ -253,7 +268,7 @@ class _ChatFiPanelWidgetState extends State<ChatFiPanelWidget> {
       ChatFiAvailability.ready => ('Ready to send', YotinTheme.sandMute),
       ChatFiAvailability.connected => (
         'Connected for this conversation',
-        YotinTheme.cyanSignal,
+        YotinTheme.emberLit,
       ),
       ChatFiAvailability.unavailable => (
         'Temporarily unavailable',
@@ -287,7 +302,7 @@ class _ChatFiPanelWidgetState extends State<ChatFiPanelWidget> {
               children: [
                 Text(
                   'ChatFi AI',
-                  style: YotinTheme.fontHero.copyWith(
+                  style: YotinTheme.fontDisplay.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -439,7 +454,11 @@ class _ChatFiPanelWidgetState extends State<ChatFiPanelWidget> {
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
       color: YotinTheme.deepBg,
       child: Text(
-        'ChatFi is an AI assistant. Confirm decisions that matter directly with Yotin.',
+        // Verbatim from index.html:618. The "conversations may be reviewed"
+        // clause is the disclosure doing the actual work here; it is not
+        // shortenable for layout.
+        'ChatFi is an AI assistant. Conversations may be reviewed to improve '
+        'the service. Confirm anything that matters directly with Yotin.',
         style: YotinTheme.fontBody.copyWith(
           color: YotinTheme.textMuted,
           fontSize: 10,

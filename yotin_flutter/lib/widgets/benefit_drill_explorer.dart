@@ -58,7 +58,7 @@ class _BenefitDrillExplorerWidgetState
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: YotinTheme.cyanSignal,
+                        color: YotinTheme.ember,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -78,7 +78,7 @@ class _BenefitDrillExplorerWidgetState
                 'STEP ${activeStep + 1}/${kWellFiBenefits.length}',
                 style: YotinTheme.fontMono.copyWith(
                   fontSize: 11,
-                  color: YotinTheme.cyanSignal,
+                  color: YotinTheme.sandMute,
                 ),
               ),
             ],
@@ -86,7 +86,7 @@ class _BenefitDrillExplorerWidgetState
           const SizedBox(height: 16),
           Text(
             'Benefits of WellFi',
-            style: YotinTheme.fontHero.copyWith(fontSize: 28),
+            style: YotinTheme.fontDisplay.copyWith(fontSize: 28),
           ),
           const SizedBox(height: 8),
           Text(
@@ -171,7 +171,7 @@ class _BenefitDrillExplorerWidgetState
                       const SizedBox(height: 8),
                       Text(
                         activeItem.title,
-                        style: YotinTheme.fontHero.copyWith(fontSize: 24),
+                        style: YotinTheme.fontDisplay.copyWith(fontSize: 24),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -197,7 +197,7 @@ class _BenefitDrillExplorerWidgetState
                           children: [
                             const Icon(
                               Icons.verified_outlined,
-                              color: YotinTheme.cyanSignal,
+                              color: YotinTheme.emberLit,
                               size: 18,
                             ),
                             const SizedBox(width: 8),
@@ -206,7 +206,7 @@ class _BenefitDrillExplorerWidgetState
                                 'FIELD CONTEXT: ${activeItem.spec}',
                                 style: YotinTheme.fontMono.copyWith(
                                   fontSize: 12,
-                                  color: YotinTheme.cyanSignal,
+                                  color: YotinTheme.emberLit,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -274,7 +274,9 @@ class _BenefitDrillExplorerWidgetState
                             decoration: BoxDecoration(
                               color: YotinTheme.voidBg.withValues(alpha: 0.86),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: YotinTheme.cyanSignal),
+                              border: Border.all(
+                                color: YotinTheme.sandLineStrong,
+                              ),
                             ),
                             child: Image.asset(
                               'assets/wellfi-internal-ghost.webp',
@@ -299,7 +301,7 @@ class _BenefitDrillExplorerWidgetState
                               'FIELD REVIEW VISUAL',
                               style: YotinTheme.fontMono.copyWith(
                                 fontSize: 10,
-                                color: YotinTheme.cyanSignal,
+                                color: YotinTheme.sandMute,
                               ),
                             ),
                           ),

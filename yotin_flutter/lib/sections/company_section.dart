@@ -38,7 +38,7 @@ class CompanySection extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: 'yôtin',
-                            style: YotinTheme.fontHero.copyWith(
+                            style: YotinTheme.fontDisplay.copyWith(
                               color: YotinTheme.emberInk,
                               fontStyle: FontStyle.italic,
                             ),
@@ -46,7 +46,7 @@ class CompanySection extends StatelessWidget {
                           const TextSpan(text: '.'),
                         ],
                       ),
-                      style: YotinTheme.fontHero.copyWith(
+                      style: YotinTheme.fontDisplay.copyWith(
                         color: YotinTheme.inkText,
                         fontSize: 42,
                         height: 1.02,
@@ -216,7 +216,7 @@ class _CompanyMark extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: YotinTheme.fontHero.copyWith(
+            style: YotinTheme.fontDisplay.copyWith(
               color: YotinTheme.inkText,
               fontSize: 15,
             ),

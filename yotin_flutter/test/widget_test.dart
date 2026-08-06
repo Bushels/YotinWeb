@@ -15,7 +15,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const YotinFlutterApp());
     expect(find.byType(YotinHomePage), findsOneWidget);
-    expect(find.textContaining('Candidate-Well Qualifier'), findsOneWidget);
+    expect(find.textContaining('Will WellFi fit your well?'), findsOneWidget);
   });
 
   testWidgets('field review exposes a main landmark and a level-one heading', (
@@ -71,22 +71,22 @@ void main() {
       );
       expect(desktopNavigation, findsOneWidget);
       expect(
-        find.descendant(of: desktopNavigation, matching: find.text('WellFi')),
+        find.descendant(of: desktopNavigation, matching: find.text('WELLFI')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: desktopNavigation, matching: find.text('Benefits')),
+        find.descendant(of: desktopNavigation, matching: find.text('BENEFITS')),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: desktopNavigation,
-          matching: find.text('Our Company'),
+          matching: find.text('OUR COMPANY'),
         ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: desktopNavigation, matching: find.text('Contact')),
+        find.descendant(of: desktopNavigation, matching: find.text('CONTACT')),
         findsOneWidget,
       );
       expect(find.byTooltip('Open site navigation'), findsNothing);
@@ -112,10 +112,10 @@ void main() {
     );
 
     for (final route in const [
-      ('WellFi', 'wellfi'),
-      ('Benefits', 'benefits'),
-      ('Our Company', 'company'),
-      ('Contact', 'contact'),
+      ('WELLFI', 'wellfi'),
+      ('BENEFITS', 'benefits'),
+      ('OUR COMPANY', 'company'),
+      ('CONTACT', 'contact'),
     ]) {
       await tester.tap(find.text(route.$1));
       await tester.pump();

@@ -33,6 +33,17 @@ class QualifierState {
     return calculateLandingThreshold(len);
   }
 
+  /// Thousands-separated metre value, matching the static site's `fmtNum`
+  /// (main.js:733): round half-up, then group digits in threes. Every operator-
+  /// facing length on the public site is grouped, so an uninterpolated
+  /// `$threshold` renders "1350 m" where the live site reads "1,350 m".
+  static String formatMetres(num value) {
+    return value.round().toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => ',',
+    );
+  }
+
   /// Evaluates active review/future flags based on selected options.
   List<String> get flags {
     final activeFlags = <String>[];
@@ -130,7 +141,7 @@ class QualifierState {
     buffer.writeln('Well type: ${wellType ?? "—"}');
     buffer.writeln('Bottomhole temperature: ${bottomholeTemp ?? "—"}');
     buffer.writeln(
-      'Intermediate casing length: ${intermediateCasingLength != null ? "${intermediateCasingLength!.toStringAsFixed(0)} m" : "—"}',
+      'Intermediate casing length: ${intermediateCasingLength != null ? "${formatMetres(intermediateCasingLength!)} m" : "—"}',
     );
     buffer.writeln('Pump landing: ${pumpLanding ?? "—"}');
     buffer.writeln('Next planned intervention: ${interventionTiming ?? "—"}');

@@ -30,7 +30,7 @@ class YotinFooterWidget extends StatelessWidget {
                       children: [
                         Text(
                           'YOTIN ENERGY',
-                          style: YotinTheme.fontHero.copyWith(
+                          style: YotinTheme.fontDisplay.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),

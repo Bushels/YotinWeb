@@ -138,7 +138,7 @@ class _TelemetryChannelCardState extends State<TelemetryChannelCard>
                   children: [
                     Text(
                       widget.value,
-                      style: YotinTheme.fontHero.copyWith(
+                      style: YotinTheme.fontDisplay.copyWith(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: YotinTheme.textWhite,

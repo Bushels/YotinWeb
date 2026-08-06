@@ -139,7 +139,7 @@ class WellFiSection extends StatelessWidget {
                 header: true,
                 child: Text(
                   'Data Below.\nInsight Above.',
-                  style: YotinTheme.fontHero.copyWith(
+                  style: YotinTheme.fontDisplay.copyWith(
                     fontSize: 42,
                     height: 1.02,
                   ),
@@ -179,7 +179,7 @@ class WellFiSection extends StatelessWidget {
                       header: true,
                       child: Text(
                         'Explore your data',
-                        style: YotinTheme.fontHero.copyWith(fontSize: 25),
+                        style: YotinTheme.fontDisplay.copyWith(fontSize: 25),
                       ),
                     ),
                   ),
@@ -227,7 +227,7 @@ class WellFiSection extends StatelessWidget {
                 header: true,
                 child: Text(
                   'How WellFi works',
-                  style: YotinTheme.fontHero.copyWith(fontSize: 28),
+                  style: YotinTheme.fontDisplay.copyWith(fontSize: 28),
                 ),
               ),
               const SizedBox(height: 20),
@@ -255,7 +255,7 @@ class WellFiSection extends StatelessWidget {
                 header: true,
                 child: Text(
                   'Public specifications',
-                  style: YotinTheme.fontHero.copyWith(fontSize: 28),
+                  style: YotinTheme.fontDisplay.copyWith(fontSize: 28),
                 ),
               ),
               const SizedBox(height: 20),
@@ -324,7 +324,7 @@ class _Channel extends StatelessWidget {
               ],
             ),
             const Spacer(),
-            Text(title, style: YotinTheme.fontHero.copyWith(fontSize: 20)),
+            Text(title, style: YotinTheme.fontDisplay.copyWith(fontSize: 20)),
             const SizedBox(height: 8),
             Text(
               description,
@@ -382,7 +382,10 @@ class _Journey extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: YotinTheme.fontHero.copyWith(fontSize: 16)),
+                Text(
+                  title,
+                  style: YotinTheme.fontDisplay.copyWith(fontSize: 16),
+                ),
                 const SizedBox(height: 7),
                 Text(
                   description,
@@ -443,7 +446,7 @@ class _Spec extends StatelessWidget {
                 Text.rich(
                   TextSpan(
                     text: value,
-                    style: YotinTheme.fontHero.copyWith(fontSize: 22),
+                    style: YotinTheme.fontDisplay.copyWith(fontSize: 22),
                     children: [
                       if (unit.isNotEmpty)
                         TextSpan(

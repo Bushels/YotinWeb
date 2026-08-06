@@ -145,7 +145,10 @@ class _SignalStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: YotinTheme.fontHero.copyWith(fontSize: 20)),
+                Text(
+                  title,
+                  style: YotinTheme.fontDisplay.copyWith(fontSize: 20),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   description,

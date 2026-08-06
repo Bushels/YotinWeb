@@ -98,7 +98,7 @@ class _DynamicWellCanvasState extends State<DynamicWellCanvas>
                           width: 8,
                           height: 8,
                           decoration: const BoxDecoration(
-                            color: YotinTheme.cyanSignal,
+                            color: YotinTheme.emberLit,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -107,7 +107,7 @@ class _DynamicWellCanvasState extends State<DynamicWellCanvas>
                           'LIVE EM TELEMETRY SIMULATION',
                           style: YotinTheme.fontMono.copyWith(
                             fontSize: 11,
-                            color: YotinTheme.cyanSignal,
+                            color: YotinTheme.sandMute,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -203,7 +203,7 @@ class _DynamicWellCanvasState extends State<DynamicWellCanvas>
                         _buildStatPill(
                           'EM FREQ',
                           '8.5 HZ',
-                          YotinTheme.cyanSignal,
+                          YotinTheme.emberLit,
                         ),
                       ],
                     );
@@ -389,7 +389,7 @@ class WellSchematicPainter extends CustomPainter {
       Offset(centerX, toolY),
       35,
       Paint()
-        ..color = YotinTheme.cyanSignal.withValues(alpha: 0.25)
+        ..color = YotinTheme.ember.withValues(alpha: 0.25)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15),
     );
 
@@ -414,7 +414,7 @@ class WellSchematicPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(centerX, toolY),
       6,
-      Paint()..color = YotinTheme.cyanSignal,
+      Paint()..color = YotinTheme.emberLit,
     );
 
     // 4. Draw EM (Electromagnetic) Signal Propagation Waves
@@ -455,7 +455,7 @@ class WellSchematicPainter extends CustomPainter {
         }
 
         final emPaint = Paint()
-          ..color = YotinTheme.cyanSignal.withValues(alpha: waveOpacity * 0.85)
+          ..color = YotinTheme.emberLit.withValues(alpha: waveOpacity * 0.85)
           ..strokeWidth = 2.5
           ..style = PaintingStyle.stroke;
 
@@ -465,12 +465,12 @@ class WellSchematicPainter extends CustomPainter {
         canvas.drawCircle(
           Offset(centerX - casingWidth / 2, currentY),
           3,
-          Paint()..color = YotinTheme.cyanSignal.withValues(alpha: waveOpacity),
+          Paint()..color = YotinTheme.signalTint.withValues(alpha: waveOpacity),
         );
         canvas.drawCircle(
           Offset(centerX + casingWidth / 2, currentY),
           3,
-          Paint()..color = YotinTheme.cyanSignal.withValues(alpha: waveOpacity),
+          Paint()..color = YotinTheme.signalTint.withValues(alpha: waveOpacity),
         );
       }
     }

@@ -3,6 +3,13 @@
 design-source/
 README.md
 
+# The Flutter WellFi Field Review prototype. It is tracked in git but is not
+# part of the static production site: /field-review/ is not built, routed, or
+# served here yet (see yotin_flutter/docs/vercel-preview-contract.md). Without
+# this entry, merging the prototype to master uploads its Dart source and asset
+# bundle into the public deployment.
+yotin_flutter/
+
 # Future equipment and superseded social assets are kept locally, not deployed.
 assets/hero-multilateral.webp
 assets/hero-sagd-island.webp
