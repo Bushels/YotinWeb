@@ -42,6 +42,18 @@ flutter test --reporter expanded
 .\tool\build_field_review.ps1 -NoPub
 ```
 
+To make a protected Vercel preview from the repository root, use the guarded
+integration wrapper and then upload the prebuilt output:
+
+```powershell
+.\tool\build_field_review_preview.ps1
+vercel deploy --prebuilt --yes
+```
+
+That wrapper keeps Flutter source out of the deployment, copies only the
+validated compiled route into `/field-review/`, and preserves the static root.
+It is a preview workflow, not a production-promotion command.
+
 For the full change loop and release gates, read
 [`docs/quality-gates.md`](docs/quality-gates.md). Gemini task rules are in
 [`GEMINI.md`](GEMINI.md); keep its changes small and make the Flutter compiler
@@ -49,10 +61,10 @@ and tests—not a model's self-assessment—the release gate.
 
 ## Before public routing or deployment
 
-1. Capture and compare 390, 820, 1280, and 1600 px states after any visual
-   change.
-2. Test the approved production origin against the live ChatFi endpoint;
-   confirm CORS and the intended failure path.
+1. Complete 390, 820, 1280, and 1600 px checks on the protected preview.
+2. Test the approved final origin against the live R3F and ChatFi endpoints;
+   confirm CORS and the intended poster/email failure paths. Do not add a
+   broad preview-origin wildcard to bypass that gate.
 3. Choose the final Flutter renderer and hosting headers before enabling
    Wasm threads.
 4. Keep the static homepage in front until the Flutter public story, SEO,

@@ -3,6 +3,12 @@
 design-source/
 README.md
 
+# Flutter source and its local build are never served directly. The guarded
+# preview script injects only the verified compiled artifact below
+# `/field-review/` into Vercel's prebuilt output.
+yotin_flutter/
+tool/
+
 # Future equipment and superseded social assets are kept locally, not deployed.
 assets/hero-multilateral.webp
 assets/hero-sagd-island.webp

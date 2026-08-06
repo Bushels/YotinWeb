@@ -2,9 +2,10 @@
 
 ## Status
 
-**Not applied.** This document deliberately does not modify the public static
-site, its `vercel.json`, or its production deployment. It is the exact release
-contract to use once an isolated preview is authorized.
+**Protected preview deployed, not promoted.** On 2026-08-06, the isolated
+`/field-review` route was built locally, injected into Vercel's prebuilt
+static output, and deployed as a protected Vercel preview. The public static
+site and production deployment remain unchanged.
 
 ## Product boundary
 
@@ -69,9 +70,34 @@ Run this on the actual preview hostname, not localhost:
    Flutter route is allowed only when it meets its app-use budget; it does not
    inherit the static homepage's marketing-page budget.
 
-## Approval gate
+## Protected preview evidence - 2026-08-06
 
-An approved next change is a small root-only integration patch that adds the
-route copy/build wiring and scoped Vercel headers, followed by one Vercel
-**preview** deployment. Production promotion, public-home replacement,
-COOP/COEP, and a root metadata change are separate decisions.
+- Preview deployment: `dpl_FEUjyXEAT2eDGCBXyUdfNRJ35DMJ` at
+  `https://yotin-energy-3a9lc5te2-kyles-projects-d3ab6818.vercel.app/field-review`.
+  It remains behind Vercel Deployment Protection.
+- The local build/copy wrapper generated Vercel output containing 50 Flutter
+  route files (30.34 MiB raw). It excludes `yotin_flutter/` and `tool/` from
+  Vercel's source upload, then injects only the verified compiled artifact
+  below `/field-review/`.
+- Vercel HTTP verification confirmed `/field-review` returns `200`,
+  `/field-review/` redirects to the canonical path, both required Wasm files
+  return `200` with `Content-Type: application/wasm`, and the local font
+  manifest and Roboto fallback return successfully. `/yotin_flutter/pubspec.yaml`
+  returns `404`, so the Flutter source is not published.
+- The unique protected preview hostname is deliberately *not* in the exact
+  production R3F or ChatFi origin allowlists. The route therefore must retain
+  its safe WellFi poster and honest ChatFi email fallback there. No wildcard
+  origin was added merely to make a preview appear live.
+
+## Next authorization gate
+
+The preview pipeline is now real. Before a production route or full live
+integration test, authorize one of these deliberately bounded paths:
+
+1. Sign into Vercel in the validation browser and complete the visual
+   preview checks with the expected poster/email fallback; or
+2. Create one stable, protected preview alias and add that exact origin to
+   both the R3F and ChatFi allowlists, then test live integrations there.
+
+Production promotion, public-home replacement, COOP/COEP, a root metadata
+change, and broad Vercel-origin allowlists remain separate decisions.

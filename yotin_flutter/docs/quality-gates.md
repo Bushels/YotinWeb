@@ -91,13 +91,13 @@ release checkpoint: advance, rework, or keep isolated
 
 ## Remaining release gates
 
-- Test the final hosting configuration for Wasm headers and the direct
-  `/field-review/` route.
-- Test the canonical R3F production origin and ChatFi CORS against the final
-  approved Yotin origin.
-- The current root Vercel deployment does not build or serve this ignored,
-  untracked Flutter artifact. Define an explicit build/copy/rewrite pipeline
-  before treating `/field-review/` as deployable.
+- Complete the protected-preview browser gate at 390, 820, 1280, and 1600 px.
+  The server route is verified, but the in-app validation browser is not
+  signed into Vercel Deployment Protection yet.
+- Decide whether live-preview proof merits one stable protected alias added to
+  the existing exact R3F and ChatFi origin allowlists. The unique Vercel
+  preview hostname is intentionally rejected today, so it must demonstrate
+  the safe poster/email fallback instead of pretending to be production.
 - Set and test a first-visit/repeat-visit payload budget before public use.
   The current Wasm app plus its renderer is materially heavier than the static
   marketing shell; do not replace the root based on local visual success.
@@ -125,3 +125,16 @@ release checkpoint: advance, rework, or keep isolated
   or ChatFi setting changed during this hardening pass. The exact preview
   acceptance criteria are in
   [`vercel-preview-contract.md`](vercel-preview-contract.md).
+
+## Protected preview evidence - 2026-08-06
+
+- `tool/build_field_review_preview.ps1` now runs the verified Flutter release
+  wrapper, generates Vercel's static output locally, injects only the compiled
+  `/field-review/` artifact, validates its required assets, and registers the
+  clean route mapping before `vercel deploy --prebuilt --yes` uploads it.
+- Protected preview deployment `dpl_FEUjyXEAT2eDGCBXyUdfNRJ35DMJ` was accepted
+  by Vercel. HTTP checks confirmed the canonical route, Wasm MIME type,
+  self-hosted fonts, noindex/cache headers, and a `404` for the excluded Flutter
+  source path.
+- This is a preview-only integration. The static root, live R3F origin policy,
+  ChatFi CORS policy, and production deployment were not changed.
