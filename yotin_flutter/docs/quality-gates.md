@@ -141,3 +141,28 @@ release checkpoint: advance, rework, or keep isolated
 - The Dart analyzer now enforces strict casts, inference, and raw types. The
   qualifier's numeric field has a native browser-accessible label, a live
   validation error, and a widget test for its assertive announcement event.
+
+## Public fallback hardening evidence - 2026-08-06
+
+- The route HTML now carries a complete no-JavaScript WellFi document rather
+  than a small loading/fallback card: hero, signal path, measurement channels,
+  public specifications, benefits, tool context, company context, and the
+  direct candidate-well email path. It remains visible unless Flutter has
+  painted a first frame, then becomes inert and hidden.
+- The fallback uses only route-relative packaged assets. The build wrapper
+  fails if its base href, public sections, or four required visual assets are
+  absent, or if a root-only `src="/assets/"` path is introduced.
+- `test/public_shell_contract_test.dart` locks the public-content landmarks,
+  one-H1 rule, published specifications, direct contact path, readiness
+  hand-off, and route-relative fallback assets. `flutter test
+  --concurrency=1 --reporter expanded` passed all 23 tests; strict analysis
+  also passed.
+- Protected deployment `dpl_F9QmTPBCdo2q3jSRx69p12Ue4fie` served the complete
+  fallback document at `/field-review`, its Wasm at `application/wasm`, and
+  its packaged WellFi logo at `image/webp`; the excluded Flutter source path
+  returned `404`. The 50-file artifact remains 30.34 MiB raw, so this proof
+  does not waive the first-/repeat-visit payload gate.
+- A sandboxed headless Gemini/Antigravity source audit correctly stopped on a
+  missing `read_file` permit. The project agreement now requires either an
+  interactive narrow allow rule or prompt-provided source excerpts; it forbids
+  `--dangerously-skip-permissions` as a shortcut.

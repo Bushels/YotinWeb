@@ -56,10 +56,14 @@
    agy --model gemini-3.6-flash-high --effort high --mode plan --sandbox --disable-slash-commands -p "<narrow question; no edits or tools>"
    ```
 
+   A sandboxed headless session cannot approve a new `read_file` permission.
+   For source audits, either use the interactive Antigravity client with an
+   explicit narrow allow rule or provide the necessary excerpt in the prompt.
    If a headless session reports a permission denial or times out, record that
-   as no result. Do not blindly retry or make a model response a merge gate.
-   Use the Flutter compiler, tests, browser evidence, and Codex review as the
-   release authority.
+   as no result. Do not retry with `--dangerously-skip-permissions`, make a
+   broad global allow rule, or make a model response a merge gate. Use the
+   Flutter compiler, tests, browser evidence, and Codex review as the release
+   authority.
 4. Read the relevant files and state the narrow files and observable
    acceptance criteria before editing.
 5. Make one bounded change. Do not opportunistically rewrite unrelated UI.

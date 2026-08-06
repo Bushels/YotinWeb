@@ -72,8 +72,8 @@ Run this on the actual preview hostname, not localhost:
 
 ## Protected preview evidence - 2026-08-06
 
-- Preview deployment: `dpl_6PcVT9KXEkqEek5hBN9rSrNq9TkY` at
-  `https://yotin-energy-9i39cgjtb-kyles-projects-d3ab6818.vercel.app/field-review`.
+- Preview deployment: `dpl_F9QmTPBCdo2q3jSRx69p12Ue4fie` at
+  `https://yotin-energy-hzsohmtmq-kyles-projects-d3ab6818.vercel.app/field-review`.
   It remains behind Vercel Deployment Protection.
 - The local build/copy wrapper generated Vercel output containing 50 Flutter
   route files (30.34 MiB raw). It excludes `yotin_flutter/` and `tool/` from
@@ -92,6 +92,12 @@ Run this on the actual preview hostname, not localhost:
   accessible name, `Intermediate casing length (m), e.g. 1000`. Invalid input
   has a live semantic error and emits an assertive Flutter announcement when
   the platform advertises announcement support.
+- The deployed HTML includes a route-relative, no-JavaScript public WellFi
+  document with the hero, signal path, measurement channels, public specs,
+  benefits, tool/company context, and a direct candidate-well email path.
+  `assets/assets/yotin-icon.png`, `wellfi-logo.webp`, the poster, and the
+  internal-tool image all resolve from the compiled route rather than the
+  static-root `/assets/` path. The build and widget contract reject drift.
 
 ## Next authorization gate
 

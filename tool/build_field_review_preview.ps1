@@ -83,6 +83,10 @@ $requiredRouteFiles = @(
     'flutter_bootstrap.js',
     'main.dart.wasm',
     'assets\FontManifest.json',
+    'assets\assets\yotin-icon.png',
+    'assets\assets\wellfi-logo.webp',
+    'assets\assets\wellfi-island-r3f-poster.webp',
+    'assets\assets\wellfi-internal-ghost.webp',
     'assets\assets\fonts\roboto\v32\KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2',
     'canvaskit\skwasm.wasm',
     'canvaskit\canvaskit.wasm'

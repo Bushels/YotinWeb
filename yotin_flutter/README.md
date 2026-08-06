@@ -33,6 +33,10 @@ state matter more than crawlability.
 - The release artifact self-hosts its renderer, the four Yotin typefaces,
   and Flutter's engine Roboto fallback. A clean browser trace has no
   third-party Flutter or font request.
+- The Flutter HTML shell has a complete, semantic no-JavaScript WellFi
+  document (not a decorative loading card), using only route-relative packaged
+  assets. A contract test protects its public facts, one-H1 outline, direct
+  email fallback, and hand-off to Flutter after first paint.
 
 ## Run the proof loop
 

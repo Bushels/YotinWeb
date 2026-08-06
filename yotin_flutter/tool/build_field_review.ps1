@@ -106,7 +106,11 @@ $requiredOutputs = @(
     'assets\AssetManifest.bin',
     'assets\AssetManifest.bin.json',
     'assets\assets\yotin-icon.png',
+    # The no-JavaScript public shell is route-relative and must not regress
+    # into a root-only fallback when the Flutter artifact is deployed alone.
+    'assets\assets\wellfi-logo.webp',
     'assets\assets\wellfi-island-r3f-poster.webp',
+    'assets\assets\wellfi-internal-ghost.webp',
     # The local Google Fonts variants are a release invariant. Their names
     # match google_fonts' asset lookup contract and are exercised in-browser.
     'assets\assets\fonts\Archivo-Bold.ttf',
@@ -179,6 +183,34 @@ if ($bootstrap -notmatch 'fontFallbackBaseUrl:\s*yotinFontFallbackBaseUrl') {
 }
 if ($bootstrap -notmatch 'forceSingleThreadedSkwasm:\s*true') {
     throw 'Field Review bootstrap does not keep Skwasm single-threaded pending COOP/COEP preview validation.'
+}
+
+$indexPath = Join-Path $outputPath 'index.html'
+$indexDocument = Get-Content -Raw -LiteralPath $indexPath
+if ($indexDocument -notmatch '<base href="/field-review/">') {
+    throw 'Field Review index does not retain the route-relative base href.'
+}
+$requiredFallbackFragments = @(
+    'id="public-shell"',
+    'id="fallback-main"',
+    'id="fallback-wellfi"',
+    'id="fallback-benefits"',
+    'id="fallback-insight"',
+    'id="fallback-company"',
+    'id="fallback-contact"',
+    'assets/assets/yotin-icon.png',
+    'assets/assets/wellfi-logo.webp',
+    'assets/assets/wellfi-island-r3f-poster.webp',
+    'assets/assets/wellfi-internal-ghost.webp'
+)
+$missingFallbackFragments = $requiredFallbackFragments | Where-Object {
+    -not $indexDocument.Contains($_)
+}
+if ($missingFallbackFragments) {
+    throw "Field Review no-JavaScript shell is incomplete: $($missingFallbackFragments -join ', ')"
+}
+if ($indexDocument -match 'src="/assets/' -or $indexDocument -match "src='/assets/") {
+    throw 'Field Review no-JavaScript shell incorrectly relies on root-only asset paths.'
 }
 
 $forbiddenEngineFiles = Get-ChildItem $outputPath -File -Recurse | Where-Object {
