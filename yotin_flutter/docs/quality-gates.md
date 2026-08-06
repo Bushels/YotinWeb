@@ -208,3 +208,8 @@ release checkpoint: advance, rework, or keep isolated
   1,000 m casing, shallower than 900 m, and intervention within three months.
   It produced the identical waitlist wording, distinct 150 °C+ email subject,
   and copy-summary fallback that Flutter now protects.
+- A fresh browser run of the compiled Flutter route on an isolated local
+  origin completed the same six-answer branch without opening the email link
+  or copying the summary. Its semantic tree exposed `HIGH-TEMP VERSION IN
+  DEVELOPMENT`, `HAVE YOTIN FOLLOW UP`, and `COPY SUMMARY`, along with the
+  complete selected-well summary.
