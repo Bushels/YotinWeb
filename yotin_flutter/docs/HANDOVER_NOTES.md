@@ -113,15 +113,31 @@ geometry and a measured width constraint; the remaining 3D decision is not a
 renderer failure.
 
 `flutter_scene` / FScene is a genuine R&D candidate for a future Flutter-native
-3D application, but do not install it here now: it is pre-1.0, requires Flutter
-master rather than stable 3.44.8, adds another WebGL/build pipeline, and does
-not solve the static-root SEO or first-visit payload problem. Revisit only as
-an isolated spike with a performance and visual-composition acceptance test.
+3D application, but do not install it here now. Version `0.20.0` is pre-1.0,
+and upstream still calls a Flutter master build the supported baseline for its
+full Flutter-GPU path. An isolated Flutter `3.44.8` Web/Wasm spike did compile
+and render a real WebGL2 scene with no browser errors, so the narrow web path
+is promising but does not change the support policy.
+
+That same spike measured an unavoidable current minimum of at least `908 KiB`
+Brotli before a product model: the package contributes a `109.1 KiB` Brotli
+shader bundle, a `791.7 KiB` Brotli environment PNG, and about `7.3 KiB` more
+Wasm. Adding it would take the `2.26 MiB` Field Review route beyond its
+`2.50 MiB` first-visit budget. It also does not solve the actual remaining
+issue: exact protected-preview origin approval for the existing R3F hero and
+ChatFi. The FScene editor/MCP is in development and unpublished. Revisit only
+as a pinned, native-first R&D spike after Flutter GPU reaches stable or the
+engine can meet a separately measured web payload budget.
+
+An independent Gemini 3.6 review ranked: retain the R3F bridge and clear the
+origin gates first; keep FScene as native-first R&D second; do not integrate it
+into the public candidate now. That review is supporting opinion only; the
+compile, renderer, and payload measurements above remain the decision evidence.
 
 ## Safe next task
 
-The next useful vertical slice is a deployment-planning task, not another UI
-rewrite: specify how the exact `build/field-review/` artifact gets built and
-served at `/field-review/`, then run origin/header/CORS/payload tests against a
-non-public preview. No deploy, package addition, or static-root change is
-authorized by this handover.
+The next useful vertical slice is an isolated Flutter public-home release
+candidate: retain the `noindex` Field Review companion, then build a separate
+root-target artifact with public metadata, structured data, robots/sitemap, and
+fragment/deep-link navigation parity. No deploy, package addition, or external
+origin-policy change is authorized by this handover.
