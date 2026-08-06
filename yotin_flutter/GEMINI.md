@@ -49,12 +49,23 @@
    implementation, or a second opinion. It is effective at widget APIs,
    layout reasoning, and framework-specific accessibility patterns. It is not
    the release authority.
-2. Use the project-local skill catalogue selectively, not as an agent swarm:
-   - `dart-run-static-analysis` for diagnostics;
-   - `flutter-build-responsive-layout` for a confirmed layout issue; and
-   - `flutter-add-widget-test` for a new user-visible behavior.
-   Do not use `flutter-add-integration-test` until its legacy Flutter Driver
-   instructions have been modernized. Do not add another agent framework.
+2. Use the project-local `.agents/skills` catalogue selectively, not as an
+   agent swarm. It is shared by Antigravity, Antigravity CLI, Gemini CLI,
+   Codex, Cursor, and OpenCode:
+   - `dart-run-static-analysis` for a bounded analyzer repair; it forbids an
+     unattended `dart fix --apply`;
+   - `dart-fix-runtime-errors` only with an actual runtime error and
+     reproducible path;
+   - `flutter-build-responsive-layout` for a confirmed layout issue and
+     `flutter-add-widget-test` for a new user-visible behavior;
+   - `flutter-add-integration-test` only when app startup, platform behavior,
+     or a multi-widget journey cannot be credibly protected by a widget or
+     browser test; and
+   - `flutter-setup-declarative-routing` only after a real deep-link route
+     table exists. The current one-screen field-review flow does not need it.
+   For Flutter Web, do not enable the Flutter Driver extension: use browser
+   automation for interaction and Dart MCP/DTD for runtime inspection and hot
+   reload. Do not add another agent framework.
 3. For a focused Antigravity second opinion, run from this directory:
 
    ```powershell

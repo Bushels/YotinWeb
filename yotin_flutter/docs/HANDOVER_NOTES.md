@@ -46,7 +46,7 @@ Flutter /field-review/
 
 ```text
 flutter analyze                         PASS
-flutter test --concurrency=1            PASS (20 tests)
+flutter test --concurrency=1            PASS (28 tests)
 .\tool\build_field_review.ps1 -NoPub   PASS
 packaged 1280 / 390 browser checks      PASS
 ```
@@ -81,9 +81,14 @@ manifest, icons, poster, and R3F assets.
   `C:\Users\kyle\AppData\Local\agy\bin\agy.exe --model gemini-3.6-flash-high --effort high --print ...`.
   AGY starts its own language-server session; the UI wrapper requires an
   unavailable `ANTIGRAVITY_LS_ADDRESS` and must not be pointed at guessed ports.
-- The installed official skill subset in `.agents/skills/` is current and
-  appropriate. Do not add the other upstream skills or new runtime packages
-  until a concrete capability demands them.
+- The nine selected upstream skills in `.agents/skills/` are shared with
+  Antigravity, Gemini CLI, Codex, Cursor, and OpenCode. Four project-local
+  guardrails now make the generic bundle safe for this Flutter Web prototype:
+  static analysis is manual and reviewed, runtime repair requires a real
+  stack trace, web integration testing uses browser automation rather than a
+  Flutter Driver extension, and routing requires a real path table. Do not
+  add the other upstream skills or new runtime packages until a concrete
+  capability demands them.
 - Start a dedicated, minimal Antigravity profile for this project: Dart MCP and
   the Yotin Flutter workspace only. The global MCP cluster caused previous
   Gemini runs to stall while unrelated MCPs connected.
