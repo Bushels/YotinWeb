@@ -619,7 +619,7 @@
   /* ======================================================================
      Candidate-well qualifier
 
-     Five questions, verdict shown before any contact details are asked for.
+     Six questions, verdict shown before any contact details are asked for.
      It can and does return "outside current spec" — the 150 °C ceiling is a
      real product limit, and a qualifier that always says yes is a lead form
      with extra steps, which this audience recognises instantly.
@@ -628,126 +628,71 @@
      here is invented.
      ====================================================================== */
 
-  var QUALIFIER_EMAIL = "info@yotinenergy.com";
 
-  var QUALIFIER_STEPS = [
-    {
-      key: "lift",
-      label: "Artificial lift",
-      question: "What lifts the well?",
-      options: [
-        { value: "Progressing cavity pump (PCP)", tag: "Best fit" },
-        { value: "Electric submersible pump (ESP)" },
-        { value: "Rod pump" },
-        { value: "Natural flow or other", flag: "lift" }
-      ]
-    },
-    {
-      key: "type",
-      label: "Well type",
-      question: "What is it producing?",
-      options: [
-        { value: "Heavy oil" },
-        { value: "Light oil" },
-        { value: "Gas" },
-        { value: "Thermal / SAGD", flag: "thermal" }
-      ]
-    },
-    {
-      key: "temp",
-      label: "Bottomhole temperature",
-      question: "How hot does it get downhole?",
-      options: [
-        { value: "Under 100 °C" },
-        { value: "100 – 150 °C", tag: "At spec" },
-        { value: "Above 150 °C", future: true },
-        { value: "Not sure", flag: "temp" }
-      ]
-    },
-    {
-      /* Asked as a number because the next question is derived from it. The
-         standoff rule is a proportion of this length, so a banded answer here
-         would make the follow-up threshold meaningless. */
-      key: "intermediate",
-      type: "number",
-      label: "Intermediate casing length",
-      question: "How long is your intermediate casing, approximately?",
-      unit: "m",
-      placeholder: "1000",
-      min: 50,
-      max: 6000
-    },
-    {
-      /* Where the pump lands decides the deployment method. The collar needs
-         roughly 10% of the intermediate's length of standoff from the shoe:
-         (shoe depth - pump depth) >= 0.10 x intermediate length. Landed closer
-         than that, WellFi runs outside the intermediate instead of inside the
-         tubing. This matches the EM physics — the formation is the antenna, and
-         an emitter sitting at the cemented shoe couples at roughly 0.1%. Either
-         comfortably above the shoe or below it in open hole is fine; at the
-         shoe is the bad case. */
-      key: "landing",
-      type: "derived",
-      label: "Pump landing",
-      /* Question and options are built from the entered casing length: the
-         collar needs ~10% of that length of standoff above the shoe, so the
-         threshold is 0.9 x length. Turning the rule into a single concrete
-         number means the engineer taps once instead of doing the arithmetic. */
-      build: function (answers) {
-        var len = answers.intermediate ? answers.intermediate.number : null;
-        if (!len) {
-          return {
-            question: "Where does the pump land in the intermediate casing?",
-            options: [
-              { value: "Well above the shoe" },
-              { value: "Close to the shoe", flag: "external" },
-              { value: "Not sure", flag: "landing" }
-            ]
-          };
-        }
-        var threshold = Math.round((len * 0.9) / 10) * 10;
-        return {
-          question: "Is the pump landed shallower or deeper than " + fmtNum(threshold) + " m?",
-          hint: "That is 10% of your intermediate above the shoe — the standoff WellFi needs to run inside the tubing.",
-          options: [
-            { value: "Shallower than " + fmtNum(threshold) + " m", tag: "< " + fmtNum(threshold) },
-            { value: "Deeper than " + fmtNum(threshold) + " m", tag: "> " + fmtNum(threshold), flag: "external" },
-            { value: "Not sure", flag: "landing" }
-          ]
-        };
-      }
-    },
-    {
-      key: "timing",
-      label: "Next planned intervention",
-      question: "When is the next pump change or planned intervention?",
-      options: [
-        { value: "Within 3 months", tag: "Ideal timing" },
-        { value: "3 – 12 months" },
-        { value: "Nothing scheduled", flag: "timing" },
-        { value: "Not sure", flag: "timing" }
-      ]
+  /* ----------------------------------------------------------------------
+     Funnel instrumentation.
+
+     The qualifier is the conversion mechanism of this page and its only
+     outcome is a mailto:, so without events there is no way to know how many
+     people reach it, which question they abandon, how the verdict splits
+     between strong / review / high-temp, or how many actually send. The
+     verdict split is a product signal as much as a marketing one: a page full
+     of "above 150 °C" results is roadmap information.
+
+     `track` is a no-op until GA_MEASUREMENT_ID in index.html is set to a real
+     property, because gtag is never defined before then. That is deliberate —
+     the events can ship and be reviewed now, and start recording when the
+     property and its privacy notice are ready, without a second edit here.
+
+     Two rules for anything added below:
+       - Never send free text. Every value must come from a fixed vocabulary
+         defined on this page, or be bucketed. The one number a visitor types
+         is a well parameter, and exact figures are customer data.
+       - Never let analytics break the qualifier. Failures are swallowed.
+     ---------------------------------------------------------------------- */
+  function track(eventName, params) {
+    try {
+      if (typeof window.gtag !== "function") return;
+      window.gtag("event", eventName, params || {});
+    } catch (err) {
+      /* Analytics must never take the funnel down with it. */
     }
-  ];
-
-  function fmtNum(n) {
-    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  // Each note explains WHY something needs review, in the engineer's terms.
-  var QUALIFIER_NOTES = {
-    temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
-    external: "Landed that deep, WellFi would run outside the intermediate rather than inside the tubing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. Running it outside is routine, but it changes the install and is worth confirming early.",
-    landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs inside the tubing or outside the intermediate. Worth pinning down before the changeout gets scoped.",
-    timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
-    lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
-    thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."
-  };
+  /* Coarse buckets so the distribution is visible without transmitting the
+     exact casing length a visitor entered. */
+  function casingBucket(metres) {
+    if (!isFinite(metres)) return "unknown";
+    if (metres < 500) return "under_500";
+    if (metres < 1000) return "500_999";
+    if (metres < 1500) return "1000_1499";
+    if (metres < 2000) return "1500_1999";
+    if (metres < 3000) return "2000_2999";
+    return "3000_plus";
+  }
+
+  /* Question set, notes, thresholds and verdict logic live in
+     qualifier-logic.js so they can be unit-tested without a DOM. That file is
+     loaded by a deferred <script> immediately before this one, so it is always
+     present by the time anything here runs. main.js owns rendering, focus
+     management, analytics and the mailto; it owns none of the decisions. */
+  // NB: `root` in this file is document.documentElement, not the global.
+  var Q = window.YotinQualifier;
+  var QUALIFIER_STEPS = Q ? Q.STEPS : [];
+  var QUALIFIER_NOTES = Q ? Q.NOTES : {};
+  var QUALIFIER_EMAIL = Q ? Q.EMAIL : "info@yotinenergy.com";
+  var fmtNum = Q ? Q.fmtNum : function (n) { return String(Math.round(n)); };
 
   function buildQualifier() {
     var host = document.querySelector("[data-qualifier]");
     var stage = document.querySelector("[data-qualifier-stage]");
     if (!host || !stage) return;
+
+    /* If qualifier-logic.js failed to load there are no questions to ask.
+       Leave the host hidden so the section falls back to its static contact
+       copy and the direct email path, rather than rendering an empty shell
+       that looks broken. */
+    if (!Q || !QUALIFIER_STEPS.length) return;
 
     host.hidden = false;
 
@@ -759,6 +704,46 @@
 
     var answers = {};
     var index = 0;
+    var started = false;
+
+    /* The funnel denominator: how many people actually reach the qualifier,
+       as opposed to landing on the page. Fires once.
+
+       Deliberately rootMargin rather than a visibility ratio. The qualifier is
+       ~1440 px tall on desktop and taller once it stacks on a phone, so a
+       `threshold: 0.4` can be unsatisfiable on short viewports — 40% of the
+       element is simply never on screen at once, and the event never fires for
+       exactly the mobile visitors it most needs to count. Shrinking the
+       observation box by 25% of the viewport instead means "scrolled far
+       enough that this is the thing you are looking at", independent of how
+       tall either the element or the screen is. */
+    if (typeof IntersectionObserver === "function") {
+      var seen = false;
+      var viewObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting || seen) return;
+          seen = true;
+          viewObserver.disconnect();
+          track("qualifier_view");
+        });
+      }, { threshold: 0, rootMargin: "0px 0px -25% 0px" });
+      viewObserver.observe(host);
+    }
+
+    /* Single path for recording an answer so the option steps and the number
+       step cannot drift apart in what they report. */
+    function recordAnswer(step, answer, reportedValue) {
+      answers[step.key] = answer;
+      if (!started) {
+        started = true;
+        track("qualifier_start");
+      }
+      track("qualifier_step", {
+        step_index: index + 1,
+        step_key: step.key,
+        answer: reportedValue
+      });
+    }
 
     function clear(node) {
       while (node.firstChild) node.removeChild(node.firstChild);
@@ -829,7 +814,9 @@
           button.appendChild(el("span", null, opt.value));
           if (opt.tag) button.appendChild(el("span", "tag", opt.tag));
           button.addEventListener("click", function () {
-            answers[step.key] = opt;
+            // opt.value is a fixed string defined in QUALIFIER_STEPS above,
+            // never anything the visitor typed.
+            recordAnswer(step, opt, opt.value);
             advance();
           });
           group.appendChild(button);
@@ -841,6 +828,10 @@
         var back = el("button", "qualifier-back", "← Back");
         back.type = "button";
         back.addEventListener("click", function () {
+          track("qualifier_back", {
+            step_index: index + 1,
+            step_key: QUALIFIER_STEPS[index].key
+          });
           index -= 1;
           renderStep();
         });
@@ -886,21 +877,23 @@
       box.appendChild(go);
 
       function submit() {
-        var raw = input.value.replace(/[^\d.]/g, "");
-        var n = parseFloat(raw);
-        if (!isFinite(n) || n <= 0) {
-          error.textContent = "Enter the approximate length in metres.";
+        var parsed = Q.parseCasingLength(input.value, step);
+        if (!parsed.ok) {
+          error.textContent = parsed.error;
+          // A validation stall is a usability signal: it means the field is
+          // asking for something the visitor doesn't have to hand.
+          track("qualifier_input_error", { step_key: step.key, reason: parsed.reason });
           input.focus();
           return;
         }
-        if (n < step.min || n > step.max) {
-          error.textContent = "That looks outside the usual range (" +
-            fmtNum(step.min) + "–" + fmtNum(step.max) + " m). Double-check the figure.";
-          input.focus();
-          return;
-        }
+        var n = parsed.number;
         error.textContent = "";
-        answers[step.key] = { value: fmtNum(n) + " " + (step.unit || ""), number: n };
+        // Bucketed, not the exact figure the visitor typed.
+        recordAnswer(
+          step,
+          { value: fmtNum(n) + " " + (step.unit || ""), number: n },
+          casingBucket(n)
+        );
         advance();
       }
 
@@ -918,17 +911,7 @@
     }
 
     function assess() {
-      var flags = [];
-      var future = false;
-      QUALIFIER_STEPS.forEach(function (step) {
-        var a = answers[step.key];
-        if (!a) return;
-        // Above 150 °C isn't a dead end any more — it's a waitlist.
-        if (a.future) future = true;
-        if (a.flag) flags.push(a.flag);
-      });
-      if (future) return { fit: "future", flags: flags };
-      return { fit: flags.length ? "review" : "strong", flags: flags };
+      return Q.assess(answers);
     }
 
     function summaryLines() {
@@ -941,11 +924,7 @@
       var lines = ["Candidate well review — WellFi", ""];
       summaryLines().forEach(function (row) { lines.push(row.label + ": " + row.value); });
       lines.push("");
-      lines.push("Self-check result: " + (
-        result.fit === "strong" ? "Strong fit" :
-        result.fit === "review" ? "Likely fit — worth a review" :
-        "Above 150 °C — waiting on the high-temperature version"
-      ));
+      lines.push("Self-check result: " + Q.resultLabel(result.fit));
       result.flags.forEach(function (f) { if (QUALIFIER_NOTES[f]) lines.push("- " + QUALIFIER_NOTES[f]); });
       lines.push("");
       lines.push("Sent from yotinenergy.com");
@@ -954,6 +933,13 @@
 
     function renderVerdict() {
       var result = assess();
+      // The verdict split is the most useful single number this page can
+      // report. `flags` is a fixed vocabulary defined above, not free text.
+      track("qualifier_result", {
+        fit: result.fit,
+        flag_count: result.flags.length,
+        flags: result.flags.length ? result.flags.join(",") : "none"
+      });
       clear(stage);
 
       var wrap = el("div", "qualifier-verdict");
@@ -1022,6 +1008,11 @@
         "&body=" + encodeURIComponent(body);
       send.appendChild(el("span", null, ctaLabel));
       send.appendChild(icon("ph-arrow-right"));
+      // The closest thing this page has to a conversion. It cannot confirm the
+      // mail was actually sent — only that the client was invoked.
+      send.addEventListener("click", function () {
+        track("qualifier_send", { fit: result.fit });
+      });
       actions.appendChild(send);
 
       // The copy button is the real fallback: plenty of corporate machines
@@ -1043,6 +1034,10 @@
           state.textContent = ok
             ? "Copied — paste it into an email to " + QUALIFIER_EMAIL
             : "Copy failed. The address is " + QUALIFIER_EMAIL;
+          // Worth separating from qualifier_send: a high copy rate means the
+          // mailto path is failing for this audience, which is a fixable
+          // conversion problem rather than a lost lead.
+          track("qualifier_copy", { fit: result.fit, ok: ok ? "yes" : "no" });
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(body).then(function () { done(true); }, function () { done(false); });
@@ -1054,8 +1049,10 @@
       var restart = el("button", "qualifier-back", "Start over");
       restart.type = "button";
       restart.addEventListener("click", function () {
+        track("qualifier_restart", { fit: result.fit });
         answers = {};
         index = 0;
+        started = false;
         renderStep();
       });
       wrap.appendChild(restart);

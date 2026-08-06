@@ -34,7 +34,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260725-5">
+  <link rel="stylesheet" href="styles.css?v=20260806-1">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -65,15 +65,23 @@
     placeholder id would fire hits at a property that doesn't exist and quietly
     poison the data, so the guard is a real regex, not a comment.
 
-    To enable: create the GA4 property (see README "Analytics"), paste the
-    Measurement ID between the quotes, and bump the styles/script ?v= keys.
-    Note that switching this on starts sending visitor data to Google — the
-    privacy notice listed in the README release gates should land first.
+    Live since 2026-08-06 on property G-9VQJHQ1L59. This now sends visitor data
+    to Google on every page view, so the privacy notice tracked in the README
+    release gates is outstanding and user-facing, not theoretical.
   -->
   <script>
     (function () {
-      var GA_MEASUREMENT_ID = "";
+      var GA_MEASUREMENT_ID = "G-9VQJHQ1L59";
       if (!/^G-[A-Z0-9]{6,}$/.test(GA_MEASUREMENT_ID)) return;
+
+      /* Local development must not land in the production property. GA4 reads
+         this flag before sending anything, so the tag still loads and the code
+         path is fully exercised — it just transmits nothing. Cheaper and more
+         reliable than filtering internal traffic by IP after the fact, and it
+         means a developer cannot skew the numbers by forgetting. */
+      if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) {
+        window["ga-disable-" + GA_MEASUREMENT_ID] = true;
+      }
 
       var tag = document.createElement("script");
       tag.async = true;
@@ -504,6 +512,54 @@
       </div>
     </section>
 
+
+    <!-- These five answers already existed in the FAQPage JSON-LD above but
+         were never rendered, so a visitor could not read what search engines
+         were being told. The markup below is the visible source of truth; the
+         JSON-LD mirrors it, and test/faq-parity.test.js fails if they drift.
+         Native <details> keeps this readable with no JavaScript at all. -->
+    <section class="faq-section" id="faq" aria-labelledby="faq-title">
+      <div class="shell">
+        <p class="eyebrow" data-motion="rise">COMMON QUESTIONS</p>
+        <h2 id="faq-title" data-motion="rise">Before you ask.</h2>
+        <details class="faq-item" name="faq">
+          <summary>
+            <span>Does WellFi need a downhole cable?</span>
+            <i class="ph ph-plus" aria-hidden="true"></i>
+          </summary>
+          <p>No. WellFi sends a low-power electromagnetic signal through the formation to a surface receiver. A fiberglass collar creates the antenna gap in the tubing string, so there is no cable to run, clamp or damage.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>
+            <span>What does WellFi measure?</span>
+            <i class="ph ph-plus" aria-hidden="true"></i>
+          </summary>
+          <p>Pressure at the lift point, temperature at tool depth, pump and string vibration, produced-fluid composition changes, and interval flow behaviour interpreted from paired pressure and fluid-condition trends.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>
+            <span>How is WellFi installed?</span>
+            <i class="ph ph-plus" aria-hidden="true"></i>
+          </summary>
+          <p>WellFi attaches to the interior or exterior of the tubing. It is most often run on a new completion or during work that is already scheduled, such as a planned progressing cavity pump changeout or a workover, so no separate intervention is required — but it can also be installed on its own run where a well justifies it.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>
+            <span>How does WellFi data reach our control system?</span>
+            <i class="ph ph-plus" aria-hidden="true"></i>
+          </summary>
+          <p>A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>
+            <span>Where does Yotin Energy operate?</span>
+            <i class="ph ph-plus" aria-hidden="true"></i>
+          </summary>
+          <p>Yotin Energy is an Indigenous-owned energy services company based in Pierceland, Saskatchewan, serving the heavy-oil and oil sands corridor across Western Canada.</p>
+        </details>
+      </div>
+    </section>
+
     <section class="company-section" id="company" aria-labelledby="company-title">
       <div class="shell company-grid">
         <div>
@@ -590,7 +646,7 @@
         <a href="#company">Our Company</a>
         <a href="#contact">Contact</a>
       </nav>
-      <p>© 2026 Yotin Energy. All rights reserved.</p>
+      <p>© 2026 Yotin Energy. All rights reserved. <a class="footer-legal" href="/privacy">Privacy</a></p>
     </div>
   </footer>
 
@@ -618,6 +674,10 @@
     <p class="chatfi-disclosure">ChatFi is an AI assistant. Conversations may be reviewed to improve the service. Confirm anything that matters directly with Yotin.</p>
   </section>
 
-  <script defer src="main.js?v=20260725-5"></script>
+  <!-- Qualifier decision logic first: main.js reads it at execution time.
+       Both are `defer`, and deferred scripts run in document order, so this is
+       guaranteed to be ready without any loader or build step. -->
+  <script defer src="qualifier-logic.js?v=20260806-1"></script>
+  <script defer src="main.js?v=20260806-1"></script>
 </body>
 </html>
