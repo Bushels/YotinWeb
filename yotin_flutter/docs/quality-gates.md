@@ -203,3 +203,8 @@ release checkpoint: advance, rework, or keep isolated
   casing length and verifies the derived 900 m choice, waitlist verdict,
   follow-up CTA, and copy-summary action remain visible. This supplements,
   rather than replaces, the model's strong/review/future tests.
+- A live browser run against the current static production page exercised that
+  same branch without opening its mail link: PCP, heavy oil, above 150 °C,
+  1,000 m casing, shallower than 900 m, and intervention within three months.
+  It produced the identical waitlist wording, distinct 150 °C+ email subject,
+  and copy-summary fallback that Flutter now protects.
