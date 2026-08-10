@@ -19,6 +19,7 @@
   var livePointerBridge = false;
   var liveTimeout = 0;
   var liveObserver = null;
+  var sameOriginReadyPoll = 0;
   var heroPointerXLimit = 16;
   var heroPointerYLimit = 9;
 
@@ -55,12 +56,32 @@
     if (liveReady || !liveFrame) return;
     liveReady = true;
     window.clearTimeout(liveTimeout);
+    window.clearInterval(sameOriginReadyPoll);
+    sameOriginReadyPoll = 0;
     heroScene.classList.add("is-live");
     sendLiveActivity();
   }
 
+  function revealSameOriginLiveFrame() {
+    if (liveReady || !liveFrame || liveOrigin !== window.location.origin) return;
+
+    try {
+      var childDocument = liveFrame.contentDocument;
+      var liveCanvas = childDocument && childDocument.querySelector("section[data-yotin-embed] canvas");
+      if (!liveCanvas) return;
+
+      livePointerBridge = true;
+      heroScene.classList.add("has-pointer-bridge");
+      revealLiveFrame();
+    } catch (_) {
+      // Cross-origin frames remain on the origin-validated message handshake.
+    }
+  }
+
   function removeFailedLiveFrame() {
     if (!liveReady && liveFrame) {
+      window.clearInterval(sameOriginReadyPoll);
+      sameOriginReadyPoll = 0;
       liveFrame.remove();
       liveFrame = null;
       livePointerBridge = false;
@@ -114,6 +135,9 @@
     }
 
     heroScene.appendChild(liveFrame);
+    if (liveOrigin === window.location.origin) {
+      sameOriginReadyPoll = window.setInterval(revealSameOriginLiveFrame, 100);
+    }
     liveTimeout = window.setTimeout(removeFailedLiveFrame, 15000);
   }
 

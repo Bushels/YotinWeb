@@ -50,6 +50,9 @@ describe('Yotin website structure & feature presence', () => {
     assert.match(script, /type: "wellfi:set-pointer"/);
     assert.match(script, /livePointerBridge = event\.data\.version >= 2/);
     assert.match(script, /classList\.toggle\("has-pointer-bridge", Boolean\(livePointerBridge\)\)/);
+    assert.match(script, /function revealSameOriginLiveFrame\(\)/);
+    assert.match(script, /childDocument\.querySelector\("section\[data-yotin-embed\] canvas"\)/);
+    assert.match(script, /sameOriginReadyPoll = window\.setInterval\(revealSameOriginLiveFrame, 100\)/);
     assert.match(script, /heroScene\.classList\.add\("is-pointer-active"\)/);
     assert.match(script, /heroScene\.classList\.remove\("is-pointer-active"\)/);
     assert.match(script, /var legacyX = livePointerBridge \? 0 : normalizedX \* 12/);
