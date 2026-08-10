@@ -48,7 +48,10 @@ describe('Yotin website structure & feature presence', () => {
     assert.match(script, /if \(!heroPointerX && !heroPointerY && !heroPointerFrame\) return;/);
     assert.match(script, /function sendLivePointer\(x, y\)/);
     assert.match(script, /type: "wellfi:set-pointer"/);
-    assert.match(script, /sendLivePointer\(heroPointerX \/ heroPointerXLimit, heroPointerY \/ heroPointerYLimit\)/);
+    assert.match(script, /livePointerBridge = event\.data\.version >= 2/);
+    assert.match(script, /var legacyX = livePointerBridge \? 0 : normalizedX \* 12/);
+    assert.match(script, /heroScene\.style\.setProperty\("--hero-legacy-x"/);
+    assert.match(script, /new URLSearchParams\(window\.location\.search\)\.get\("wellfiLocal"\) === "1"/);
   });
 
   test('wellfi benefits section contains drill cutaway & fallback grid', () => {

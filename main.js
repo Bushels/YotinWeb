@@ -16,6 +16,7 @@
   var liveOrigin = "";
   var liveInView = true;
   var liveReady = false;
+  var livePointerBridge = false;
   var liveTimeout = 0;
   var liveObserver = null;
   var heroPointerXLimit = 16;
@@ -44,6 +45,8 @@
   function receiveLiveMessage(event) {
     if (!liveFrame || event.source !== liveFrame.contentWindow || event.origin !== liveOrigin) return;
     if (!event.data || event.data.type !== "wellfi:r3f-ready") return;
+    livePointerBridge = event.data.version >= 2 &&
+      event.data.capabilities && event.data.capabilities.pointer === true;
     revealLiveFrame();
   }
 
@@ -59,6 +62,7 @@
     if (!liveReady && liveFrame) {
       liveFrame.remove();
       liveFrame = null;
+      livePointerBridge = false;
       window.removeEventListener("message", receiveLiveMessage);
       document.removeEventListener("visibilitychange", sendLiveActivity);
       if (liveObserver) {
@@ -74,7 +78,10 @@
     if (connection && connection.saveData) return;
 
     var isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-    var source = heroScene.getAttribute(isLocal ? "data-live-src-local" : "data-live-src");
+    // A normal site preview should work on its own. Opt into the separate
+    // WellFi dev server only while deliberately developing both sites.
+    var useLocalRenderer = isLocal && new URLSearchParams(window.location.search).get("wellfiLocal") === "1";
+    var source = heroScene.getAttribute(useLocalRenderer ? "data-live-src-local" : "data-live-src");
     if (!source) return;
 
     var url = new URL(source);
@@ -133,7 +140,17 @@
     // the normalized position through the origin-checked bridge so the actual
     // R3F group retains its own camera/object parallax, without translating a
     // cross-origin WebGL layer over the hero copy.
-    sendLivePointer(heroPointerX / heroPointerXLimit, heroPointerY / heroPointerYLimit);
+    var normalizedX = heroPointerX / heroPointerXLimit;
+    var normalizedY = heroPointerY / heroPointerYLimit;
+    sendLivePointer(normalizedX, normalizedY);
+
+    // Production may briefly serve the previous renderer during a staggered
+    // rollout. It does not understand wellfi:set-pointer, so retain a small
+    // layout-based nudge that keeps the WebGL layer behind the hero copy.
+    var legacyX = livePointerBridge ? 0 : normalizedX * 12;
+    var legacyY = livePointerBridge ? 0 : normalizedY * 7;
+    heroScene.style.setProperty("--hero-legacy-x", legacyX.toFixed(2) + "px");
+    heroScene.style.setProperty("--hero-legacy-y", legacyY.toFixed(2) + "px");
   }
 
   function queueHeroPointer(x, y) {
