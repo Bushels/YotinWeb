@@ -96,7 +96,7 @@ describe('the notice matches what is actually collected', () => {
 
   test('gives a contact route for access and correction requests', () => {
     const text = privacy();
-    assert.match(text, /info@yotinenergy\.com/);
+    assert.match(text, /kyle\.gronning@yotinenergy\.com/);
     assert.match(text, /PIPEDA|Personal Information Protection/i);
   });
 });

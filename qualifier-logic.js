@@ -205,7 +205,7 @@
   root.YotinQualifier = {
     STEPS: STEPS,
     NOTES: NOTES,
-    EMAIL: "info@yotinenergy.com",
+    EMAIL: "kyle.gronning@yotinenergy.com",
     fmtNum: fmtNum,
     landingThreshold: landingThreshold,
     parseCasingLength: parseCasingLength,
