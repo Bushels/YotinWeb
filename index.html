@@ -34,7 +34,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260810-1">
+  <link rel="stylesheet" href="styles.css?v=20260810-2">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -137,7 +137,7 @@
     "category": "Downhole telemetry system",
     "url": "https://yotinenergy.com/#wellfi",
     "image": "https://yotinenergy.com/assets/yotin-wellfi-og-2026.png",
-    "description": "WellFi is a wireless downhole telemetry tool that reports pressure, temperature, vibration and produced-fluid condition to surface over electromagnetic telemetry, with no downhole cable. It can be run on a new completion, during a planned pump changeout or workover, or as its own installation, and hands decoded readings to an existing RTU or SCADA system over MODBUS RS-485.",
+    "description": "WellFi is a wireless downhole telemetry tool that reports pressure, temperature, vibration and produced-fluid condition to surface over electromagnetic telemetry, with no downhole cable. It can be run on a new completion, during a planned pump changeout or workover, or as its own installation, and hands decoded readings to an existing RTU or SCADA system over MODBUS RS-485 or 4-20 mA.",
     "brand": { "@type": "Brand", "name": "WellFi" },
     "manufacturer": { "@type": "Organization", "name": "Yotin Energy" },
     "additionalProperty": [
@@ -145,7 +145,7 @@
       { "@type": "PropertyValue", "name": "Temperature rating", "value": "150 °C" },
       { "@type": "PropertyValue", "name": "Tool outer diameter", "value": "46 mm" },
       { "@type": "PropertyValue", "name": "Battery life", "value": "5+ years" },
-      { "@type": "PropertyValue", "name": "Surface output", "value": "MODBUS RS-485" },
+      { "@type": "PropertyValue", "name": "Surface output", "value": "MODBUS RS-485 / 4-20 mA" },
       { "@type": "PropertyValue", "name": "Deployments", "value": "160 installed internationally" }
     ]
   }
@@ -185,7 +185,7 @@
         "name": "How does WellFi data reach our control system?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends."
+          "text": "A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 or 4-20 mA to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends."
         }
       },
       {
@@ -315,7 +315,7 @@
           <h2 id="wellfi-title" data-motion="rise">Data Below.<br><span>Insight Above.</span></h2>
           <div class="section-summary" data-motion="rise">
             <p class="measurement-line">Pressure. Temperature. Vibration. At Surface.</p>
-            <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485.</p>
+            <p>WellFi can be added during a pump change or included in a new well. A fiberglass collar creates the antenna gap, the tool sends data through the surrounding formation, and the surface receiver hands the decoded readings to MODBUS RS-485 or 4-20 mA.</p>
           </div>
         </div>
 
@@ -386,7 +386,7 @@
           </li>
           <li data-motion="rise">
             <span class="journey-icon"><i class="ph ph-plugs-connected" aria-hidden="true"></i><span>04</span></span>
-            <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 for the existing RTU or SCADA system.</p></div>
+            <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 or 4-20 mA for the existing RTU or SCADA system.</p></div>
           </li>
         </ol>
 
@@ -419,7 +419,7 @@
           <div data-motion="rise">
             <i class="ph ph-plugs" aria-hidden="true"></i>
             <dt>Surface output</dt>
-            <dd>RS-485</dd>
+            <dd>RS-485 / 4-20 mA</dd>
           </div>
         </dl>
       </div>
@@ -548,7 +548,7 @@
             <span>How does WellFi data reach our control system?</span>
             <i class="ph ph-plus" aria-hidden="true"></i>
           </summary>
-          <p>A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends.</p>
+          <p>A surface receiver and ground reference decode the telemetry and output it over MODBUS RS-485 or 4-20 mA to the existing RTU or SCADA system. The WellFi Access Portal also analyzes the data and returns recommendations on drawdown, vibration and produced-fluid trends.</p>
         </details>
         <details class="faq-item" name="faq">
           <summary>
@@ -677,7 +677,7 @@
   <!-- Qualifier decision logic first: main.js reads it at execution time.
        Both are `defer`, and deferred scripts run in document order, so this is
        guaranteed to be ready without any loader or build step. -->
-  <script defer src="qualifier-logic.js?v=20260810-1"></script>
-  <script defer src="main.js?v=20260810-1"></script>
+  <script defer src="qualifier-logic.js?v=20260810-2"></script>
+  <script defer src="main.js?v=20260810-2"></script>
 </body>
 </html>
