@@ -104,6 +104,77 @@
   }
 
   /* ======================================================================
+     Hero â€” light pointer parallax
+     Keep input in this document rather than handing it to the cross-origin
+     iframe. That restores the tactile scene nudge while preserving normal
+     page scrolling, including a vertical phone swipe.
+     ====================================================================== */
+
+  var heroSection = document.querySelector(".hero");
+  var heroPointerX = 0;
+  var heroPointerY = 0;
+  var heroPointerFrame = 0;
+
+  function paintHeroPointer() {
+    heroPointerFrame = 0;
+    if (!heroScene) return;
+    heroScene.style.setProperty("--hero-pointer-x", heroPointerX.toFixed(2) + "px");
+    heroScene.style.setProperty("--hero-pointer-y", heroPointerY.toFixed(2) + "px");
+  }
+
+  function queueHeroPointer(x, y) {
+    heroPointerX = x;
+    heroPointerY = y;
+    if (!heroPointerFrame) heroPointerFrame = window.requestAnimationFrame(paintHeroPointer);
+  }
+
+  function updateHeroPointer(event) {
+    // Let controls stay visually still while the visitor chooses a CTA. On
+    // desktop, the art begins to the right of the copy column. On compact
+    // screens it is the full backdrop, so a finger can still nudge it through
+    // the copy rather than losing the interaction altogether.
+    if (!liveReady || !heroSection) return;
+    if (event.target instanceof Element && event.target.closest("a, button, input, select, textarea, label")) {
+      resetHeroPointer();
+      return;
+    }
+
+    var bounds = heroSection.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    var sceneBounds = heroScene.getBoundingClientRect();
+    var interactionLeft = window.innerWidth <= 820
+      ? sceneBounds.left
+      : Math.max(sceneBounds.left, bounds.left + bounds.width * 0.38);
+    if (
+      event.clientX < interactionLeft || event.clientX > sceneBounds.right ||
+      event.clientY < sceneBounds.top || event.clientY > sceneBounds.bottom
+    ) {
+      resetHeroPointer();
+      return;
+    }
+    var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+    var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+
+    queueHeroPointer(Math.max(-1, Math.min(1, x)) * 12, Math.max(-1, Math.min(1, y)) * 7);
+  }
+
+  function resetHeroPointer() {
+    if (!heroPointerX && !heroPointerY && !heroPointerFrame) return;
+    queueHeroPointer(0, 0);
+  }
+
+  if (heroSection && heroScene && !reduceMotion && "PointerEvent" in window) {
+    heroSection.addEventListener("pointermove", updateHeroPointer, { passive: true });
+    heroSection.addEventListener("pointerleave", resetHeroPointer, { passive: true });
+    heroSection.addEventListener("pointerup", resetHeroPointer, { passive: true });
+    heroSection.addEventListener("pointercancel", resetHeroPointer, { passive: true });
+    window.addEventListener("scroll", resetHeroPointer, { passive: true });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) resetHeroPointer();
+    });
+  }
+
+  /* ======================================================================
      Header and navigation
      ====================================================================== */
 
