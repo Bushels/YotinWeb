@@ -49,9 +49,13 @@ describe('Yotin website structure & feature presence', () => {
     assert.match(script, /function sendLivePointer\(x, y\)/);
     assert.match(script, /type: "wellfi:set-pointer"/);
     assert.match(script, /livePointerBridge = event\.data\.version >= 2/);
+    assert.match(script, /classList\.toggle\("has-pointer-bridge", Boolean\(livePointerBridge\)\)/);
+    assert.match(script, /heroScene\.classList\.add\("is-pointer-active"\)/);
+    assert.match(script, /heroScene\.classList\.remove\("is-pointer-active"\)/);
     assert.match(script, /var legacyX = livePointerBridge \? 0 : normalizedX \* 12/);
     assert.match(script, /heroScene\.style\.setProperty\("--hero-legacy-x"/);
     assert.match(script, /new URLSearchParams\(window\.location\.search\)\.get\("wellfiLocal"\) === "1"/);
+    assert.match(css, /\.hero-scene\.is-live:not\(\.has-pointer-bridge\):not\(\.is-pointer-active\)[\s\S]*?animation:\s*hero-legacy-idle/);
   });
 
   test('wellfi benefits section contains drill cutaway & fallback grid', () => {

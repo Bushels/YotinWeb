@@ -395,6 +395,13 @@ a { color: inherit; text-decoration: none; }
 }
 .hero-scene.is-live > .hero-poster { opacity: 0; }
 .hero-scene.is-live > .hero-live-frame { opacity: 1; }
+.hero-scene.is-live:not(.has-pointer-bridge):not(.is-pointer-active) {
+  animation: hero-legacy-idle 5.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes hero-legacy-idle {
+  0%, 100% { margin-top: 4px; margin-right: -8px; }
+  50% { margin-top: -4px; margin-right: 8px; }
+}
 
 /* Scrim: seats the copy on the art instead of letting it float in a void. */
 .hero-scrim {

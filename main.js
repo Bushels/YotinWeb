@@ -47,6 +47,7 @@
     if (!event.data || event.data.type !== "wellfi:r3f-ready") return;
     livePointerBridge = event.data.version >= 2 &&
       event.data.capabilities && event.data.capabilities.pointer === true;
+    heroScene.classList.toggle("has-pointer-bridge", Boolean(livePointerBridge));
     revealLiveFrame();
   }
 
@@ -63,6 +64,7 @@
       liveFrame.remove();
       liveFrame = null;
       livePointerBridge = false;
+      heroScene.classList.remove("has-pointer-bridge");
       window.removeEventListener("message", receiveLiveMessage);
       document.removeEventListener("visibilitychange", sendLiveActivity);
       if (liveObserver) {
@@ -186,6 +188,7 @@
     var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
     var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
 
+    heroScene.classList.add("is-pointer-active");
     queueHeroPointer(
       Math.max(-1, Math.min(1, x)) * heroPointerXLimit,
       Math.max(-1, Math.min(1, y)) * heroPointerYLimit
@@ -193,6 +196,7 @@
   }
 
   function resetHeroPointer() {
+    if (heroScene) heroScene.classList.remove("is-pointer-active");
     if (!heroPointerX && !heroPointerY && !heroPointerFrame) return;
     queueHeroPointer(0, 0);
   }
