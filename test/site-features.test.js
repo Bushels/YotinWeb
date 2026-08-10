@@ -33,22 +33,22 @@ describe('Yotin website structure & feature presence', () => {
     assert.match(html, /assets\/wellfi-island-r3f-poster\.webp/);
   });
 
-  test('live R3F hero has restrained pointer parallax without trapping touch scroll', () => {
+  test('live R3F hero has visible motion and pointer parallax without trapping touch scroll', () => {
     assert.match(html, /data-wellfi-live/);
     assert.match(css, /touch-action:\s*pan-y pinch-zoom;/);
     assert.match(
       css,
-      /\.hero-scene\s*\{[\s\S]*?--hero-pointer-x:\s*0px;[\s\S]*?transform:\s*translate3d\(var\(--hero-pointer-x\), var\(--hero-pointer-y\), 0\);[\s\S]*?\}/,
-    );
-    assert.match(
-      css,
       /\.hero-scene > \.hero-poster,\s*\.hero-scene > \.hero-live-frame\s*\{[\s\S]*?pointer-events:\s*none;/,
     );
+    assert.doesNotMatch(css, /--hero-pointer-x|--hero-pointer-y/);
     assert.match(script, /heroSection\.addEventListener\("pointermove", updateHeroPointer/);
     assert.match(script, /heroSection\.addEventListener\("pointercancel", resetHeroPointer/);
     assert.match(script, /var sceneBounds = heroScene\.getBoundingClientRect\(\);/);
     assert.match(script, /var interactionLeft = window\.innerWidth <= 820/);
     assert.match(script, /if \(!heroPointerX && !heroPointerY && !heroPointerFrame\) return;/);
+    assert.match(script, /function sendLivePointer\(x, y\)/);
+    assert.match(script, /type: "wellfi:set-pointer"/);
+    assert.match(script, /sendLivePointer\(heroPointerX \/ heroPointerXLimit, heroPointerY \/ heroPointerYLimit\)/);
   });
 
   test('wellfi benefits section contains drill cutaway & fallback grid', () => {
@@ -68,6 +68,11 @@ describe('Yotin website structure & feature presence', () => {
   test('specifications section is present with key product ratings', () => {
     assert.match(html, /WellFi/);
     assert.match(html, /150 °C/); // tool rating
+  });
+
+  test('surface-output specification scales its long value down to fit', () => {
+    assert.match(html, /<dd class="spec-output-value">RS-485 \/ 4-20 mA<\/dd>/);
+    assert.match(css, /\.spec-grid dd\.spec-output-value \{ font-size: clamp\(32px, 3\.25vw, 46px\);/);
   });
 
   test('company story & Indigenous ownership section is present', () => {

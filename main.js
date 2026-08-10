@@ -18,6 +18,8 @@
   var liveReady = false;
   var liveTimeout = 0;
   var liveObserver = null;
+  var heroPointerXLimit = 16;
+  var heroPointerYLimit = 9;
 
   function sendLiveActivity() {
     // Only meaningful once the child has navigated and announced itself.
@@ -27,6 +29,15 @@
     liveFrame.contentWindow.postMessage({
       type: "wellfi:set-active",
       active: liveInView && !document.hidden
+    }, liveOrigin);
+  }
+
+  function sendLivePointer(x, y) {
+    if (!liveReady || !liveFrame || !liveFrame.contentWindow || !liveOrigin) return;
+    liveFrame.contentWindow.postMessage({
+      type: "wellfi:set-pointer",
+      x: Math.max(-1, Math.min(1, x)),
+      y: Math.max(-1, Math.min(1, y))
     }, liveOrigin);
   }
 
@@ -118,8 +129,11 @@
   function paintHeroPointer() {
     heroPointerFrame = 0;
     if (!heroScene) return;
-    heroScene.style.setProperty("--hero-pointer-x", heroPointerX.toFixed(2) + "px");
-    heroScene.style.setProperty("--hero-pointer-y", heroPointerY.toFixed(2) + "px");
+    // The iframe cannot receive pointer events without trapping scroll. Mirror
+    // the normalized position through the origin-checked bridge so the actual
+    // R3F group retains its own camera/object parallax, without translating a
+    // cross-origin WebGL layer over the hero copy.
+    sendLivePointer(heroPointerX / heroPointerXLimit, heroPointerY / heroPointerYLimit);
   }
 
   function queueHeroPointer(x, y) {
@@ -155,7 +169,10 @@
     var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
     var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
 
-    queueHeroPointer(Math.max(-1, Math.min(1, x)) * 12, Math.max(-1, Math.min(1, y)) * 7);
+    queueHeroPointer(
+      Math.max(-1, Math.min(1, x)) * heroPointerXLimit,
+      Math.max(-1, Math.min(1, y)) * heroPointerYLimit
+    );
   }
 
   function resetHeroPointer() {
