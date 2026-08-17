@@ -97,6 +97,37 @@
     })();
   </script>
 
+  <!--
+    Microsoft Clarity — scroll maps, heatmaps and session replay.
+
+    Answers the question GA4 structurally cannot: how far down this page people
+    actually get, and where they stop. GA4's only scroll signal is a single
+    Enhanced Measurement event at 90% depth, which is a binary, not a position.
+    That matters here because the centrepiece is a 260vh pinned drill sequence
+    two thirds of the way down the page.
+
+    Unlike GA4 there is no "clarity-disable" flag to read, so local development
+    is excluded by never injecting the tag at all rather than by loading it and
+    asking it to stay quiet. Same intent as the GA guard above: a developer
+    cannot skew the recordings by forgetting.
+
+    Clarity records sessions, so the qualifier carries data-clarity-mask. See
+    the note on that element — masking it is not optional.
+  -->
+  <script>
+    (function () {
+      var CLARITY_PROJECT_ID = "y3xy2c323j";
+      if (!/^[a-z0-9]{8,}$/.test(CLARITY_PROJECT_ID)) return;
+      if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) return;
+
+      (function (c, l, a, r, i, t, y) {
+        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+        t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+        y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+      })(window, document, "clarity", "script", CLARITY_PROJECT_ID);
+    })();
+  </script>
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -628,7 +659,16 @@
                  drift when a question is added. -->
             <p><span data-qualifier-count>Six</span> questions, no contact details required to see the answer — including when the answer is no.</p>
           </div>
-          <div class="qualifier-stage" data-qualifier-stage></div>
+          <!-- data-clarity-mask is a privacy requirement, not a preference.
+               The GA4 funnel deliberately transmits the intermediate casing
+               length as a bucket ("1500_1999") and never the typed figure,
+               because a specific length plus a temperature and a lift type
+               starts to describe an identifiable well. Clarity records the
+               session itself, so without this mask the replay would capture
+               the exact keystrokes the bucketing exists to avoid — and would
+               quietly defeat that decision everywhere it was made. Mask the
+               stage, which is where main.js renders every answer. -->
+          <div class="qualifier-stage" data-qualifier-stage data-clarity-mask="true"></div>
         </section>
       </div>
     </section>
