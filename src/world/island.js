@@ -74,13 +74,21 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   let compact = false;
 
   // channels: { light, cutaway, candle, field, wind, flow, fog }
+  let lastElapsed = 0;
   function update(t, elapsed, channels, { reducedMotion = false } = {}) {
     const s = cycleState(t);
+    // Real elapsed time between frames: assuming 1/60 made every eased world state frame-rate dependent, so on a
+    // software renderer or a slow phone they converged an order of magnitude too slowly (round 6).
+    const dt = lastElapsed ? Math.min(0.25, Math.max(0, elapsed - lastElapsed)) : 1 / 60;
+    lastElapsed = elapsed;
     state.cycle = s;
     state.elapsed = elapsed;
     const L = channels.light;
-    sun.intensity = 0.1 + 2.7 * L * (0.55 + 0.45 * s.sun);
-    hemi.intensity = 0.16 + 0.75 * L * (0.6 + 0.4 * s.sky) + 0.05;
+    // Golden hour is an authored light, not a lottery: the 12 s ambient cycle used to swing the key by 45 %, so the
+    // hero could be seen (and captured) at a dim phase — measured darker than the deliberately darkest chapter
+    // (round 6). The cycle now shapes the light; it no longer decides it.
+    sun.intensity = 0.1 + 3.6 * L * (0.82 + 0.18 * s.sun);
+    hemi.intensity = 0.16 + 0.95 * L * (0.78 + 0.22 * s.sky) + 0.05;
     rim.intensity = 0.12 + 0.26 * (1 - L); // the rim separates silhouettes; it must not become the key light as L → 0 (round 5)
     const flow = channels.flow ?? L;
     const flowTime = elapsed % 20;
@@ -91,12 +99,12 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     casedFlow.setCutaway(1 - 0.72 * cut, cut < 0.05);
     tool.update(channels.candle, state.toolFocus);
     field.setReveal(channels.field);
-    field.update(1 / 60, elapsed);
+    field.update(dt, elapsed);
     forest.uniforms.wind.value = channels.wind;
     forest.uniforms.windTime.value = elapsed;
     wind.update(elapsed, channels.wind);
     // candle boost from the qualifier verdict (world:candle) decays on its own
-    if (state.candleBoost > 0) { state.candleBoost = Math.max(0, state.candleBoost - 0.004); tool.update(Math.min(1, channels.candle + state.candleBoost), state.toolFocus); }
+    if (state.candleBoost > 0) { state.candleBoost = Math.max(0, state.candleBoost - dt * 0.24); tool.update(Math.min(1, channels.candle + state.candleBoost), state.toolFocus); }
     if (!reducedMotion) {
       const idleY = Math.sin(elapsed * 0.18) * (compact ? 0.018 : 0.026);
       const idleX = Math.sin(elapsed * 0.13 + 0.8) * (compact ? 0.006 : 0.01);

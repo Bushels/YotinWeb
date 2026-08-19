@@ -8,7 +8,7 @@
 // candle 0..1 (collar glow) · field 0..1 (section-plane field reveal) · wind 0..1 · flow 0..1 (chevrons) ·
 // fog 0..1
 export const CHAPTERS = [
-  { id: 'surface',    section: '.hero',              dwell: 1.0, world: { light: 0.85, cutaway: 0.0, candle: 0.1,  field: 0.0, wind: 0.6, flow: 0.25, fog: 0.0 } },
+  { id: 'surface',    section: '.hero',              dwell: 1.0, world: { light: 1.0,  cutaway: 0.0, candle: 0.1,  field: 0.0, wind: 0.6, flow: 0.25, fog: 0.0 } },
   { id: 'descent',    section: '[data-chapter="descent"]',    dwell: 1.5, world: { light: 0.38, cutaway: 0.6, candle: 0.12, field: 0.0, wind: 0.2, flow: 0.3, fog: 0.02 } },
   { id: 'tool',       section: '[data-chapter="tool"]',       dwell: 1.4, world: { light: 0.24, cutaway: 0.85, candle: 0.12, field: 0.0, wind: 0.05, flow: 0.2, fog: 0.03 } },
   { id: 'signal',     section: '[data-chapter="signal"]',     dwell: 1.6, world: { light: 0.03, cutaway: 0.9, candle: 1.0,  field: 1.0, wind: 0.0, flow: 0.0, fog: 0.05 } },
@@ -30,7 +30,7 @@ export const POSES = [
   { id: 'deployment-a', position: [-0.8, -0.4, 12.3], target: [-6.0, -2.1, 5.4],  fov: 26, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
   { id: 'yotin',        position: [-6.5, 8.0, 15.0],  target: [-4.6, -0.3, 3.6],  fov: 34, mobile: { position: [-6.0, 5.8, 19.5], target: [-4.6, -1.2, 3.6], fov: 44 } }, // the pad + wind in the upper 60 vh band, paper below (round 2) // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
-  { id: 'fit',          position: [1.6, -0.3, 12.8],  target: [-3.0, -2.3, 4.4],  fov: 30, mobile: { position: [1.8, 0.2, 16.5], target: [-2.1, -2.7, 4.4], fov: 44 } }, // mobile: heel + collar inside the band, not cropped at the right edge (round 5)
+  { id: 'fit',          position: [-3.0, 1.5, 17.0],  target: [-5.0, -2.5, 5.0],  fov: 26, mobile: { position: [-2.6, 1.9, 20.5], target: [-4.6, -2.9, 5.0], fov: 36 } }, // BOTH proposed placements are framed in the free right column — inside-the-tubing (-3.83,-2.38,4.86) and the open-hole anchor (-0.67,-2.45,3.32) — so the verdict's candle never lands behind the qualifier column (pose search, round 6)
 ];
 
 export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);

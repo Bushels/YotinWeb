@@ -358,6 +358,13 @@ export function createToolViz(world) {
       if (behind) { x = W - x; y = H - y; }
       const minX = (W > 1100 ? 210 : 16) + 90, maxX = W - 110, minY = 84 + 40, maxY = H - 24;
       const el = cap.el;
+      // The standoff caption labels a specific line: if that line is not on screen the label is pointing at
+      // nothing, so it hides rather than clamping to an edge (round 6).
+      if (cap === standoffCaption) {
+        const off = behind || x < minX - 40 || x > maxX + 40 || y < minY || y > maxY;
+        el.style.visibility = off ? 'hidden' : '';
+        if (off) continue;
+      }
       if (cap.side) {
         // level labels: flush right of the rule's end, never clamped — hidden when the point is off-screen or behind
         const off = behind || x < minX - 60 || x > maxX || y < minY || y > maxY;

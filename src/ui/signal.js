@@ -107,7 +107,15 @@ export function mountSignal() {
       if (Math.abs(e.clientX - lastX) > 3 || Math.abs(e.clientY - lastY) > 3) { moved = true; lastX = e.clientX; lastY = e.clientY; clearTimeout(dwellTimer); dwellTimer = setTimeout(() => { if (moved) { circuit.probe(w.camera, canvas, lastX, lastY); w.requestRender(); moved = false; } }, 200); }
     }, { passive: true });
     // Per-frame loop draw
-    const tick = () => { circuit.update(1 / 60); requestAnimationFrame(tick); };
+    // Real elapsed time, not an assumed 1/60: on a software renderer or a slow phone the loop had drawn only ~40 %
+    // of its length by the time the caption already claimed the circuit was closed (round 6).
+    let lastTick = 0;
+    const tick = (now) => {
+      const dt = lastTick ? Math.min(0.25, (now - lastTick) / 1000) : 1 / 60;
+      lastTick = now;
+      circuit.update(dt);
+      requestAnimationFrame(tick);
+    };
     requestAnimationFrame(tick);
     reflect();
   }

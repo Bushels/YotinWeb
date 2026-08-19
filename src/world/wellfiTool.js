@@ -82,6 +82,13 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   halo.scale.setScalar(0.9); halo.position.x = L * 0.16; halo.renderOrder = 27; halo.name = 'collar-halo';
   group.add(halo);
 
+  // A candle that lights nothing is a decal. This is a TIGHT local light — 0.55 units of reach, so it kisses the
+  // rock immediately around the collar and cannot throw the cone that got the first point light deleted (round 1
+  // removed a 1.8-unit light that read as a downward beam; round 6 asked for the light back, small).
+  const glowLight = new THREE.PointLight(glowColor, 0, 0.55, 2.4);
+  glowLight.position.x = L * 0.16;
+  group.add(glowLight);
+
   function update(boost, focus) {
     const k = Math.max(EMBER, boost);
     const sig = smooth(0.28, 0.55, k);              // 0 = sand (rest/ember), 1 = cyan (transmission)
@@ -96,6 +103,10 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
     ringMatA.color.copy(glow); ringMatB.color.copy(glow);
     const ringOpacity = (0.04 + 0.24 * focus) * (0.55 + 0.45 * sig);
     ringMatA.opacity = ringOpacity; ringMatB.opacity = ringOpacity;
+    // the local light only exists once the collar is genuinely transmitting, and stays weak
+    glowLight.color.copy(glow);
+    glowLight.intensity = 0.55 * sig * k;
+    glowLight.visible = glowLight.intensity > 0.02;
     // draw-call diet: near-invisible emphasis geometry is not submitted (phone tier budget)
     inspectionSleeve.visible = inspectionSleeveMat.opacity > 0.03;
     ringA.visible = ringB.visible = ringOpacity > 0.05;
