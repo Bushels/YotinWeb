@@ -162,3 +162,10 @@ Opus 1–8: candle at the open-hole anchor with the four field planes named (§3
 5. Operator-route exposure and `s/`.
 6. Confirm the local-only schematic download.
 7. Parked for v1.1: opt-in wind-only sound; Evidence Lens (SCHEMATIC/EVIDENCE toggle); sun azimuth from the local clock.
+8. **Raised by the self-improvement panel (round 1, 2026-08-19) and deferred to you — brand/product calls, not build calls:**
+   - the feather glyph on the "Proudly Indigenous owned" chip (Opus: swap for a neutral mark from the icon set);
+   - the "Best fit" tag on qualifier Q1's PCP option (Opus: it pre-answers the qualifier — say it in the verdict instead);
+   - the contact H1 repeating the hero's "Know the Unknown." (Fable: a contact headline of its own);
+   - the approved ghost render staying as the chapter-4 figure (kept per §4; it now reads steel until X-ray/hover);
+   - h2 second lines over the world are now **sand** (ember stays for eyebrows, CTAs, the hero's full stop and the paper italic) — two of three critics called solid-ember two-line headlines a 2016 landing-page tell; revert is one CSS rule in `src/styles/world.css` if you prefer the ember lines.
+9. **Accepted by the lead in round 1 (recorded in §6):** scroll length at measured (≈ 10 / 11 / 13.7 viewports) with the one-click conversion path; runtime caps re-baselined with the shadow pass counted (≤ 80 / 130 k desktop, ≤ 56 / 62 k phone) and asserted.
