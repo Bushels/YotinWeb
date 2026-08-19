@@ -34,7 +34,7 @@ export function createCircuit(island, THREE) {
 
   // Wellhead reference: a thin ring on the wellhead block (V₁) — a proxy sphere for the raycast.
   const whRing = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.235, 48), new THREE.MeshBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
-  whRing.rotation.x = -Math.PI / 2;
+  whRing.rotation.x = -Math.PI / 2; whRing.visible = false;
   whRing.position.set(wellhead.x, 0.34, wellhead.z);
   const whProxy = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), new THREE.MeshBasicMaterial({ visible: false }));
   whProxy.position.set(wellhead.x, 0.3, wellhead.z);
@@ -46,6 +46,7 @@ export function createCircuit(island, THREE) {
   loopGeom.setAttribute('position', new THREE.BufferAttribute(loopPts, 3));
   const loopMat = new THREE.LineBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0, depthWrite: false });
   const loop = new THREE.Line(loopGeom, loopMat);
+  loop.visible = false; // drawn only once both references are placed
   loop.frustumCulled = false;
   group.add(loop);
   function updateLoop() {
@@ -68,6 +69,7 @@ export function createCircuit(island, THREE) {
     state.closed = state.wellhead && state.ground && sep > 0.06;
     stake.visible = state.ground;
     whRing.material.opacity = state.wellhead ? 0.9 : 0;
+    whRing.visible = state.wellhead;
     capMat.color.set(state.closed ? '#22D3EE' : '#e8dcc8');
   }
   function update(dt) {
@@ -75,6 +77,7 @@ export function createCircuit(island, THREE) {
     loopDraw += (target - loopDraw) * (1 - Math.exp(-4 * dt));
     loopGeom.setDrawRange(0, Math.max(0, Math.round(loopDraw * 24)));
     loopMat.opacity = 0.75 * Math.min(1, loopDraw * 1.4);
+    loop.visible = loopDraw > 0.02;
   }
 
   // Probe: pointer/tap on rock → local field reveal. Cast against the four section planes.

@@ -45,9 +45,9 @@ describe('tool + deployment twins', () => {
     assert.deepEqual(bad, []);
   });
 
-  test('chapter gates: tool [[1.6,3.4]], deployment [[3.6,5.2]]', () => {
+  test('chapter gates: tool [[1.6,3.4]], deployment [[3.6,4.998]] (ends where the yôtin chapter arrives)', () => {
     assert.match(toolJs, /TOOL_GATE = \[\[1\.6, 3\.4\]\]/);
-    assert.match(deployJs, /DEPLOY_GATE = \[\[3\.6, 5\.2\]\]/);
+    assert.match(deployJs, /DEPLOY_GATE = \[\[3\.6, 4\.998\]\]/);
   });
 
   test('in-world numeric readouts carry the "representative values" chip; the sr text stays static', () => {

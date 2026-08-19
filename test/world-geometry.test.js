@@ -59,8 +59,13 @@ describe('well geometry', () => {
   test('at least two legs leave the notch into solid rock and produce bore mouths on the back wall', () => {
     const leaving = paths.laterals.filter((c) => c.userData.leavesNotch);
     assert.ok(leaving.length >= 2, `only ${leaving.length} legs leave the notch`);
-    assert.ok(paths.boreMouths.length >= 2);
-    for (const m of paths.boreMouths) assert.ok(Math.abs(m.point.z - layout.NOTCH.minZ) < 0.03);
+    const back = paths.boreMouths.filter((m) => m.plane === 'back');
+    assert.ok(back.length >= 2);
+    for (const m of back) assert.ok(Math.abs(m.point.z - layout.NOTCH.minZ) < 0.03);
+    // and the cased string is named where it enters the notch through the x = -1.6 wall (spec §3)
+    const casedMouth = paths.boreMouths.find((m) => m.id === 'cased');
+    assert.ok(casedMouth && casedMouth.plane === 'left', 'cased bore mouth on the notch wall');
+    assert.ok(Math.abs(casedMouth.point.x - layout.NOTCH.minX) < 0.03);
   });
   test('the candle (default view) is at the open-hole anchor, on the bench near the x = -1.6 wall', () => {
     const p = wellPath.getWellFiPlacement(paths, wellPath.DEFAULT_WELLFI_VIEW);

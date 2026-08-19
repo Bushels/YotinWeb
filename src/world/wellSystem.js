@@ -68,9 +68,9 @@ export function buildWellSystem(paths, mats) {
 
   // Casing shoe — the OD step engineers look for, at the heel.
   const shoe = new THREE.Mesh(
-    new THREE.TorusGeometry(RADII.cased * 1.35, 0.028, 10, 24),
-    new THREE.MeshStandardMaterial({ color: '#d7e3ea', roughness: 0.35, metalness: 0.85 }),
-  );
+    new THREE.TorusGeometry(RADII.cased * 1.2, 0.03, 10, 24),
+    new THREE.MeshStandardMaterial({ color: '#d7e3ea', roughness: 0.35, metalness: 0.85, emissive: new THREE.Color('#d7e3ea'), emissiveIntensity: 0.2 }),
+  ); // the OD step at the heel — readable at ch3 light (round 3); tighter than before so it does not read as a syringe flange
   shoe.position.copy(paths.shoe);
   shoe.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), paths.cased.getTangentAt(1).normalize());
   shoe.name = 'shoe';
@@ -79,13 +79,24 @@ export function buildWellSystem(paths, mats) {
   // Bore mouths on the back cut face: a dark ellipse with a thin sand rim where a leg enters solid rock.
   const mouths = new THREE.Group();
   mouths.name = 'bore-mouths';
+  // All mouth rims merge into one mesh and all discs into another (two draw calls, not two per mouth).
+  const mouthRimMat = new THREE.MeshBasicMaterial({ color: '#d9cfbd', transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
+  const discMat = new THREE.MeshBasicMaterial({ color: '#05030a', side: THREE.DoubleSide });
+  const rimGeoms = [], discGeoms = [];
   paths.boreMouths.forEach((m) => {
-    const ring = new THREE.Mesh(new THREE.RingGeometry(RADII.lateral * 0.9, RADII.lateral * 1.25, 32), new THREE.MeshBasicMaterial({ color: '#b3aa9a', transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false }));
-    const disc = new THREE.Mesh(new THREE.CircleGeometry(RADII.lateral * 0.9, 32), new THREE.MeshBasicMaterial({ color: '#05030a', side: THREE.DoubleSide }));
-    [ring, disc].forEach((mesh) => { mesh.position.copy(m.point); mesh.position.z += 0.004; mesh.rotation.y = 0; }); // ring lies in the z = -0.6 plane, facing +z
-    ring.name = `${m.id}-mouth-rim`; disc.name = `${m.id}-mouth`;
-    mouths.add(disc, ring);
+    const r = m.r || RADII.lateral;
+    const ring = new THREE.RingGeometry(r * 0.9, r * 1.25, 32);
+    const disc = new THREE.CircleGeometry(r * 0.9, 32);
+    // back wall (z = -0.6): the ring lies in that plane facing +z; left wall (x = -1.6): facing +x
+    [ring, disc].forEach((g) => { if (m.plane === 'left') { g.rotateY(Math.PI / 2); g.translate(m.point.x + 0.004, m.point.y, m.point.z); } else { g.translate(m.point.x, m.point.y, m.point.z + 0.004); } });
+    rimGeoms.push(ring); discGeoms.push(disc);
   });
+  if (rimGeoms.length) {
+    const rims = new THREE.Mesh(mergeIndexed(rimGeoms), mouthRimMat); rims.name = 'bore-mouth-rims';
+    const discs = new THREE.Mesh(mergeIndexed(discGeoms), discMat); discs.name = 'bore-mouths-discs';
+    mouths.add(discs, rims);
+    rimGeoms.concat(discGeoms).forEach((g) => g.dispose());
+  }
   group.add(mouths);
 
   // Wellhead stub + block at grade.

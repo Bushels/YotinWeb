@@ -1,6 +1,6 @@
 // Scroll-length gate (spec §6, accepted 2026-08-19 after round 1): the DOM is the site and stays complete, so
-// the caps are the measured figures plus ~0.3 viewport of headroom — 10.7 at 1440×900, 11.9 at 1366×768, 14.3 at
-// 390×844 (re-measured after round 2: 60 vh rise band per spec, fit chapter single column) — asserted so the
+// the caps are the measured figures plus ~0.3 viewport of headroom — 10.7 at 1440×900, 11.9 at 1366×768, 14.7 at
+// 390×844 (re-measured after rounds 2–3: 60 vh rise band per spec, fit chapter single column) — asserted so the
 // length cannot drift further. Pass --strict to exit non-zero on FAIL.
 //
 //   npx vite --port 5176 --strictPort &
@@ -14,7 +14,7 @@ const strict = Boolean(args.strict);
 const VIEWPORTS = [
   { w: 1440, h: 900, cap: 10.7, label: 'desktop' },
   { w: 1366, h: 768, cap: 11.9, label: 'desktop' },
-  { w: 390, h: 844, cap: 14.3, label: 'phone' },
+  { w: 390, h: 844, cap: 14.7, label: 'phone' },
 ];
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });

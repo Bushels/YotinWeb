@@ -13,10 +13,18 @@
   var navToggle = document.querySelector("[data-nav-toggle]");
   var mobileNav = document.querySelector("[data-mobile-nav]");
 
+  var lastDirY = 0;
   function updateHeader() {
     if (!header) return;
-    if (window.scrollY > 44) header.setAttribute("data-scrolled", "");
+    var y = window.scrollY;
+    if (y > 44) header.setAttribute("data-scrolled", "");
     else header.removeAttribute("data-scrolled");
+    // scroll direction (ignore jitter < 8 px; always "up" near the top): on phones the ChatFi launcher yields
+    // while the visitor reads downward and returns when they pause or scroll back (round 3).
+    if (Math.abs(y - lastDirY) > 8) {
+      root.setAttribute("data-scroll-dir", y > lastDirY && y > 120 ? "down" : "up");
+      lastDirY = y;
+    }
   }
 
   function closeNav(returnFocus) {

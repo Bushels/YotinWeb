@@ -41,13 +41,13 @@ function toolAnchor(curve, param) {
   return { position: curve.getPointAt(param), tangent: curve.getTangentAt(param).normalize().clone() };
 }
 
-// Where a curve crosses the plane z = zPlane (first crossing), or null.
-function crossing(curve, zPlane, samples = 200) {
+// Where a curve crosses the plane axis = value (first crossing), or null. axis: 'z' (default) or 'x'.
+function crossing(curve, plane, samples = 200, axis = 'z') {
   let prev = curve.getPointAt(0);
   for (let i = 1; i <= samples; i++) {
     const p = curve.getPointAt(i / samples);
-    if ((prev.z - zPlane) * (p.z - zPlane) <= 0 && prev.z !== p.z) {
-      const f = (prev.z - zPlane) / (prev.z - p.z);
+    if ((prev[axis] - plane) * (p[axis] - plane) <= 0 && prev[axis] !== p[axis]) {
+      const f = (prev[axis] - plane) / (prev[axis] - p[axis]);
       return { point: prev.clone().lerp(p, f), tangent: p.clone().sub(prev).normalize(), u: (i - 1 + f) / samples };
     }
     prev = p;
@@ -95,6 +95,12 @@ export function buildWellPaths() {
     const hit = crossing(c, NOTCH.minZ);
     if (hit) boreMouths.push({ id: `leg-${i}`, plane: 'back', ...hit });
   });
+  // The cased string enters the notch through the x = -1.6 wall (spec §3: "name that bore mouth too") — the
+  // hand-off the eye needs between the front-face casing and the heel (round 3).
+  {
+    const hit = crossing(cased, NOTCH.minX, 200, 'x');
+    if (hit) boreMouths.push({ id: 'cased', plane: 'left', r: RADII.cased, ...hit });
+  }
 
   return { cased, openHole, laterals, shoe, wellhead, wellfiTools, boreMouths };
 }

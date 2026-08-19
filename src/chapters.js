@@ -22,11 +22,11 @@ export const CHAPTERS = [
 export const POSES = [
   { id: 'surface',      position: [27.8, 22.0, 30.9], target: [-1.8, -1.3, 2.2],  fov: 20, mobile: { position: [24.0, 22.5, 30.5], target: [-1.2, -3.2, 2.2], fov: 30 } },
   { id: 'descent',      position: [-0.2, 2.3, 15.2],  target: [-4.9, -1.2, 5.0],  fov: 28, mobile: { position: [-0.6, 1.4, 16.5], target: [-4.9, -2.4, 5.0], fov: 38 } },
-  { id: 'tool',         position: [1.6, -1.3, 7.4],   target: [-0.55, -2.45, 3.3], fov: 24, mobile: { position: [1.9, -1.85, 9.8], target: [-0.55, -3.55, 3.3], fov: 34 } }, // mobile: tool in the upper 38 vh band above the cards (round 2)
-  { id: 'signal',       position: [4.1, 0.55, 13.2],  target: [-2.8, -2.1, 4.0],  fov: 28, mobile: { position: [2.0, -0.4, 21.0], target: [-0.6, -5.4, 3.2], fov: 36 } }, // collar right of centre AND the wellhead/front-face return in frame (round 2); mobile: collar in the 42 vh band
-  { id: 'deployment-a', position: [-2.0, -0.8, 10.3], target: [-4.9, -2.15, 5.45], fov: 24, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
+  { id: 'tool',         position: [0.55, -1.9, 5.3],  target: [-0.55, -2.45, 3.3], fov: 18, mobile: { position: [1.9, -1.85, 9.8], target: [-0.55, -3.55, 3.3], fov: 34 } }, // mobile: tool in the upper 38 vh band above the cards (round 2)
+  { id: 'signal',       position: [4.1, 1.3, 13.2],   target: [-2.8, -1.35, 4.0], fov: 28, mobile: { position: [2.0, -0.4, 21.0], target: [-0.6, -5.4, 3.2], fov: 36 } }, // collar right of centre AND the wellhead/front-face return in frame (round 2); mobile: collar in the 42 vh band
+  { id: 'deployment-a', position: [-0.8, -0.4, 12.3], target: [-6.0, -2.1, 5.4],  fov: 26, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
-  { id: 'yotin',        position: [-6.5, 5.4, 15.5],  target: [-4.6, -0.7, 3.6],  fov: 34, mobile: { position: [-6.0, 5.8, 19.5], target: [-4.6, -1.2, 3.6], fov: 44 } }, // the pad + wind in the upper 60 vh band, paper below (round 2) // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
+  { id: 'yotin',        position: [-6.5, 8.0, 15.0],  target: [-4.6, -0.3, 3.6],  fov: 34, mobile: { position: [-6.0, 5.8, 19.5], target: [-4.6, -1.2, 3.6], fov: 44 } }, // the pad + wind in the upper 60 vh band, paper below (round 2) // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
   { id: 'fit',          position: [1.6, -0.3, 12.8],  target: [-3.0, -2.3, 4.4],  fov: 30, mobile: { position: [1.8, 0.2, 16.5], target: [-3.0, -2.7, 4.4], fov: 40 } },
 ];
 
@@ -34,10 +34,17 @@ export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);
 
 // Map conductor progress (0..6, fractional) to pose progress (0..7). Chapter 4 spans poses 4→5 over its
 // first 55 %, then holds pose 5 through the FAQ; chapters 5 and 6 map to poses 6 and 7.
+// Continuous piecewise map (round 3: a hard cut 5 → 6 at p = 5 snapped the camera at the #company anchor):
+//   4 → 5 : deployment-a → deployment-b over the first 55 % of chapter 4, held through benefits + FAQ
+//   4.8 → 5.3: the RISE — deployment-b → yôtin, beginning under the FAQ scrim and landing a third of the way into the band
+//   5.3 → 5.8: hold the pad + wind while the paper is read
+//   5.8 → 6: ease into fit
 export function poseProgress(p) {
   if (p <= 4) return p;
-  if (p < 5) { const l = p - 4; return 4 + Math.min(1, l / 0.55); }
-  return p + 1; // 5→6, 6→7
+  if (p < 4.8) { const l = p - 4; return 4 + Math.min(1, l / 0.55); }
+  if (p < 5.3) return 5 + (p - 4.8) / 0.5;   // the rise begins under the FAQ's smoked scrim and completes a third of the way down the band
+  if (p < 5.8) return 6;                       // hold the pad + wind while the paper is read
+  return 6 + Math.min(1, (p - 5.8) / 0.2);
 }
 
 // Interpolate adjacent chapter channel values.

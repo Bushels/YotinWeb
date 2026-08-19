@@ -21,7 +21,9 @@ await page.goto(url, { waitUntil: 'load', timeout: 60000 });
 const worldOn = await page.evaluate(() => document.documentElement.classList.contains('world-on'));
 const report = { url, viewport: [W, H], worldOn, frames: [], logs };
 if (worldOn) {
-  await page.waitForFunction(() => document.documentElement.classList.contains('world-live'), null, { timeout: 45000 });
+  // fail fast on a boot error (the page falls back to stills and world-live never arrives)
+  await page.waitForFunction(() => document.documentElement.classList.contains('world-live') || document.documentElement.classList.contains('world-failed'), null, { timeout: 45000 });
+  if (await page.evaluate(() => document.documentElement.classList.contains('world-failed'))) { console.error('world failed to boot - see console logs: ' + logs.join(' | ')); process.exit(2); }
   const anchors = await page.evaluate(() => window.__yotinWorld.conductor.anchors);
   const ids = await page.evaluate(() => window.__yotinWorld.conductor.getState().anchors.map((_, i) => i));
   for (let i = 0; i < anchors.length; i++) {
@@ -56,10 +58,10 @@ if (worldOn) {
   // present and lit) and every other chapter's frame carries none outside the rail column (the collar is sand)
   try {
     const sharp = (await import('sharp')).default;
-    const cyanCount = async (file, x0) => {
+    const cyanCount = async (file, x0, y0 = 90) => { // y0: skip the header band (the logomark earns cyan after the circuit closes)
       const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
       let n = 0, peak = 0;
-      for (let y = 0; y < info.height; y++) for (let x = x0; x < info.width; x++) {
+      for (let y = y0; y < info.height; y++) for (let x = x0; x < info.width; x++) {
         const k = (y * info.width + x) * info.channels, r = data[k], g = data[k + 1], b = data[k + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b); if (!mx) continue;
         const sat = (mx - mn) / mx, L = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
@@ -67,7 +69,7 @@ if (worldOn) {
       }
       return { n, peak };
     };
-    const railX = W > 1100 ? 200 : 0;
+    const railX = 0; // the rail column is inside the scan (round 3: cyan leaked there at the ch4 anchor)
     const ch3 = report.frames.find((f) => f.i === 3);
     const c3 = ch3 ? await cyanCount(ch3.file, railX) : { n: 0 };
     const leaks = [];

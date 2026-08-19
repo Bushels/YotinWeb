@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { COLORS } from './layout.js';
 import { EMBER } from './cycle.js';
+import { mergeIndexed } from './forest.js';
 
 export const TOOL_LENGTH = 0.62;
 
@@ -35,13 +36,17 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   // Body: four named volumes along +X.
   const body = new THREE.Group();
   body.name = 'body';
+  // Four named volumes, three finishes (round 3: one steel rod read as a hypodermic): matte battery housing,
+  // glossier sensor package, plain sleeve; the isolation gap is a dark band with a ring at each edge.
   const steel = new THREE.MeshStandardMaterial({ color: '#c6ccd1', metalness: 0.8, roughness: 0.4 }); // neutral steel, not blue-white
+  const matte = new THREE.MeshStandardMaterial({ color: '#9aa0a5', metalness: 0.55, roughness: 0.78 });
+  const gloss = new THREE.MeshStandardMaterial({ color: '#d2d7db', metalness: 0.85, roughness: 0.24 });
   const dark = new THREE.MeshStandardMaterial({ color: '#2a2622', metalness: 0.2, roughness: 0.7 });
   const L = TOOL_LENGTH;
   const volumes = [
-    { name: 'battery',  len: L * 0.28, r: 0.05, mat: steel,  x: -L * 0.36 },
-    { name: 'sensors',  len: L * 0.26, r: 0.05, mat: steel,  x: -L * 0.05 },
-    { name: 'gap',      len: L * 0.10, r: 0.047, mat: dark,  x: L * 0.16 },   // the isolation gap — dark band
+    { name: 'battery',  len: L * 0.28, r: 0.05, mat: matte,  x: -L * 0.36 },
+    { name: 'sensors',  len: L * 0.26, r: 0.05, mat: gloss,  x: -L * 0.05 },
+    { name: 'gap',      len: L * 0.12, r: 0.047, mat: dark,  x: L * 0.16 },   // the isolation gap — dark band
     { name: 'sleeve',   len: L * 0.30, r: 0.05, mat: steel,  x: L * 0.36 },
   ];
   const hotspots = {};
@@ -52,6 +57,11 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
     body.add(m);
     hotspots[vdef.name] = m;
   });
+  // gap edge rings: the isolation gap reads as a ring, not a notch
+  const edgeMat = new THREE.MeshStandardMaterial({ color: '#1c1916', metalness: 0.3, roughness: 0.6 });
+  const edgeGeoms = [-1, 1].map((side) => { const g = new THREE.TorusGeometry(0.054, 0.007, 8, 24); g.rotateY(Math.PI / 2); g.translate(L * 0.16 + side * L * 0.06, 0, 0); return g; });
+  const edges = new THREE.Mesh(mergeIndexed(edgeGeoms), edgeMat); edges.name = 'gap-edges'; body.add(edges); // one draw call for both rings
+  edgeGeoms.forEach((g) => g.dispose());
   group.add(body);
 
   // Witness capsule (soft outline) and the emissive collar sleeve — the candle. Values >1 are additive halo, no bloom.
@@ -84,6 +94,9 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
     ringMatA.color.copy(glow); ringMatB.color.copy(glow);
     const ringOpacity = (0.04 + 0.24 * focus) * (0.55 + 0.45 * sig);
     ringMatA.opacity = ringOpacity; ringMatB.opacity = ringOpacity;
+    // draw-call diet: near-invisible emphasis geometry is not submitted (phone tier budget)
+    inspectionSleeve.visible = inspectionSleeveMat.opacity > 0.03;
+    ringA.visible = ringB.visible = ringOpacity > 0.05;
   }
 
   return {

@@ -17,7 +17,8 @@
     "capture:interactions": "node scripts/interactions.mjs --url http://localhost:5174/?world=1 --out scratch/frames --w 1366 --h 768",
     "check:runtime": "node scripts/frames.mjs --url http://localhost:5174/?world=1 --out scratch/frames --w 1440 --h 900 --strict --quiet && node scripts/frames.mjs --url http://localhost:5174/?world=1 --out scratch/frames --w 390 --h 844 --strict --quiet",
     "check:colour": "node scripts/colour-gate.mjs --strict",
-    "check": "npm run build && node scripts/budget.mjs && node scripts/colour-gate.mjs --strict && node --test test/*.test.js"
+    "check": "npm run build && node scripts/budget.mjs && node scripts/colour-gate.mjs --strict && node --test test/*.test.js",
+    "check:all": "npm run check && npm run check:rm && npm run check:scroll && npm run check:runtime"
   },
   "devDependencies": {
     "playwright": "^1.60.0",

@@ -140,6 +140,7 @@ export function bootWorld() {
     partStrength += (partTarget - partStrength) * (1 - Math.exp(-4 * dt));
     if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
     rig.apply(poseProgress(p), dt, camera.aspect);
+    island.wind.setCameraHeight(camera.position.y); // the wind is only seen from above ground (the rise surfaces into it)
     island.update(elapsed % 12, elapsed, w);
     scene.fog.density = (w.fog || 0) * 0.6;
     renderer.render(scene, camera);

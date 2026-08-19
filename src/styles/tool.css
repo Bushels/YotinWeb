@@ -104,3 +104,7 @@ html.tool-orbit.tool-orbit-drag main { cursor: grabbing; }
 [data-drill-benefits] li[data-hotspot] { cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
 [data-drill-benefits] li[data-hotspot]:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 [data-drill-benefits] li.is-hover, [data-drill-benefits] li.is-active { border-color: var(--sand); background: rgba(232, 220, 200, 0.06); }
+
+/* Projected level labels (chapter 4): quiet mono tags at the line and its earlier ghost. */
+.level-caption { font-size: 10px; padding: 2px 8px; }
+.level-caption.is-earlier { opacity: 0.7; border-style: dashed; }

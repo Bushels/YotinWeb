@@ -83,7 +83,7 @@ html.world-on .hero-message h1 .w:nth-child(4) > span { animation-delay: 264ms; 
 .rise-band { display: none; }
 html.world-on .company-section { background: transparent; padding-top: 0; }
 html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; } /* spec §4 row 5: 60 vh rise (round 2) */
-html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
+html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: clamp(72px, 12vh, 120px); margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
 html.world-on .rise-caption span:last-child { color: var(--ember); }
 html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(40px, 5vw, 64px); padding-bottom: clamp(40px, 5vw, 64px); position: relative; z-index: 1; }
 @media (max-height: 560px) { html.world-on .rise-band { height: 40vh; } }
@@ -125,8 +125,9 @@ html.world-on .journey-list {
 html.world-on .journey-list > li, html.world-on .journey-list > li:nth-child(even) { grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; }
 html.world-on .journey-list > li:nth-child(odd) { border-right: 1px solid var(--line); }
 html.world-on .journey-list .journey-icon { width: 40px; height: 40px; font-size: 16px; }
-html.world-on .journey-list h3 { font-size: 16px; margin: 2px 0 4px; }
-html.world-on .journey-list p { font-size: 13px; line-height: 1.45; }
+html.world-on .journey-list h3 { font-size: 15px; margin: 2px 0 3px; }
+html.world-on .journey-list p { font-size: 12.5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html.world-on .journey-list > li, html.world-on .journey-list > li:nth-child(even) { padding: 10px 12px; }
 html.world-on .signal-stage { margin-top: 16px; padding: 20px 22px; }
 @media (min-width: 901px) { html.world-on .signal-stage { max-width: min(720px, 60%); margin-right: auto; grid-template-columns: 1fr; } html.world-on .signal-stage .readout { max-width: 420px; } } /* the collar's side of the frame stays uncovered while the instrument is in use (round 2) */
 @media (max-width: 1100px) {
@@ -145,13 +146,13 @@ html.world-on .insight-section { padding: clamp(48px, 5vw, 80px) 0; }
   html.world-on .device-banner img { max-height: min(200px, 26vh); }
 }
 html.world-on .device-banner { margin-top: clamp(28px, 3vw, 44px); padding: clamp(20px, 2.5vw, 34px) 0 18px; background: rgba(3, 7, 11, 0.82); } /* ch4 panel scrim: the figure sits over the live tool */
-html.world-on .device-banner img { max-height: 220px; object-fit: contain; filter: saturate(0.22) brightness(0.82); transition: filter 600ms ease; } /* steel at rest; the x-ray view earns its colour */
-html.world-on.xray-on .device-banner img, html.world-on .device-banner:hover img, html.world-on .device-banner:focus-within img { filter: none; }
+html.world-on .device-banner img { max-height: 220px; object-fit: contain; filter: saturate(0.22) brightness(0.82); transition: filter 600ms ease; } /* steel always (one-candle rule): the figure never shows its native cyan */
+html.world-on.xray-on .device-banner img { filter: saturate(0.22) brightness(1) contrast(1.18); } /* x-ray on: a contrast lift, no hue */
 html.world-on .device-caption { position: relative; z-index: 1; margin-top: 18px; color: var(--sand); }
 @media (max-width: 820px) { html.world-on .device-banner img { max-height: 150px; } html.world-on .device-banner { background: rgba(3, 7, 11, 0.92); } }
 html.world-on .portal-note { margin-top: 20px; }
 html.world-on .drill-fallback { padding: clamp(48px, 6vw, 88px) 0; }
-html.world-on .drill-fallback ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+html.world-on .drill-fallback ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 html.world-on .faq-section { padding: clamp(40px, 4vw, 64px) 0; }
 html.world-on .faq-section h2 { margin-bottom: 12px; }
 html.world-on .faq-item summary { min-height: 48px; padding: 12px 0; }
@@ -280,19 +281,23 @@ html.world-on .contact-section h2 span { color: var(--sand); }
 
 /* Chapter 6 (round 2): questions left, live well right — one column at ≤ 50 % so the right half stays the
    world's; the H2 steps down so Q1 is on screen at the anchor on a 768-tall laptop. */
+/* order at EVERY width (round 3): eyebrow + H2 → the qualifier (the invited action; Q1 on screen at the anchor)
+   → the email / ChatFi fallback — the contact grid becomes display: contents so its two blocks join the
+   section's flex column */
+html.world-on .contact-section { display: flex; flex-direction: column; }
+html.world-on .contact-grid { display: contents; }
+html.world-on .contact-grid > div, html.world-on .contact-section .fit-shell { width: min(100%, var(--shell)); margin-inline: auto; padding-inline: var(--pad); box-sizing: border-box; }
+html.world-on .contact-grid > div:first-child { order: 1; }
+html.world-on .contact-section .fit-shell { order: 2; margin-top: 18px; }
+html.world-on .contact-grid > .contact-actions { order: 3; margin-top: 28px; }
+html.world-on .contact-grid > div::before { inset: -16px -20px; }
 @media (min-width: 1101px) {
-  /* order: eyebrow + H2 → the qualifier (the invited action, Q1 on screen at the anchor) → the email / ChatFi
-     fallback — the contact grid becomes display: contents so its two blocks join the section's flex column */
-  html.world-on .contact-section { display: flex; flex-direction: column; padding-top: 40px; }
-  html.world-on .contact-grid { display: contents; }
-  html.world-on .contact-grid > div, html.world-on .contact-section .fit-shell { width: min(100%, var(--shell)); margin-inline: auto; padding-inline: var(--pad); box-sizing: border-box; }
-  html.world-on .contact-grid > div:first-child { order: 1; max-width: 50%; margin-left: 0; }
-  html.world-on .contact-section .fit-shell { order: 2; margin-top: 18px; }
-  html.world-on .contact-grid > .contact-actions { order: 3; max-width: 50%; margin-left: 0; margin-top: 28px; }
-  html.world-on .contact-grid > div::before { inset: -16px -20px; }
+  html.world-on .contact-section { padding-top: 40px; }
+  html.world-on .contact-grid > div:first-child, html.world-on .contact-grid > .contact-actions { max-width: 50%; margin-left: 0; }
   html.world-on .contact-section h2 { font-size: clamp(38px, 4.2vw, 58px); margin-bottom: 0; }
   html.world-on .contact-actions > p { font-size: 17px; margin-bottom: 12px; }
 }
+@media (max-width: 820px) { html.world-on .contact-section h2 { font-size: clamp(34px, 9vw, 44px); } }
 
 /* Units keep their casing inside uppercase mono chrome (kPa, mm/s RMS, 4-20 mA, °C) — round 2. */
 html.world-on .readout-list b, html.world-on .chip-out, html.world-on .tool-chip .unit, html.world-on [data-unit] { text-transform: none; }
@@ -300,3 +305,12 @@ html.world-on .readout-list b, html.world-on .chip-out, html.world-on .tool-chip
 /* Chapter 3 step numbers: sand-on-ink, so saturated ember is reserved for the Close-the-Circuit control and
    cyan for the candle (round 2). */
 html.world-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color: var(--sand); border: 1px solid rgba(232, 220, 200, 0.35); }
+
+/* Phones: the local scrims' negative insets stay inside the viewport (a -28 px bleed on a flush block widened the
+   document by 28 px — round 3). */
+@media (max-width: 820px) {
+  html.world-on .section-intro::before, html.world-on .insight-head::before, html.world-on .drill-fallback-head::before, html.world-on .contact-grid > div::before { inset: -14px 0; }
+}
+@media (max-width: 820px) {
+  html.world-on .drill-fallback ul { grid-template-columns: minmax(0, 1fr); } /* one column: a 3-up grid widened the document at 390 (round 3; placed after the desktop rule it overrides) */
+}

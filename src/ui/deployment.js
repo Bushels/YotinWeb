@@ -9,7 +9,7 @@ import { getToolViz } from './tool.js';
 // Flow chevron tints per application (sand family — no cyan; thermal keeps the sand and adds a warm haze).
 const FLOW_TINTS = { light: '#e9dcc0', heavy: '#d9c39a', gas: '#c9d4da', thermal: '#d9c39a' };
 
-export const DEPLOY_GATE = [[3.6, 5.2]];
+export const DEPLOY_GATE = [[3.6, 4.998]]; // ends where the yôtin chapter arrives (the #company top at the header) — its labels, pump and x-ray must not outlive chapter 4 (round 3)
 
 export function mountDeployment() {
   const insight = document.getElementById('insight');
@@ -42,7 +42,7 @@ export function mountDeployment() {
       viz.setXray(xrayOn);
       xrayBtn.setAttribute('aria-pressed', String(xrayOn));
       if (xrayCaption) xrayCaption.hidden = !xrayOn;
-      document.documentElement.classList.toggle('xray-on', xrayOn); // the approved ghost figure shows its x-ray colour only while X-ray is on (one-candle rule)
+      document.documentElement.classList.toggle('xray-on', xrayOn); // x-ray state on <html> (the figure lifts contrast only — it never shows its native cyan: one-candle rule)
     }
     I.register('xray', {
       proxy: null, twin: xrayBtn, chapters: DEPLOY_GATE,
@@ -71,6 +71,12 @@ export function mountDeployment() {
 
     // Fluid-level instrument — the invited action. Slider 0 = above pump, 1 = pump-off. Trend ghost on release.
     let lastReleased = range ? Number(range.value) / 100 : 0;
+    // projected world labels at the level line ("now") and its trend ghost ("earlier") — the DOM caption alone
+    // left the drag without a world-side consequence (round 3)
+    const mkLabel = (text, cls) => { const el = document.createElement('p'); el.className = 'surface-caption level-caption ' + cls; el.textContent = text; el.hidden = true; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); return el; };
+    const nowLabel = mkLabel('fluid level · now', 'is-now');
+    const earlierLabel = mkLabel('earlier', 'is-earlier');
+    const showLabels = (on, withEarlier) => { nowLabel.hidden = !on; earlierLabel.hidden = !(on && withEarlier); viz.setLevelCaptions(on ? nowLabel : null, on && withEarlier ? earlierLabel : null); };
     if (range) {
       viz.setLevel(lastReleased);
       I.register('fluid-level', { proxy: viz.levelRing, twin: range, chapters: DEPLOY_GATE, cursor: 'ns-resize', apply3D() {} });
@@ -80,6 +86,7 @@ export function mountDeployment() {
         range.setAttribute('aria-valuetext', levelText(d));
         const pumpOff = d >= 0.97;
         if (surface) { if (pumpOff && inChapter) { surface.hidden = false; viz.setSurfaceCaption(surface); } else { surface.hidden = true; viz.setSurfaceCaption(null); } }
+        showLabels(inChapter, trend && !trend.hidden);
       };
       range.addEventListener('input', reflectLevel);
       range.addEventListener('change', () => {
@@ -122,6 +129,7 @@ export function mountDeployment() {
       viz.setLevelShown(inside);
       if (!inside) { if (surface) surface.hidden = true; viz.setSurfaceCaption(null); setXray(false); }
       else if (range && Number(range.value) / 100 >= 0.97 && surface) { surface.hidden = false; viz.setSurfaceCaption(surface); }
+      showLabels(inside, trend && !trend.hidden);
     });
   }
 

@@ -49,7 +49,10 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
   }
   function place(p, normal) {
     const pot = potentialAt(p, collar);
-    if (pot < 0.02) return; // magnitude floor — no dim grid
+    if (pot < 0.06) return; // magnitude floor — no dim grid
+    // density falls with magnitude (spec §3): stochastic rejection — full near the collar, a few strokes on the
+    // far wall; without it every lattice point survived and the far field read as an LED carpet (round 3)
+    if (rand() > Math.min(1, Math.pow(pot / 0.45, 1.5))) return;
     // stroke lies in the plane, aligned to the projected gradient
     const gr = gradient(p).clone();
     gr.addScaledVector(normal, -gr.dot(normal));
@@ -91,7 +94,7 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
     uProbe: { value: probeTex },
     uTime: { value: 0 },
     uSealTop: { value: SEAL.topY }, uSealBottom: { value: SEAL.bottomY }, uShadow: { value: 0.65 },
-    uCull: { value: 0.045 },
+    uCull: { value: 0.11 },
   };
   const mat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, side: THREE.DoubleSide });
   mat.customProgramCacheKey = () => 'candle-field-v2';
@@ -130,7 +133,7 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nuniform vec3 uColor;\nvarying float vI;')
       .replace('#include <color_fragment>', `#include <color_fragment>
-        diffuseColor.rgb = uColor * (0.25 + 1.4 * vI);
+        diffuseColor.rgb = uColor * (0.08 + 1.6 * vI); // low-intensity strokes carry no constant floor
         diffuseColor.a = min(1.0, vI * 1.1);`);
   };
 
@@ -140,7 +143,7 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
   const dummy = new THREE.Object3D();
   const potAttr = new Float32Array(Math.max(1, count));
   for (let i = 0; i < count; i++) {
-    dummy.position.copy(positions[i]); dummy.quaternion.copy(quats[i]); dummy.scale.setScalar(1);
+    dummy.position.copy(positions[i]); dummy.quaternion.copy(quats[i]); dummy.scale.set(0.6 + rand() * 0.7, 1, 1); // stroke-length jitter: not equal dashes
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
     potAttr[i] = pots[i];

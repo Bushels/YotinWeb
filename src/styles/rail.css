@@ -16,6 +16,11 @@
   pointer-events: none;
 }
 html.world-on .rail, html.stills-on .rail { display: flex; } /* the rail is DOM-only: it exists on the stills path too (spec §4/§7) */
+/* Gutter ground (round 3): the rail must read at ≥ 4.5:1 over whatever stratum the risen world puts behind it, so
+   the gutter gets a backdrop — a soft dark wash that fades out before the content column — not just a token. */
+@media (min-width: 1101px) {
+  html.world-on .rail::before, html.stills-on .rail::before { content: ""; position: fixed; top: 0; bottom: 0; left: 0; width: 196px; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgba(3, 7, 11, 0.9) 0, rgba(3, 7, 11, 0.9) 120px, rgba(3, 7, 11, 0) 196px); }
+}
 html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform: none; }
 .rail > * { pointer-events: auto; }
 .rail-chapters { display: flex; flex-direction: column; gap: 2px; }
@@ -52,7 +57,6 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
    sand-on-dark colours over the world that runs beside the sheet; the tally/legend are already hidden there
    (chapter index ≥ 5) and the return marker with them. (A paper-tinted card over the rise band read as a light
    tombstone — round 2.) */
-.rail[data-chapter="yotin"] .rail-marker-up { display: none; }
 
 /* Reserved gutter: copy never enters the rail's column. */
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }

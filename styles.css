@@ -1753,6 +1753,8 @@ a { color: inherit; text-decoration: none; }
 
   .chatfi-launcher span { display: none; }
   .chatfi-launcher { width: 60px; min-width: 60px; height: 60px; padding: 0; right: 16px; bottom: 16px; }
+  /* yields while reading downward so it never sits on the copy it would cover (round 3) */
+  html[data-scroll-dir="down"] .chatfi-launcher:not([aria-expanded="true"]) { opacity: 0; pointer-events: none; transform: translateY(12px); }
   /* Use the real available height rather than a fixed cap — --chatfi-vh is
      kept in sync with visualViewport so the panel rides above the keyboard. */
   .chatfi-panel {

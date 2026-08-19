@@ -11,6 +11,7 @@
   background: rgba(3, 7, 11, 0.6);
 }
 @media (max-width: 900px) { .signal-stage { grid-template-columns: 1fr; } }
+.circuit-title { margin: 0 0 8px; color: var(--ember); }
 .circuit-lede { margin: 0 0 14px; color: var(--muted); }
 .circuit-refs { display: flex; flex-wrap: wrap; gap: 10px; }
 .circuit-ref {

@@ -105,7 +105,7 @@ export function createToolViz(world) {
 
   // ---- fluid-level instrument ---------------------------------------------------------------------------------
   const cased = island.paths.cased;
-  const pumpMat = new THREE.MeshStandardMaterial({ color: '#1b1a19', roughness: 0.6, metalness: 0.5, emissive: new THREE.Color(EMBER), emissiveIntensity: 0 });
+  const pumpMat = new THREE.MeshStandardMaterial({ color: '#5e5650', roughness: 0.6, metalness: 0.5, emissive: new THREE.Color(EMBER), emissiveIntensity: 0.12 });
   const pump = new THREE.Mesh(new THREE.CylinderGeometry(RADII.cased * 0.7, RADII.cased * 0.7, 0.18, 14), pumpMat);
   pump.name = 'pump';
   placeOnCased(pump, PUMP_U);
@@ -113,7 +113,7 @@ export function createToolViz(world) {
   root.add(pump);
   const levelMat = new THREE.MeshBasicMaterial({ color: SAND, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false, toneMapped: false });
   const earlierMat = levelMat.clone(); earlierMat.opacity = 0.4;
-  const levelRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.012, 6, 40), levelMat); // legible at the ch4 pose distance (round 2)
+  const levelRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.008, 6, 40), levelMat); // the ring reads edge-on; the horizontal line + projected label carry it (round 3)
   levelRing.name = 'fluid-level'; levelRing.renderOrder = 31; levelRing.visible = false;
   const earlierRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.008, 6, 40), earlierMat);
   earlierRing.name = 'fluid-level-earlier'; earlierRing.renderOrder = 31; earlierRing.visible = false;
@@ -125,7 +125,7 @@ export function createToolViz(world) {
     if (obj.geometry && obj.geometry.type === 'TorusGeometry') obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), t);
   }
   // a short horizontal sand tick across the string at the level — the ring alone reads as a hairline at distance
-  const levelTick = new THREE.Mesh(new THREE.PlaneGeometry(RADII.cased * 3.2, 0.014), levelMat);
+  const levelTick = new THREE.Mesh(new THREE.PlaneGeometry(RADII.cased * 4.2, 0.026), levelMat);
   levelTick.name = 'fluid-level-tick'; levelTick.renderOrder = 31; levelTick.visible = false;
   root.add(levelTick);
   let drawdown = 0, earlier = null, levelShown = false;
@@ -211,6 +211,7 @@ export function createToolViz(world) {
   let benchTarget = 0, cutTarget = 0, ringBoost = 0, ringTarget = 0, witnessWarm = 0, witnessTarget = 0;
   let surfaceCaption = null; // { el } projected each frame at the wellhead
   let standoffCaption = null; // { el, obj } projected each frame at the standoff line (chapter 6)
+  let levelCaption = null, earlierCaption = null; // { el, obj } projected at the fluid level / its earlier ghost (chapter 4)
   let chapterActive = { tool: false, deployment: false };
 
   // ---- orbit (rotate the input rig about a pivot so the tool stays put on screen) ----------------------------------
@@ -306,13 +307,15 @@ export function createToolViz(world) {
     else { if (flowBlink > -1000) flowBlink -= dt * 1000; trunkColor.copy(tint); casedColor.copy(tint); legColor.copy(tint); }
     if (now < flowSpeedBoostUntil) flowOffset += dt * 0.4;
     if (flowOffset > 0) { const u = island.materials.trunkFlow.uniforms.uTime; u.value = u.value + flowOffset; island.materials.casedFlow.uniforms.uTime.value += flowOffset; island.materials.legFlow.uniforms.uTime.value += flowOffset; }
-    // x-ray: tubing to 28 %, shell nearly gone, ghost hairlines
+    // x-ray: tubing to 28 %, shell nearly gone, ghost hairlines. Otherwise in chapter 4 the cased string is held
+    // LEGIBLE (0.6) so the instrument sits on a visible tube — the chapter's cutaway 0.95 had made it vanish (round 3)
     if (xray) { island.materials.casedFlow.setCutaway(0.28, false); if (shell) shell.material.opacity = 0.05; }
+    else if (chapterActive.deployment) { island.materials.casedFlow.setCutaway(0.6, false); }
     ghost.visible = xray && chapterActive.deployment;
     // fluid level + pump warm (+ visibility gated to chapter 4)
     pump.visible = levelRing.visible = chapterActive.deployment; levelTick.visible = chapterActive.deployment && levelShown;
     earlierRing.visible = chapterActive.deployment && earlier != null;
-    pumpMat.emissiveIntensity = THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9;
+    pumpMat.emissiveIntensity = 0.12 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9; // a readable body before pump-off
     // drive head keeps turning at one constant rate (chapter 4)
     if (chapterActive.deployment && !world.paused && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
     // halo / bench / cut edges
@@ -320,7 +323,7 @@ export function createToolViz(world) {
     benchLift += (benchTarget - benchLift) * k; if (benchMat && benchMat.emissive) benchMat.emissiveIntensity = benchLift * 0.14;
     cutBoost += (cutTarget - cutBoost) * k; if (cutEdges) cutEdges.material.opacity = cutBase + 0.5 * cutBoost;
     // projected captions: the surface caption (wellhead) and the standoff caption (the 0.9 line, chapter 6)
-    for (const cap of [surfaceCaption, standoffCaption]) {
+    for (const cap of [surfaceCaption, standoffCaption, levelCaption, earlierCaption]) {
       if (!cap) continue;
       rig.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
       if (cap.obj) { cap.obj.getWorldPosition(_v); _v.y += 0.12; } else { island.well.wellhead.getWorldPosition(_v); _v.y += 0.4; }
@@ -359,6 +362,7 @@ export function createToolViz(world) {
     brightenCut(on) { cutTarget = on ? 1 : 0; pump_(); },
     setSurfaceCaption(el) { surfaceCaption = el ? { el } : null; if (el) pump_(); },
     setStandoffCaption(el, obj) { standoffCaption = el && obj ? { el, obj } : null; if (el) pump_(); },
+    setLevelCaptions(nowEl, earlierEl) { levelCaption = nowEl ? { el: nowEl, obj: levelTick } : null; earlierCaption = earlierEl ? { el: earlierEl, obj: earlierRing } : null; pump_(); },
     setChapter(name, on) { chapterActive[name] = Boolean(on); world.requestRender(); pump_(); },
     points: {
       pump: () => pump.position.clone(),

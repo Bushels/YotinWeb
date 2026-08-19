@@ -18,7 +18,7 @@ const CAPTION = {
     shallower: 'Pump answered shallower than the standoff line · WellFi proposed inside the intermediate · inside casing — attenuated coupling',
     deeper: 'Pump answered deeper than the standoff line · Proposed outside-intermediate WellFi configuration — review required · open hole — direct coupling to the formation',
   },
-  verdict: { strong: 'strong fit — the candle lights', review: 'likely fit — review required', future: 'high-temp version in development — tool dimmed' },
+  verdict: { strong: 'strong fit — WellFi lights at the proposed placement', review: 'likely fit — review required', future: 'high-temp version in development — tool dimmed' },
 };
 const STANDOFF_TEXT = 'standoff line drawn — 10 % of intermediate';
 const SPEC_LINE = '10,000 psia · 150 °C · 46 mm OD · 5+ yr · MODBUS RS-485 / 4-20 mA';

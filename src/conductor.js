@@ -19,7 +19,13 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
     const docTop = (el) => el.getBoundingClientRect().top + (scrollY || 0); // document space, not offsetParent space
     anchors = els.map((el, i) => {
       if (i === 0) return 0;
-      if (i === els.length - 1) return Math.min(max, docTop(el) - innerHeight * 0.15);
+      if (i === els.length - 1) {
+        // phones/tablets: the last chapter arrives on its focus element (the qualifier band + Q1), not the section
+        // top — the H2/lede stack above it would otherwise fill the first screen (round 3)
+        const focus = el.querySelector('[data-anchor-focus]');
+        if (focus && innerWidth < 1100) return Math.min(max, docTop(focus) - headerH());
+        return Math.min(max, docTop(el) - innerHeight * 0.15);
+      }
       // data-anchor="top": the chapter arrives when the section's top reaches the header (the yôtin chapter: its
       // sticky rise band must be fully on screen at arrival, not already scrolled under the paper — round 2)
       if (el.dataset && el.dataset.anchor === 'top') return clamp(docTop(el) - headerH(), 0, max);
@@ -104,6 +110,8 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
     if (typeof ResizeObserver !== 'undefined') {
       ro = new ResizeObserver(() => { measure(); readScroll(); });
       els.forEach((el) => ro.observe(el));
+      ro.observe(document.body); // any in-flow height change (a caption collapsing, a font swap) re-measures the anchors (round 3)
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); readScroll(); });
     }
     active = -1; lastTime = 0;
     frame = requestAnimationFrame(tick);
