@@ -56,7 +56,9 @@ for (let i = 0; i < anchors.length; i++) {
   await page.waitForTimeout(120);
   const box = await page.evaluate(() => { const r = document.querySelector('#world canvas').getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; });
   const png = path.join(out, `ch${i}.png`);
-  await page.screenshot({ path: png, clip: box, omitBackground: false });
+  // The last chapter renders the most and the software renderer is slow: the default 30 s screenshot timeout was
+  // silently leaving ch6 stale (the colour gate caught it — round 5).
+  await page.screenshot({ path: png, clip: box, omitBackground: false, timeout: 120000, animations: 'allow' });
   const info = await page.evaluate(() => { const w = window.__yotinWorld; return { chapter: document.documentElement.dataset.chapter, exact: w.state.exact, smooth: w.state.smooth }; });
   const entry = { i, y: anchors[i], png, ...info };
   if (sharp) {
