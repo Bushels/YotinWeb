@@ -263,11 +263,9 @@ html.world-on .contact-section h2 span { color: var(--sand); }
   html.world-on .signal-strip { gap: 6px; }
 }
 
-/* Chapter 5: the paper runs full-bleed into the rail gutter (a dark column beside cream read as a layout seam —
-   round 1); the rail keeps its own ground as a small dark card on the paper. */
-@media (min-width: 1101px) {
-  html.world-on .company-section .company-grid { margin-left: -196px; padding-left: calc(196px + var(--pad, 24px)); border-radius: 0 10px 0 0; }
-}
+/* Chapter 5: the paper is a sheet laid on the world — inset from the rail gutter on the left, so the gutter shows
+   the world beside it and the rail stays sand-on-dark (round 2; the full-bleed variant put a light card over
+   the rise band). */
 
 /* Reveals over the world settle sooner and travel less (round 1: half-revealed cards at the chapter anchor read
    as disabled). Same view() timeline; a gentler keyframe and a range that completes by the time the element's
@@ -283,10 +281,17 @@ html.world-on .contact-section h2 span { color: var(--sand); }
 /* Chapter 6 (round 2): questions left, live well right — one column at ≤ 50 % so the right half stays the
    world's; the H2 steps down so Q1 is on screen at the anchor on a 768-tall laptop. */
 @media (min-width: 1101px) {
-  html.world-on .contact-grid { grid-template-columns: minmax(0, 1fr); max-width: 50%; gap: 20px; align-items: start; }
-  html.world-on .contact-section h2 { font-size: clamp(38px, 4.2vw, 60px); }
-  html.world-on .contact-actions > p { font-size: 17px; margin-bottom: 14px; }
-  html.world-on .contact-section { padding-top: 40px; }
+  /* order: eyebrow + H2 → the qualifier (the invited action, Q1 on screen at the anchor) → the email / ChatFi
+     fallback — the contact grid becomes display: contents so its two blocks join the section's flex column */
+  html.world-on .contact-section { display: flex; flex-direction: column; padding-top: 40px; }
+  html.world-on .contact-grid { display: contents; }
+  html.world-on .contact-grid > div, html.world-on .contact-section .fit-shell { width: min(100%, var(--shell)); margin-inline: auto; padding-inline: var(--pad); box-sizing: border-box; }
+  html.world-on .contact-grid > div:first-child { order: 1; max-width: 50%; margin-left: 0; }
+  html.world-on .contact-section .fit-shell { order: 2; margin-top: 18px; }
+  html.world-on .contact-grid > .contact-actions { order: 3; max-width: 50%; margin-left: 0; margin-top: 28px; }
+  html.world-on .contact-grid > div::before { inset: -16px -20px; }
+  html.world-on .contact-section h2 { font-size: clamp(38px, 4.2vw, 58px); margin-bottom: 0; }
+  html.world-on .contact-actions > p { font-size: 17px; margin-bottom: 12px; }
 }
 
 /* Units keep their casing inside uppercase mono chrome (kPa, mm/s RMS, 4-20 mA, °C) — round 2. */

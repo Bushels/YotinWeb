@@ -48,15 +48,11 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { color: var(--sand); border-left-color: var(--sand); }
 .rail-legend-item:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 
-/* Over the paper chapter the rail turns to ink on a paper-tinted ground: invisible on the paper itself, a light
-   card where it overlaps the rise band above it. (A dark box here read as a grey tombstone — round 1.) */
-.rail[data-chapter="yotin"] { background: rgba(245, 240, 232, 0.9); padding: 10px 10px 10px 0; border-radius: 6px; color: #1b1f24; }
-.rail[data-chapter="yotin"] .rail-chapters a, .rail[data-chapter="yotin"] .rail-list li, .rail[data-chapter="yotin"] .rail-legend-item, .rail[data-chapter="yotin"] .rail-caption { color: #4a4f56; border-left-color: rgba(27, 31, 36, 0.25); } /* ≈ 7.4:1 on the paper card */
-.rail[data-chapter="yotin"] .rail-list li.is-lit, .rail[data-chapter="yotin"] .rail-tally.is-signal .rail-list li[data-tally="wellfi"].is-lit { color: #1b1f24; }
+/* The paper chapter: the paper is a sheet laid on the world, inset from the rail gutter, so the rail keeps its
+   sand-on-dark colours over the world that runs beside the sheet; the tally/legend are already hidden there
+   (chapter index ≥ 5) and the return marker with them. (A paper-tinted card over the rise band read as a light
+   tombstone — round 2.) */
 .rail[data-chapter="yotin"] .rail-marker-up { display: none; }
-.rail[data-chapter="yotin"] .rail-chapters a[aria-current="true"] { color: #9f470d; border-left-color: #9f470d; }
-.rail[data-chapter="yotin"] .rail-track { border-left-color: rgba(27, 31, 36, 0.3); }
-.rail[data-chapter="yotin"] .rail-marker-down { background: #1b1f24; }
 
 /* Reserved gutter: copy never enters the rail's column. */
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }
@@ -75,10 +71,6 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
   .rail-legend { display: none; pointer-events: auto; background: rgba(3, 7, 11, 0.94); padding: 8px 16px 12px; border-bottom: 1px solid rgba(232, 220, 200, 0.12); opacity: 1; transform: none; }
   .rail.is-open .rail-legend { display: flex; }
   .rail-legend-item { min-height: 44px; display: flex; align-items: center; }
-  .rail[data-chapter="yotin"] { background: transparent; padding: 0; }
-  .rail[data-chapter="yotin"] .rail-bar { background: rgba(245, 240, 232, 0.92); color: #4a4f56; border-bottom-color: rgba(27, 31, 36, 0.15); }
-  .rail[data-chapter="yotin"] .rail-bar-current { color: #9f470d; }
-  .rail[data-chapter="yotin"] .rail-bar-tally { color: #1b1f24; }
 }
 @media (prefers-reduced-motion: reduce) { .rail *, .rail-tally, .rail-legend { transition: none !important; } }
 

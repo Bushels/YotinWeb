@@ -63,7 +63,7 @@ if (worldOn) {
         const k = (y * info.width + x) * info.channels, r = data[k], g = data[k + 1], b = data[k + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b); if (!mx) continue;
         const sat = (mx - mn) / mx, L = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-        if (sat > 0.35 && b > r * 1.3 && g > r * 1.2 && L > 0.25) { n++; if (L > peak) peak = L; }
+        if (sat > 0.45 && b > r * 1.6 && g > r * 1.5 && L > 0.25) { n++; if (L > peak) peak = L; }
       }
       return { n, peak };
     };
