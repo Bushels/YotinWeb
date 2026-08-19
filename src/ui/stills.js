@@ -81,16 +81,24 @@ export function mountStills() {
     // chapter whose anchor is NEAREST the viewport centre — never hold "surface" on a page that is two-thirds
     // scrolled (round 2: the reduced-motion frames showed the hero still at 33 % and 66 %). The last chapter
     // anchors at its top (the conductor's rule) so the FAQ still holds chapter 4 until #contact arrives.
+    // Mirror the conductor's anchor rule exactly (src/conductor.js measure): a chapter arrives when its anchor
+    // scroll position is reached — section centre at viewport centre; data-anchor="top" sections at their top under
+    // the header; the last chapter at top − 15 vh (or on its [data-anchor-focus] on phones). Current = the last
+    // anchor reached. (Nearest-centre picked chapter 5 while the FAQ was still on screen — round 4.)
+    const headerH = () => { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')); return Number.isFinite(v) ? v : 72; };
+    function anchorY(el, i) {
+      const r = el.getBoundingClientRect(); const top = r.top + window.scrollY; const h = window.innerHeight;
+      if (i === 0) return 0;
+      if (i === anchors.length - 1) { const f = el.querySelector('[data-anchor-focus]'); if (f && window.innerWidth < 1100) return f.getBoundingClientRect().top + window.scrollY - headerH(); return top - h * 0.15; }
+      if (el.dataset && el.dataset.anchor === 'top') return top - headerH();
+      if (el.dataset && el.dataset.anchor === 'top-mobile' && window.innerWidth <= 820) return top - headerH() - 36;
+      return top + r.height * 0.5 - h * 0.5;
+    }
     function pick() {
-      const mid = window.innerHeight / 2;
-      let best = -1, bestD = Infinity;
-      anchors.forEach((el, i) => {
-        const r = el.getBoundingClientRect();
-        const centre = i === anchors.length - 1 ? r.top : (r.top + r.bottom) / 2;
-        const d = r.top <= mid && r.bottom >= mid ? 0 : Math.abs(centre - mid);
-        if (d < bestD || (d === bestD && i > best)) { bestD = d; best = i; }
-      });
-      if (best >= 0) show(best);
+      const y = window.scrollY + 1;
+      let best = 0;
+      anchors.forEach((el, i) => { if (anchorY(el, i) <= y) best = i; });
+      show(best);
     }
     let ticking = false;
     window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; pick(); }); } }, { passive: true });
