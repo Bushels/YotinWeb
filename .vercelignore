@@ -7,8 +7,5 @@ README.md
 # deployed — the page loads it — but the tests are dev-only.
 test/
 
-# Future equipment and superseded social assets are kept locally, not deployed.
-assets/hero-multilateral.webp
-assets/hero-sagd-island.webp
-assets/slotted-liner.png
-assets/og-card-2.jpg
+# Future equipment and superseded social assets are parked locally, not deployed.
+design-source/

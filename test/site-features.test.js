@@ -119,12 +119,12 @@ describe('asset & dependency paths', () => {
   });
 
   test('key images referenced in HTML exist in assets/', () => {
-    const assetMatches = [...html.matchAll(/src="(assets\/[^"]+)"/g)];
+    const assetMatches = [...html.matchAll(/src="\/(assets\/[^"]+)"/g)];
     assert.ok(assetMatches.length > 0, 'no assets found in index.html');
     for (const [, fullAssetPath] of assetMatches) {
       const cleanPath = fullAssetPath.split('?')[0];
       assert.ok(
-        fs.existsSync(path.join(root, cleanPath)),
+        fs.existsSync(path.join(root, 'public', cleanPath)),
         `missing asset file: ${cleanPath}`
       );
     }

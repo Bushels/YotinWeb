@@ -26,15 +26,15 @@
   <meta name="twitter:image" content="https://yotinenergy.com/assets/yotin-wellfi-og-2026.png">
   <meta name="twitter:image:alt" content="Yotin Energy and WellFi wireless downhole telemetry.">
 
-  <link rel="icon" href="assets/yotin-icon.png">
-  <link rel="apple-touch-icon" href="assets/yotin-icon.png">
+  <link rel="icon" href="/assets/yotin-icon.png">
+  <link rel="apple-touch-icon" href="/assets/yotin-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://mpsgroup.energy">
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
-  <link rel="preload" as="image" href="assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20260810-4">
+  <link rel="preload" as="image" href="/assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
+  <link rel="stylesheet" href="/styles.css">
 
   <!--
     Modern browsers animate reveals natively via `animation-timeline: view()`,
@@ -239,7 +239,7 @@
   <header class="site-header" data-header>
     <div class="shell header-inner">
       <a class="brand-mini" href="#top" aria-label="Yotin Energy — home">
-        <img src="assets/yotin-icon.png" alt="" width="54" height="38">
+        <img src="/assets/yotin-icon.png" alt="" width="54" height="38">
         <span class="brand-mini-copy">
           <strong>YOTIN</strong>
           <small>An Indigenous Energy Services Company</small>
@@ -282,7 +282,7 @@
         >
           <img
             class="hero-poster"
-            src="assets/wellfi-island-r3f-poster.webp?v=20260723-4"
+            src="/assets/wellfi-island-r3f-poster.webp?v=20260723-4"
             alt=""
             width="1920"
             height="1080"
@@ -298,7 +298,7 @@
       <div class="shell hero-grid">
         <div class="hero-copy">
           <div class="hero-message">
-            <img class="hero-wordmark" src="assets/wellfi-logo.webp" alt="WellFi" width="868" height="191" fetchpriority="high" decoding="async" data-hero-step>
+            <img class="hero-wordmark" src="/assets/wellfi-logo.webp" alt="WellFi" width="868" height="191" fetchpriority="high" decoding="async" data-hero-step>
             <h1 id="hero-title" data-hero-step>Know the<br>Unknown<span>.</span></h1>
             <!-- The scene already shows pressure, temperature and vibration, so
                  the copy implies the channels rather than listing them again. -->
@@ -463,8 +463,8 @@
       so nothing is duplicated in the DOM.
     -->
     <section class="drill-section" id="benefits" aria-labelledby="benefits-title" data-drill
-             data-formation="assets/drill-formation.webp"
-             data-casing="assets/drill-casing.webp">
+             data-formation="/assets/drill-formation.webp"
+             data-casing="/assets/drill-casing.webp">
       <div class="shell drill-fallback" data-drill-fallback>
         <div class="drill-fallback-head">
           <p class="eyebrow">WHY OPERATORS RUN IT</p>
@@ -522,7 +522,7 @@
         <figure class="device-banner" data-motion="fade">
           <span class="device-glow" aria-hidden="true"></span>
           <img
-            src="assets/wellfi-internal-ghost.webp"
+            src="/assets/wellfi-internal-ghost.webp"
             alt="The WellFi tool deployed inside production tubing, with the housing ghosted to reveal the electromagnetic isolator collar and the internal sensor package."
             width="1800"
             height="392"
@@ -677,7 +677,7 @@
   <footer class="site-footer">
     <div class="shell footer-inner">
       <a class="footer-brand" href="#top">
-        <img src="assets/yotin-icon.png" alt="" width="58" height="41">
+        <img src="/assets/yotin-icon.png" alt="" width="58" height="41">
         <span><strong>YOTIN</strong><small>An Indigenous Energy Services Company</small></span>
       </a>
       <nav aria-label="Footer">
@@ -717,7 +717,6 @@
   <!-- Qualifier decision logic first: main.js reads it at execution time.
        Both are `defer`, and deferred scripts run in document order, so this is
        guaranteed to be ready without any loader or build step. -->
-  <script defer src="qualifier-logic.js?v=20260810-3"></script>
-  <script defer src="main.js?v=20260810-4"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

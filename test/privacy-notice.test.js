@@ -35,10 +35,10 @@ describe('privacy notice', () => {
   });
 
   test('is in the sitemap and not blocked by robots', () => {
-    const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+    const sitemap = fs.readFileSync(path.join(root, 'public', 'sitemap.xml'), 'utf8');
     assert.match(sitemap, /<loc>https:\/\/yotinenergy\.com\/privacy<\/loc>/);
 
-    const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
+    const robots = fs.readFileSync(path.join(root, 'public', 'robots.txt'), 'utf8');
     for (const line of robots.split(/\r?\n/)) {
       const disallow = line.match(/^Disallow:\s*(\S+)/i);
       if (disallow && '/privacy'.startsWith(disallow[1])) {
