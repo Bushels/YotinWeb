@@ -8,6 +8,7 @@ import { CHAPTERS, POSES, chapterElements, worldAt, poseProgress } from './chapt
 import { createScrollConductor } from './conductor.js';
 import { createCameraRig } from './cameraRig.js';
 import { gate } from './gate.js';
+import { createInteractions } from './interactions.js';
 
 export function bootWorld() {
   const host = document.getElementById('world');
@@ -94,6 +95,11 @@ export function bootWorld() {
     dirty = true;
   });
 
+  // Interactions: hotspot registry + raycast FSM + DOM twins. Chapter modules register into it.
+  const track = (name, params) => { try { if (window.gtag) window.gtag('event', name, params); } catch (e) { /* analytics never breaks the world */ } };
+  const interactions = createInteractions({ camera, canvas, world: island, getExact: () => (lastState || conductor.getState()).exact, requestRender: () => { dirty = true; }, track });
+  document.addEventListener('world:progress', () => interactions.updateAvailability());
+
   const timer = new THREE.Timer();
   timer.connect(document);
   let idleFrames = 0;
@@ -113,6 +119,7 @@ export function bootWorld() {
     const st = lastState || conductor.getState();
     const p = st.smooth;
     const w = worldAt(p);
+    interactions.update();
     rig.apply(poseProgress(p), dt, camera.aspect);
     island.update(elapsed % 12, elapsed, w);
     scene.fog.density = (w.fog || 0) * 0.6;
