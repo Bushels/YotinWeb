@@ -79,9 +79,13 @@ describe('qualifier:state detail is normalized only', () => {
 describe('fit modules stay local', () => {
   test('no network primitives in src/ui/fit.js or src/world/wellBuilder.js', () => {
     for (const [name, src] of [['fit.js', fitJs], ['wellBuilder.js', builderJs]]) {
-      for (const forbidden of ['fetch(', 'XMLHttpRequest', 'sendBeacon', 'WebSocket', 'new Image(', 'import(']) {
+      for (const forbidden of ['fetch(', 'XMLHttpRequest', 'sendBeacon', 'WebSocket', 'new Image(']) {
         assert.ok(!src.includes(forbidden), `${name} must not contain ${forbidden}`);
       }
+      // dynamic import() is allowed ONLY for the first-party world module (spec §6: the stills path must not
+      // request world bytes, so the builder loads after world:first-frame) — never a remote URL.
+      const dyn = [...src.matchAll(/import\(([^)]*)\)/g)].map((m) => m[1].trim());
+      for (const arg of dyn) assert.match(arg, /^['"]\.\.\/world\/wellBuilder\.js['"]$/, `${name}: unexpected dynamic import ${arg}`);
     }
   });
 
