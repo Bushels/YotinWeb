@@ -49,7 +49,7 @@ html.world-on .contact-grid > div {
 html.world-on .section-intro::before,
 html.world-on .insight-head::before,
 html.world-on .drill-fallback-head::before,
-html.world-on .contact-grid > div:first-child::before {
+html.world-on .contact-grid > div::before {
   content: "";
   position: absolute;
   inset: -24px -28px;

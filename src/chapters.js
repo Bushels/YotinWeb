@@ -12,7 +12,7 @@ export const CHAPTERS = [
   { id: 'descent',    section: '[data-chapter="descent"]',    dwell: 1.5, world: { light: 0.38, cutaway: 0.6, candle: 0.2,  field: 0.0, wind: 0.2, flow: 0.4, fog: 0.02 } },
   { id: 'tool',       section: '[data-chapter="tool"]',       dwell: 1.4, world: { light: 0.24, cutaway: 0.85, candle: 0.35, field: 0.0, wind: 0.05, flow: 0.25, fog: 0.03 } },
   { id: 'signal',     section: '[data-chapter="signal"]',     dwell: 1.6, world: { light: 0.03, cutaway: 0.9, candle: 1.0,  field: 1.0, wind: 0.0, flow: 0.0, fog: 0.05 } },
-  { id: 'deployment', section: '#insight',           dwell: 1.5, world: { light: 0.32, cutaway: 0.95, candle: 0.4, field: 0.15, wind: 0.05, flow: 0.3, fog: 0.03 } },
+  { id: 'deployment', section: '#insight',           dwell: 1.5, world: { light: 0.32, cutaway: 0.95, candle: 0.4, field: 0.05, wind: 0.05, flow: 0.3, fog: 0.03 } },
   { id: 'yotin',      section: '#company',           dwell: 1.0, world: { light: 0.75, cutaway: 0.2, candle: 0.1,  field: 0.0, wind: 1.0, flow: 0.5, fog: 0.0 } },
   { id: 'fit',        section: '#contact',           dwell: 1.3, world: { light: 0.42, cutaway: 0.8, candle: 0.5,  field: 0.3, wind: 0.15, flow: 0.3, fog: 0.02 } },
 ];
@@ -27,7 +27,7 @@ export const POSES = [
   { id: 'deployment-a', position: [0.9, -1.8, 6.2],   target: [-0.6, -2.45, 3.3],  fov: 22, mobile: { position: [1.1, -1.5, 8.2], target: [-0.6, -2.7, 3.3], fov: 32 } },
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
   { id: 'yotin',        position: [-6.5, 5.2, 14.5],  target: [-4.6, 0.6, 3.6],   fov: 34, mobile: { position: [-6.0, 5.8, 18.5], target: [-4.6, 0.0, 3.6], fov: 44 } },
-  { id: 'fit',          position: [-0.9, 0.2, 11.8],  target: [-4.6, -2.2, 5.0],  fov: 28, mobile: { position: [-0.4, 0.4, 15.5], target: [-4.6, -2.6, 5.0], fov: 38 } },
+  { id: 'fit',          position: [1.6, -0.3, 12.8],  target: [-3.0, -2.3, 4.4],  fov: 30, mobile: { position: [1.8, 0.2, 16.5], target: [-3.0, -2.7, 4.4], fov: 40 } },
 ];
 
 export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);
