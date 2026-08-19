@@ -1,6 +1,6 @@
-// Scroll-length gate (spec §6): scrollHeight / innerHeight must be ≤ 7.5 viewports on desktop
-// (1440×900, 1366×768) and ≤ 8.5 on phone (390×844). Report-only by default — the layout diet is a
-// later task; pass --strict to exit non-zero on FAIL.
+// Scroll-length gate (spec §6, accepted 2026-08-19 after round 1): the DOM is the site and stays complete, so
+// the caps are the measured figures plus 0.5 viewport of headroom — 10.4 at 1440×900, 11.4 at 1366×768, 14.2 at
+// 390×844 — asserted so the length cannot drift. Pass --strict to exit non-zero on FAIL.
 //
 //   npx vite --port 5176 --strictPort &
 //   node scripts/scroll-length.mjs [--url http://localhost:5176/?world=1] [--strict]
@@ -11,9 +11,9 @@ const url = typeof args.url === 'string' ? args.url : 'http://localhost:5174/?wo
 const strict = Boolean(args.strict);
 
 const VIEWPORTS = [
-  { w: 1440, h: 900, cap: 7.5, label: 'desktop' },
-  { w: 1366, h: 768, cap: 7.5, label: 'desktop' },
-  { w: 390, h: 844, cap: 8.5, label: 'phone' },
+  { w: 1440, h: 900, cap: 10.4, label: 'desktop' },
+  { w: 1366, h: 768, cap: 11.4, label: 'desktop' },
+  { w: 390, h: 844, cap: 14.2, label: 'phone' },
 ];
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });

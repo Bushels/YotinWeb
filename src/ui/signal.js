@@ -62,7 +62,7 @@ export function mountSignal() {
       say('One point is not a measurement — voltage is a difference.');
     } else {
       if (digitsShown) dissolveDigits();
-      say('The receiver reads a difference between two points on the lease. Place both.');
+      say(''); // the lede above already says "place both" — no duplicate line at rest (round 1)
     }
     world && world.requestRender();
   }

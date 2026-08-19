@@ -36,5 +36,18 @@ if (worldOn) {
   await page.screenshot({ path: path.join(out, `stills-${W}x${H}.png`) });
 }
 report.scrollRatio = await page.evaluate(() => document.documentElement.scrollHeight / window.innerHeight);
-console.log(JSON.stringify(report, null, 1));
+report.tier = await page.evaluate(() => document.documentElement.dataset.worldTier);
+if (!args.quiet) console.log(JSON.stringify(report, null, 1));
 await browser.close();
+
+// Runtime budget (spec §6, re-baselined 2026-08-19 after round 1 with the shadow pass counted): renderer.info at
+// every chapter anchor. Desktop (tier 3, shadows) ≤ 80 calls / 130 k tris; phone (tier 1) ≤ 56 calls / 62 k tris.
+// `--strict` fails the process; otherwise it reports. npm run check:runtime runs both viewports strict.
+if (worldOn) {
+  const phone = W <= 820;
+  const CAP = phone ? { calls: 56, tris: 62000 } : { calls: 80, tris: 130000 };
+  const over = report.frames.filter((f) => f.calls > CAP.calls || f.tris > CAP.tris);
+  const peak = report.frames.reduce((m, f) => ({ calls: Math.max(m.calls, f.calls), tris: Math.max(m.tris, f.tris) }), { calls: 0, tris: 0 });
+  console.error(`runtime ${W}x${H} tier ${report.tier}: peak ${peak.calls} calls / ${peak.tris} tris (cap ${CAP.calls} / ${CAP.tris}) — ${over.length ? 'OVER at ch ' + over.map((f) => f.i).join(',') : 'within cap'}`);
+  if (args.strict && over.length) process.exit(1);
+}

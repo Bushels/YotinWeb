@@ -231,3 +231,23 @@ html.motion-paused .scroll-rail,
 html.motion-paused .device-banner img { animation: none !important; }
 html.motion-paused [data-motion],
 html.motion-paused [data-hero-step] { opacity: 1 !important; transform: none !important; }
+
+/* Display type over the world (round 1, two critics): one ember word per page — the hero's full stop. The h2
+   second lines set in sand so ember stays a surface accent (eyebrows, CTAs, counters), not a floodlight. The
+   paper chapter keeps its ember-ink italic; the qualifier verdict keeps its own colours. */
+html.world-on .section-intro h2 span,
+html.world-on .insight-head h2 span,
+html.world-on .contact-section h2 span { color: var(--sand); }
+
+/* Phone layout diet (spec §4 shed order, round 1): two-up channel cards and spec tiles at ≤ 560 px — the
+   world carries the dwell, the DOM gets tighter rhythm. Tiles keep their 44 px twins. */
+@media (max-width: 560px) {
+  html.world-on .channel-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  html.world-on .channel-card { padding: 14px 12px; min-height: 0; }
+  html.world-on .channel-card p { font-size: 12.5px; line-height: 1.4; }
+  html.world-on .spec-grid { grid-template-columns: repeat(2, 1fr); }
+  html.world-on .spec-grid > div { min-height: 0; padding: 18px 16px; }
+  html.world-on .spec-grid dd { font-size: 30px; margin-top: 12px; }
+  html.world-on .spec-grid dd.spec-output-value { font-size: 20px; }
+  html.world-on .signal-strip { gap: 6px; }
+}

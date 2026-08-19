@@ -27,7 +27,8 @@
 .circuit-stake { display: block; margin-top: 16px; font: 500 11px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .circuit-stake small { text-transform: none; letter-spacing: 0; opacity: 0.8; }
 .circuit-stake input[type="range"] { display: block; width: 100%; margin-top: 8px; accent-color: var(--ember); min-height: 44px; }
-.circuit-caption { margin: 14px 0 0; color: var(--sand); font-size: 15px; line-height: 1.5; }
+.circuit-caption { margin: 14px 0 0; color: var(--sand); font-size: 15px; line-height: 1.5; min-height: 1.5em; }
+.circuit-caption:empty { margin: 0; min-height: 0; }
 
 .readout { padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: rgba(3, 7, 11, 0.7); align-self: start; }
 .readout-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font: 600 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; }

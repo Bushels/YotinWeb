@@ -12,8 +12,9 @@
     "test": "node --test test/*.test.js",
     "build:manifest": "node scripts/manifest.mjs dist",
     "check:budget": "node scripts/budget.mjs",
-    "check:scroll": "node scripts/scroll-length.mjs",
+    "check:scroll": "node scripts/scroll-length.mjs --strict",
     "check:rm": "node scripts/rm-smoke.mjs",
+    "check:runtime": "node scripts/frames.mjs --url http://localhost:5174/?world=1 --out scratch/frames --w 1440 --h 900 --strict --quiet && node scripts/frames.mjs --url http://localhost:5174/?world=1 --out scratch/frames --w 390 --h 844 --strict --quiet",
     "check": "npm run build && node scripts/budget.mjs && node --test test/*.test.js"
   },
   "devDependencies": {
