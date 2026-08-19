@@ -168,15 +168,26 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
     dimHalo = over;
     if (witness && witness.material) witness.material.color.set(over ? WITNESS_WARM : WITNESS_COOL);
   }
+  // Coupling: the caption for a shallower landing says "inside casing — attenuated coupling", so the world has to
+  // show it. Steel around the emitter shorts a large part of the dipole; open hole couples straight into the
+  // formation. This is the ratio the candle and the field are scaled by (round 7, engineering-truth review).
+  const COUPLING = { 'below-pump': 0.45, 'outside-intermediate': 1 };
+  let coupling = 1;
   function applyLanding(landing, hasLength) {
     standoff.visible = Boolean(hasLength) || Boolean(landing);
     placeMarker(landing);
-    moveTool(landing === 'shallower' ? 'below-pump' : 'outside-intermediate');
+    const view = landing === 'shallower' ? 'below-pump' : 'outside-intermediate';
+    coupling = COUPLING[view];
+    moveTool(view);
   }
   function applyVerdict(verdict) {
     if (verdict === 'strong' || verdict === 'review') {
+      // The CANDLE answers "does WellFi fit" (the verdict), so it is not scaled by placement — the strong answer
+      // must never render dimmer than the weaker one. Coupling is a different claim and it belongs to the FIELD:
+      // a collar shorted by steel casing pushes a visibly weaker field into the formation, which is exactly what
+      // the caption "inside casing — attenuated coupling" says (round 7, engineering-truth review).
       target.boost = verdict === 'strong' ? 0.8 : 0.3; // base 0.12 → strong 0.92 (cyan), review 0.42 (sand warming)
-      island.field.swell();
+      island.field.swell(coupling);
       document.dispatchEvent(new CustomEvent('world:candle', { detail: { boost: target.boost } }));
     } else {
       target.boost = 0;

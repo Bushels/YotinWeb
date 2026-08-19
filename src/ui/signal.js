@@ -43,6 +43,22 @@ export function mountSignal() {
     digitsShown = false;
   }
 
+  // DOM-only fallback so the lesson works on the stills path too. The Close-the-Circuit beat is a state machine
+  // about voltage, not about three.js: on the reduced-motion / no-WebGL page the two references and the separation
+  // slider used to render as dead controls under an aria-live caption describing a state nobody could reach
+  // (round 7). This stands in for `circuit` when there is no world; the world path overwrites it in attach().
+  function makeDomCircuit() {
+    const st = { wellhead: false, ground: false, closed: false };
+    let sep = stakeRange ? Number(stakeRange.value) / 100 : 0.6;
+    return {
+      state: st,
+      get sep() { return sep; },
+      placeStake(t) { sep = Math.max(0, Math.min(1, t)); },
+      updateLoop() {},
+      set(next) { Object.assign(st, next); st.closed = st.wellhead && st.ground && sep > 0.06; },
+    };
+  }
+
   function reflect() {
     if (!circuit) return;
     const s = circuit.state;
@@ -67,8 +83,22 @@ export function mountSignal() {
     world && world.requestRender();
   }
 
+  // Wire the DOM controls at first paint on every path. If the world arrives, attach() aborts these listeners and
+  // re-registers the same controls as raycast twins, so the behaviour is identical and never doubled.
+  const domCtl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const domOpts = domCtl ? { signal: domCtl.signal } : undefined;
+  function wireDom() {
+    if (!circuit) circuit = makeDomCircuit();
+    refWell.addEventListener('click', () => { circuit.set({ wellhead: !circuit.state.wellhead }); reflect(); }, domOpts);
+    refGround.addEventListener('click', () => { circuit.set({ ground: !circuit.state.ground }); reflect(); }, domOpts);
+    if (stakeRange) stakeRange.addEventListener('input', () => { circuit.placeStake(Number(stakeRange.value) / 100); circuit.updateLoop(); circuit.set({}); reflect(); }, domOpts);
+    reflect();
+  }
+
   async function attach(w) {
     world = w;
+    if (domCtl) domCtl.abort();   // hand the same controls over to the world's twins
+    circuit = null;
     // world module: dynamic import so the stills path never requests a world-chunk byte (spec §6)
     const { createCircuit } = await import('../world/circuit.js');
     circuit = createCircuit(w.island, w.THREE);
@@ -76,6 +106,7 @@ export function mountSignal() {
     const gate = [[2.6, 4.2]];
     I.register('ref-wellhead', { proxy: circuit.whProxy, twin: refWell, chapters: gate, apply3D() {}, onActivate() { circuit.set({ wellhead: !circuit.state.wellhead }); reflect(); } });
     I.register('ref-ground', { proxy: circuit.stakeProxy, twin: refGround, chapters: gate, apply3D() {}, onActivate() { circuit.set({ ground: !circuit.state.ground }); reflect(); } });
+
     // The 3D references toggle themselves; the interactions FSM's "active" state is not what we mean here, so
     // reflect aria-pressed from circuit state instead of the FSM's active flag.
     if (stakeRange) {
@@ -123,6 +154,7 @@ export function mountSignal() {
   function inChapter(w) { const p = w.state.exact; return p >= 2.6 && p < 4.2; }
   function overUI(e) { const t = e.target; return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .signal-stage, .qualifier')); }
 
+  wireDom(); // the lesson works from first paint, world or not
   if (window.__yotinWorld) attach(window.__yotinWorld);
   else document.addEventListener('world:first-frame', () => attach(window.__yotinWorld), { once: true });
   return { reflect };

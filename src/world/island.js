@@ -58,8 +58,11 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   if (tier === 'high') {
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.near = 1; sun.shadow.camera.far = 40;
-    sun.shadow.camera.left = -11; sun.shadow.camera.right = 11; sun.shadow.camera.top = 9; sun.shadow.camera.bottom = -9;
+    // The shadow box must cover the slab AND the long shadows a low sun throws off it: at ~18° elevation a 2.5-unit
+    // spruce lays a ~7.7-unit shadow, so a ±11 × ±9 box ended inside the visible ground and every receiver past its
+    // edge snapped to unshadowed — a razor-straight vertical brightness step across the world (round 7).
+    sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 60;
+    sun.shadow.camera.left = -19; sun.shadow.camera.right = 19; sun.shadow.camera.top = 19; sun.shadow.camera.bottom = -19;
     sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
     terrain.strataMeshes.forEach((m) => { m.receiveShadow = true; m.castShadow = false; }); // receivers only: casting re-rendered ~40 k tris into the shadow map for a corner shadow the baked contact darkening already paints
     terrain.bench.receiveShadow = true;

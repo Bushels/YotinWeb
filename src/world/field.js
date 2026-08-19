@@ -163,7 +163,9 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
   }
   // Breath state: target swells to 1 on swell(), relaxes to idle (0.35) with a slow non-periodic wander.
   let breath = 0, breathTarget = 0.35, wander = 0;
-  function swell() { breath = Math.max(breath, 0.2); breathTarget = 1.0; }
+  // `strength` lets the caller say how well the emitter is coupled to the formation (1 = open hole; a collar
+  // shorted by steel casing swells the field visibly less — round 7).
+  function swell(strength = 1) { const t = Math.max(0.25, Math.min(1, strength)); breath = Math.max(breath, 0.2 * t); breathTarget = t; }
   function update(dt, elapsed) {
     uniforms.uTime.value = elapsed;
     // relax toward idle after a swell; idle wanders slowly with noise (no clock)
