@@ -35,6 +35,10 @@ Design spec (panel-converged, authoritative): `docs/superpowers/specs/2026-08-19
 | Reduced-motion first paint (excl. fonts/marks/ui) | 127 KB | 73 KB |
 | Reduced-motion full scroll, all-in | 470 KB | 223 KB — **zero world requests** (`scripts/rm-smoke.mjs`) |
 
+Five scripted gates, all green: `check` (build + budgets + stills colour gate + 125 tests), `check:rm`,
+`check:runtime` (draw calls, triangles, horizontal overflow and the one-candle rule at every chapter anchor),
+`check:scroll`, and `capture:interactions`.
+
 Runtime (`npm run check:runtime`, `renderer.info` at every chapter anchor, asserted): desktop tier 3 peaks 76 calls / 121 k tris against ≤ 80 / 130 k (the sun shadow pass counted); phone tier 1 peaks 54 / 46 k against ≤ 56 / 62 k. The same job asserts no horizontal overflow at any anchor and the one-candle rule (saturated cyan present in chapter 3, absent elsewhere). Scroll length (`npm run check:scroll`): 10.4 viewports desktop · 11.6 laptop · 13.95 phone, asserted at +0.3 — the page *is* the content; the conversion path (hero → header **Check your well fit** → qualifier Q1) is one click. Interaction states (`npm run capture:interactions`): orbit, circuit closed / no-difference, x-ray, pump-off, three fit verdicts.
 
 ### Before / after
@@ -246,7 +250,7 @@ npm test
 npm run check
 ```
 
-`npm test` runs fourteen `node:test` suites (121 tests). `npm run check` builds, runs the resource budgets,
+`npm test` runs fifteen `node:test` suites (125 tests). `npm run check` builds, runs the resource budgets,
 the stills colour gate and the suites. Three more checks run on demand against the dev server: `npm run
 check:rm` (Playwright, reduced-motion smoke — zero world requests, rail present with aria-current),
 `npm run check:runtime` (draw calls / triangles per chapter, overflow, one-candle) and `npm run check:scroll`.
