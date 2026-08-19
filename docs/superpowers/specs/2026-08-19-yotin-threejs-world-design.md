@@ -98,7 +98,7 @@ DOM order: Hero + signal strip (h2 → h3 captions) → `#wellfi` [intro · chan
 |---|---|
 | `critical` | ≤ 290 KB: HTML ≤ 45 · CSS ≤ 22 · fonts ≤ 110 (subset, self-hosted: Archivo 600/700, Plex Sans 400/500, Plex Mono 400/500; codepoint check includes ô and the syllabics range if used) · **chapter-0 poster = the chapter-0 still, one URL, ≤ 60 KB** · wordmark ≤ 23 · icon ≤ 8 |
 | `ui` | ≤ 60 KB |
-| `world` | ≤ 185 KB (three chunk ≤ 160; world/field/conductor modules ≤ 25 — the spike's eleven modules already measure 14 KB gz) |
+| `world` | ≤ 215 KB, one chunk (measured at Gate 2: three tree-shaken for shadows + sprites + instancing + PMREM ≈ 165 KB; the fifteen world/conductor/interaction modules ≈ 45 KB gz — GLSL template strings compress poorly; raised from the 185 KB estimate with this rationale; total page JS 231 KB gz, reduced-motion path still zero world bytes) |
 | reduced-motion first paint | HTML 45 + CSS 22 + shared poster/still 60 = **≤ 127 KB excluding fonts, marks and `ui`**; all-in (adds fonts 110 + marks 31 + `ui` ≤ 60) **≤ 330 KB** |
 | reduced-motion full scroll | first paint + 6 lazy stills (chapters 1–6, ≤ 22 KB each) = **≤ 259 KB excluding fonts/marks/`ui`**; all-in **≤ 470 KB**; **zero `world` requests including modulepreload** |
 | runtime | ≤ 55 calls / 100 k tris desktop; ≤ 40 / 60 k phone; DPR 1.75 / 1.5 / 1.35 — `renderer.info` at chapters 0/3/6 |

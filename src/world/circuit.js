@@ -2,10 +2,10 @@
 // V₂), the hairline measurement loop that only draws when both are placed, the stake that slides along the
 // lease road, and probing the rock (pointer/tap → local field reveal with decaying memory). Everything is
 // qualitative: no distance scale, no S/N bar, no numbers.
-import * as THREE from 'three';
 import { ROAD_RECT, SLAB, NOTCH, BENCH_Y } from './layout.js';
+// THREE is injected by the caller (the world chunk owns three; UI chunks must never import it — spec §6).
 
-export function createCircuit(island) {
+export function createCircuit(island, THREE) {
   const group = new THREE.Group();
   group.name = 'circuit';
   island.parallax.add(group);

@@ -16,6 +16,18 @@ export default defineConfig({
     assetsInlineLimit: 0,
     sourcemap: false,
     rollupOptions: {
+      output: {
+        // One world chunk (spec §6): three.js and every src/world module except the pure-data layout.js that the
+        // rail's formation legend imports on the stills path. The chunk keeps the name "boot" so the resource
+        // contract (scripts/manifest.mjs: /_app/boot*.js = world bucket) and the reduced-motion smoke hold.
+        manualChunks(id) {
+          const n = id.split(String.fromCharCode(92)).join('/');
+          if (n.includes('/node_modules/three/')) return 'boot';
+          if (n.includes('/src/world/') && !n.endsWith('/layout.js')) return 'boot';
+          if (n.endsWith('/src/boot.js') || n.endsWith('/src/interactions.js') || n.endsWith('/src/cameraRig.js') || n.endsWith('/src/conductor.js')) return 'boot';
+          return undefined;
+        },
+      },
       input: {
         main: resolve(here, 'index.html'),
         privacy: resolve(here, 'privacy.html'),

@@ -1,7 +1,6 @@
 // Port of Forest.tsx — 3 InstancedMesh spruce variants, deterministic mulberry32 scatter, per-instance HSL tint.
 // Adds an optional wind uniform (vertex sway) — the R3F original had none.
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { onCap, PAD_RECT, ROAD_RECT, SLAB } from './layout.js';
 
 export function mulberry32(seed) {
@@ -34,9 +33,33 @@ function spruceGeometry(v) {
     cone.translate(0, atY + h / 2, 0);
     parts.push(cone);
   }
-  const merged = mergeGeometries(parts);
+  const merged = mergeIndexed(parts);
   parts.forEach((p) => p.dispose());
   return merged;
+}
+
+// Minimal indexed-geometry merge (position/normal/uv + index) — avoids pulling BufferGeometryUtils (37 KB of
+// source) into the world chunk for three cones and a trunk.
+function mergeIndexed(geoms) {
+  let vCount = 0, iCount = 0;
+  geoms.forEach((g) => { vCount += g.attributes.position.count; iCount += g.index.count; });
+  const pos = new Float32Array(vCount * 3), nor = new Float32Array(vCount * 3), uv = new Float32Array(vCount * 2);
+  const idx = new Uint32Array(iCount);
+  let vo = 0, io = 0;
+  geoms.forEach((g) => {
+    pos.set(g.attributes.position.array, vo * 3);
+    nor.set(g.attributes.normal.array, vo * 3);
+    if (g.attributes.uv) uv.set(g.attributes.uv.array, vo * 2);
+    const gi = g.index.array;
+    for (let i = 0; i < gi.length; i++) idx[io + i] = gi[i] + vo;
+    vo += g.attributes.position.count; io += gi.length;
+  });
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  out.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  out.setIndex(new THREE.BufferAttribute(idx, 1));
+  return out;
 }
 
 const inRect = (x, z, r) => x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ;

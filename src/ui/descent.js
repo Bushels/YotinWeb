@@ -2,12 +2,12 @@
 // 01 the tool (sensors + collar at the heel), 02 the sensors (same place, the measurement), 03 the receiver
 // at the wellhead. They light in sequence as the descent passes them; hovering/focusing a strip step warms
 // its marker. Strip steps are the visible twins (≥ 44 px). No numbers.
-import * as THREE from 'three';
 
 export function mountDescent() {
   const steps = Array.from(document.querySelectorAll('.signal-step'));
   if (!steps.length) return null;
   function attach(w) {
+    const THREE = w.THREE;
     const island = w.island;
     const ringGeom = new THREE.RingGeometry(0.16, 0.2, 40);
     const mk = (pos, normal) => {

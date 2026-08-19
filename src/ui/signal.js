@@ -70,7 +70,7 @@ export function mountSignal() {
 
   function attach(w) {
     world = w;
-    circuit = createCircuit(w.island);
+    circuit = createCircuit(w.island, w.THREE);
     const I = w.interactions;
     const gate = [[2.6, 4.2]];
     I.register('ref-wellhead', { proxy: circuit.whProxy, twin: refWell, chapters: gate, apply3D() {}, onActivate() { circuit.set({ wellhead: !circuit.state.wellhead }); reflect(); } });

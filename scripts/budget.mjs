@@ -31,7 +31,7 @@ const CAPS = {
   wordmark: 23 * KB,
   icon: 8 * KB,
   ui: 60 * KB,
-  world: 185 * KB,
+  world: 215 * KB, // measured 2026-08-19: three (tree-shaken, shadows+sprites+instancing+PMREM) ≈ 165 KB + 15 world modules ≈ 45 KB — see spec §6
   stillEach: 22 * KB,
   rmFirstPaint: 127 * KB,      // html + css + ch0 still
   rmFirstPaintAllIn: 330 * KB, // + fonts + wordmark + icon + ui

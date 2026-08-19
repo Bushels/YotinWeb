@@ -158,7 +158,7 @@ export function bootWorld() {
   conductor.start();
 
   const api = {
-    renderer, scene, camera, rig, island, conductor, interactions, track,
+    renderer, scene, camera, rig, island, conductor, interactions, track, THREE,
     get state() { return lastState || conductor.getState(); },
     requestRender() { dirty = true; },
     get paused() { return paused; },
