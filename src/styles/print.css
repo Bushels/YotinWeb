@@ -1,0 +1,38 @@
+/* Print stylesheet (spec §5): the page as an engineering handout. The canvas is replaced by nothing (the
+   chapter-0 still prints as the hero poster), the tally becomes a plain list, specs print as a bordered table,
+   the FAQ prints fully expanded, the qualifier verdict and summary print if present, then the contact block.
+   Hairlines only; no backgrounds that cost toner. */
+@media print {
+  @page { margin: 16mm; }
+  html, body { background: #fff !important; color: #111 !important; }
+  #world, .rail, .fixed-layer, .stills, .chatfi-launcher, .chatfi-panel, .scroll-rail, .nav-toggle, .nav-cta, .mobile-nav,
+  .hero-scrim, .scroll-cue, .rise-band, .signal-stage .circuit-stake, .motion-toggle, [data-stills], video, iframe { display: none !important; }
+  .site-header { position: static !important; background: none !important; border-bottom: 1px solid #999; }
+  main { padding-left: 0 !important; }
+  section { background: none !important; color: #111 !important; padding: 10mm 0 !important; break-inside: avoid-page; }
+  .hero { min-height: 0 !important; }
+  .hero-scene { position: static !important; width: 100% !important; height: auto !important; opacity: 1 !important; transform: none !important; }
+  .hero-poster { position: static !important; width: 100% !important; height: auto !important; opacity: 1 !important; }
+  h1, h2, h3, h4 { color: #111 !important; break-after: avoid; }
+  .hero-message h1 .w > span { animation: none !important; transform: none !important; }
+  a { color: #111 !important; text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #555; }
+  .spec-grid { display: table !important; width: 100%; border-collapse: collapse; }
+  .spec-grid > div { display: table-row !important; background: none !important; }
+  .spec-grid dt, .spec-grid dd { display: table-cell !important; padding: 4px 8px; border: 1px solid #bbb; }
+  .spec-grid i { display: none; }
+  details.faq-item { break-inside: avoid; }
+  details.faq-item > p { display: block !important; }
+  details.faq-item summary i { display: none; }
+  details.faq-item:not([open]) > p { display: block !important; }
+  .channel-grid, .drill-fallback ul, .company-marks { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .channel-card, .spec-grid > div, .drill-fallback li, .company-mark, .portal-note, .journey-list li, .readout, .circuit { background: none !important; border: 1px solid #bbb !important; color: #111 !important; }
+  .company-section { color: #111 !important; }
+  .company-section .company-grid { background: none !important; }
+  .qualifier { background: none !important; border: 1px solid #bbb !important; }
+  .qualifier-stage button, .qualifier-stage input { display: none !important; }
+  .signal-stage { display: block !important; }
+  .readout-list b { color: #111 !important; }
+  .site-footer { border-top: 1px solid #999; }
+  .site-footer::after { content: "yotinenergy.com — printed from the Yotin Energy website. Representative values; schematic, not to scale."; display: block; margin-top: 6mm; font-size: 10px; color: #555; }
+}
