@@ -30,8 +30,10 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
 
   // Flow materials: sand-tinted chevrons (no cyan at the surface). Pulse (bullet) never set.
   const casedFlow = createPulseMaterial({ base: { color: COLORS.casing, roughness: 0.35, metalness: 0.85, transparent: true, opacity: 1 }, pulseColor: SAND_FLOW, flowCount: 10, flowColor: SAND_FLOW });
-  const trunkFlow = createPulseMaterial({ base: { color: '#4a3826', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 12, flowColor: SAND_FLOW });
-  const legFlow = createPulseMaterial({ base: { color: '#43321f', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 8, flowColor: SAND_FLOW });
+  // Open-hole bores: base at or below the pay so the slot floor never out-lights the bench (round 2); the
+  // chevrons stay readable as dim flow inside a dark slot, not a lit ribbon.
+  const trunkFlow = createPulseMaterial({ base: { color: '#2b1e14', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 12, flowColor: '#8a7455' });
+  const legFlow = createPulseMaterial({ base: { color: '#261a11', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 8, flowColor: '#8a7455' });
 
   const terrain = buildTerrain();
   const forest = buildForest(tier);
@@ -83,8 +85,8 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     const flow = channels.flow ?? L;
     const flowTime = elapsed % 20;
     casedFlow.setFlow(0.9 * flow, flowTime);
-    trunkFlow.setFlow(0.9 * flow, flowTime);
-    legFlow.setFlow(0.9 * flow, flowTime);
+    trunkFlow.setFlow(0.35 * flow, flowTime);
+    legFlow.setFlow(0.25 * flow, flowTime);
     const cut = Math.max(channels.cutaway, 0);
     casedFlow.setCutaway(1 - 0.72 * cut, cut < 0.05);
     tool.update(channels.candle, state.toolFocus);

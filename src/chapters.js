@@ -22,11 +22,11 @@ export const CHAPTERS = [
 export const POSES = [
   { id: 'surface',      position: [27.8, 22.0, 30.9], target: [-1.8, -1.3, 2.2],  fov: 20, mobile: { position: [24.0, 22.5, 30.5], target: [-1.2, -3.2, 2.2], fov: 30 } },
   { id: 'descent',      position: [-0.2, 2.3, 15.2],  target: [-4.9, -1.2, 5.0],  fov: 28, mobile: { position: [-0.6, 1.4, 16.5], target: [-4.9, -2.4, 5.0], fov: 38 } },
-  { id: 'tool',         position: [1.6, -1.3, 7.4],   target: [-0.55, -2.45, 3.3], fov: 24, mobile: { position: [1.9, -1.0, 9.8], target: [-0.55, -2.7, 3.3], fov: 34 } },
-  { id: 'signal',       position: [2.4, -0.2, 15.5],  target: [-0.4, -2.4, 3.2],  fov: 27, mobile: { position: [2.0, 0.6, 21.0], target: [-0.6, -2.6, 3.2], fov: 36 } },
-  { id: 'deployment-a', position: [0.9, -1.8, 6.2],   target: [-0.6, -2.45, 3.3],  fov: 22, mobile: { position: [1.1, -1.5, 8.2], target: [-0.6, -2.7, 3.3], fov: 32 } },
+  { id: 'tool',         position: [1.6, -1.3, 7.4],   target: [-0.55, -2.45, 3.3], fov: 24, mobile: { position: [1.9, -1.85, 9.8], target: [-0.55, -3.55, 3.3], fov: 34 } }, // mobile: tool in the upper 38 vh band above the cards (round 2)
+  { id: 'signal',       position: [3.2, 0.9, 12.0],   target: [-2.8, -1.4, 4.0],  fov: 27, mobile: { position: [2.0, -0.4, 21.0], target: [-0.6, -5.4, 3.2], fov: 36 } }, // collar right of centre AND the wellhead/front-face return in frame (round 2); mobile: collar in the 42 vh band
+  { id: 'deployment-a', position: [-2.0, -0.8, 10.3], target: [-4.9, -2.15, 5.45], fov: 24, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
-  { id: 'yotin',        position: [-6.5, 5.2, 14.5],  target: [-4.6, 0.6, 3.6],   fov: 34, mobile: { position: [-6.0, 5.8, 18.5], target: [-4.6, 0.0, 3.6], fov: 44 } },
+  { id: 'yotin',        position: [-6.5, 3.4, 16.5],  target: [-4.6, 1.1, 3.6],   fov: 34, mobile: { position: [-6.0, 4.0, 20.0], target: [-4.6, 0.4, 3.6], fov: 44 } }, // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
   { id: 'fit',          position: [1.6, -0.3, 12.8],  target: [-3.0, -2.3, 4.4],  fov: 30, mobile: { position: [1.8, 0.2, 16.5], target: [-3.0, -2.7, 4.4], fov: 40 } },
 ];
 

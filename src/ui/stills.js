@@ -74,17 +74,26 @@ export function mountStills() {
         if (i < 0) return;
         if (e.isIntersecting) inView.add(i); else inView.delete(i);
       });
-      if (!inView.size) return; // between anchors: hold the current still (chapter 4 holds through the FAQ)
+      pick();
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
+    anchors.forEach((el) => io.observe(el));
+    // Between anchors (or after a deep-link / instant jump that lands no anchor in the centre band) choose the
+    // chapter whose anchor is NEAREST the viewport centre — never hold "surface" on a page that is two-thirds
+    // scrolled (round 2: the reduced-motion frames showed the hero still at 33 % and 66 %). The last chapter
+    // anchors at its top (the conductor's rule) so the FAQ still holds chapter 4 until #contact arrives.
+    function pick() {
       const mid = window.innerHeight / 2;
       let best = -1, bestD = Infinity;
-      inView.forEach((i) => {
-        const r = anchors[i].getBoundingClientRect();
-        const d = r.top > mid ? r.top - mid : r.bottom < mid ? mid - r.bottom : 0;
+      anchors.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const centre = i === anchors.length - 1 ? r.top : (r.top + r.bottom) / 2;
+        const d = r.top <= mid && r.bottom >= mid ? 0 : Math.abs(centre - mid);
         if (d < bestD || (d === bestD && i > best)) { bestD = d; best = i; }
       });
       if (best >= 0) show(best);
-    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
-    anchors.forEach((el) => io.observe(el));
+    }
+    let ticking = false;
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; pick(); }); } }, { passive: true });
   }
 
   // "Show the 3D world": once, near the chapter-0 still, only when WebGL2 + minimum tier pass.

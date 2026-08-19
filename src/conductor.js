@@ -12,6 +12,7 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
 
   const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
 
+  const headerH = () => { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')); return Number.isFinite(v) ? v : 72; };
   function measure() {
     const max = maxScroll();
     widthAtMeasure = innerWidth;
@@ -19,6 +20,9 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
     anchors = els.map((el, i) => {
       if (i === 0) return 0;
       if (i === els.length - 1) return Math.min(max, docTop(el) - innerHeight * 0.15);
+      // data-anchor="top": the chapter arrives when the section's top reaches the header (the yôtin chapter: its
+      // sticky rise band must be fully on screen at arrival, not already scrolled under the paper — round 2)
+      if (el.dataset && el.dataset.anchor === 'top') return clamp(docTop(el) - headerH(), 0, max);
       const v = docTop(el) + el.offsetHeight * 0.5 - innerHeight * 0.5;
       return clamp(v, 0, max);
     });

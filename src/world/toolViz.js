@@ -113,9 +113,9 @@ export function createToolViz(world) {
   root.add(pump);
   const levelMat = new THREE.MeshBasicMaterial({ color: SAND, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false, toneMapped: false });
   const earlierMat = levelMat.clone(); earlierMat.opacity = 0.4;
-  const levelRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.004, 6, 40), levelMat);
+  const levelRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.012, 6, 40), levelMat); // legible at the ch4 pose distance (round 2)
   levelRing.name = 'fluid-level'; levelRing.renderOrder = 31; levelRing.visible = false;
-  const earlierRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.003, 6, 40), earlierMat);
+  const earlierRing = new THREE.Mesh(new THREE.TorusGeometry(RADII.cased * 0.82, 0.008, 6, 40), earlierMat);
   earlierRing.name = 'fluid-level-earlier'; earlierRing.renderOrder = 31; earlierRing.visible = false;
   root.add(levelRing, earlierRing);
   function placeOnCased(obj, u) {
@@ -124,8 +124,12 @@ export function createToolViz(world) {
     obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), t); // cylinder/torus axis → tangent
     if (obj.geometry && obj.geometry.type === 'TorusGeometry') obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), t);
   }
+  // a short horizontal sand tick across the string at the level — the ring alone reads as a hairline at distance
+  const levelTick = new THREE.Mesh(new THREE.PlaneGeometry(RADII.cased * 3.2, 0.014), levelMat);
+  levelTick.name = 'fluid-level-tick'; levelTick.renderOrder = 31; levelTick.visible = false;
+  root.add(levelTick);
   let drawdown = 0, earlier = null, levelShown = false;
-  function setLevel(d) { drawdown = Math.min(1, Math.max(0, d)); placeOnCased(levelRing, FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * drawdown); }
+  function setLevel(d) { drawdown = Math.min(1, Math.max(0, d)); const u = FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * drawdown; placeOnCased(levelRing, u); levelTick.position.copy(cased.getPointAt(u)); levelTick.position.z += 0.16; levelTick.visible = levelShown; }
   function setEarlier(d) { earlier = d; if (d == null) { earlierRing.visible = false; return; } placeOnCased(earlierRing, FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * d); earlierRing.visible = levelShown; }
   setLevel(0);
 
@@ -205,7 +209,8 @@ export function createToolViz(world) {
     return false; // orbit drags, scroll and pointer moves dirty the frame on their own
   }
   let benchTarget = 0, cutTarget = 0, ringBoost = 0, ringTarget = 0, witnessWarm = 0, witnessTarget = 0;
-  let surfaceCaption = null; // { el, anchor } projected each frame
+  let surfaceCaption = null; // { el } projected each frame at the wellhead
+  let standoffCaption = null; // { el, obj } projected each frame at the standoff line (chapter 6)
   let chapterActive = { tool: false, deployment: false };
 
   // ---- orbit (rotate the input rig about a pivot so the tool stays put on screen) ----------------------------------
@@ -305,7 +310,7 @@ export function createToolViz(world) {
     if (xray) { island.materials.casedFlow.setCutaway(0.28, false); if (shell) shell.material.opacity = 0.05; }
     ghost.visible = xray && chapterActive.deployment;
     // fluid level + pump warm (+ visibility gated to chapter 4)
-    pump.visible = levelRing.visible = chapterActive.deployment;
+    pump.visible = levelRing.visible = chapterActive.deployment; levelTick.visible = chapterActive.deployment && levelShown;
     earlierRing.visible = chapterActive.deployment && earlier != null;
     pumpMat.emissiveIntensity = THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9;
     // drive head keeps turning at one constant rate (chapter 4)
@@ -314,10 +319,11 @@ export function createToolViz(world) {
     haloMat.opacity += (haloTarget - haloMat.opacity) * k; if (haloMat.opacity < 0.01 && haloTarget === 0) halo.visible = false;
     benchLift += (benchTarget - benchLift) * k; if (benchMat && benchMat.emissive) benchMat.emissiveIntensity = benchLift * 0.14;
     cutBoost += (cutTarget - cutBoost) * k; if (cutEdges) cutEdges.material.opacity = cutBase + 0.5 * cutBoost;
-    // surface caption projection (DOM twin positioned at the wellhead)
-    if (surfaceCaption) {
+    // projected captions: the surface caption (wellhead) and the standoff caption (the 0.9 line, chapter 6)
+    for (const cap of [surfaceCaption, standoffCaption]) {
+      if (!cap) continue;
       rig.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
-      island.well.wellhead.getWorldPosition(_v); _v.y += 0.4;
+      if (cap.obj) { cap.obj.getWorldPosition(_v); _v.y += 0.12; } else { island.well.wellhead.getWorldPosition(_v); _v.y += 0.4; }
       _ndc.copy(_v).project(camera);
       // Clamp into the viewport (inside the rail gutter / header) — when the pad is out of frame the caption holds
       // the edge nearest the wellhead, which still says where "surface" is.
@@ -327,7 +333,7 @@ export function createToolViz(world) {
       if (behind) { x = W - x; y = H - y; }
       const minX = (W > 1100 ? 210 : 16) + 90, maxX = W - 110, minY = 84 + 40, maxY = H - 24;
       const cx = Math.min(maxX, Math.max(minX, x)), cy = Math.min(maxY, Math.max(minY, y));
-      const el = surfaceCaption.el;
+      const el = cap.el;
       el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px) translate(-50%, -100%)`;
       el.classList.toggle('is-clamped', cx !== x || cy !== y);
     }
@@ -347,11 +353,12 @@ export function createToolViz(world) {
     setLevel(d) { setLevel(d); pump_(); },
     get drawdown() { return drawdown; },
     setEarlier(d) { setEarlier(d); pump_(); },
-    setLevelShown(v) { levelShown = Boolean(v); earlierRing.visible = levelShown && earlier != null; pump_(); },
+    setLevelShown(v) { levelShown = Boolean(v); earlierRing.visible = levelShown && earlier != null; levelTick.visible = levelShown && chapterActive.deployment; pump_(); },
     focusHalo(pos) { focusHalo(pos); pump_(); },
     liftBench(on) { benchTarget = on ? 1 : 0; pump_(); },
     brightenCut(on) { cutTarget = on ? 1 : 0; pump_(); },
     setSurfaceCaption(el) { surfaceCaption = el ? { el } : null; if (el) pump_(); },
+    setStandoffCaption(el, obj) { standoffCaption = el && obj ? { el, obj } : null; if (el) pump_(); },
     setChapter(name, on) { chapterActive[name] = Boolean(on); world.requestRender(); pump_(); },
     points: {
       pump: () => pump.position.clone(),

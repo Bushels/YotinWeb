@@ -19,9 +19,11 @@ html.world-on .rail, html.stills-on .rail { display: flex; } /* the rail is DOM-
 html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform: none; }
 .rail > * { pointer-events: auto; }
 .rail-chapters { display: flex; flex-direction: column; gap: 2px; }
-.rail-chapters a { color: var(--sand); opacity: 0.45; text-decoration: none; padding: 2px 8px; border-left: 1px solid rgba(232, 220, 200, 0.28); transition: opacity 240ms ease, color 240ms ease, border-color 240ms ease; }
-.rail-chapters a:hover, .rail-chapters a:focus-visible { opacity: 0.9; outline: none; }
-.rail-chapters a[aria-current="true"] { opacity: 1; color: var(--ember); border-left-color: var(--ember); }
+/* Contrast: nav text is dimmed with COLOUR tokens, never opacity (round 2: sand at 45 % measured 3:1 over the shale).
+   --sand-mute #b3aa9a ≈ 8.5:1 on near-black; ember current ≈ 6.7:1. */
+.rail-chapters a { color: var(--sand-mute, #b3aa9a); text-decoration: none; padding: 2px 8px; border-left: 1px solid rgba(232, 220, 200, 0.28); transition: color 240ms ease, border-color 240ms ease; }
+.rail-chapters a:hover, .rail-chapters a:focus-visible { color: var(--sand); outline: none; }
+.rail-chapters a[aria-current="true"] { color: var(--ember); border-left-color: var(--ember); }
 
 /* Tally: a vertical track with two markers, and the casing marks lit by name. */
 .rail-tally { display: grid; grid-template-columns: 10px 1fr; column-gap: 10px; opacity: 0; transform: translateX(-6px); transition: opacity 320ms ease, transform 320ms ease; }
@@ -32,38 +34,60 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-marker-up { background: #22D3EE; opacity: 0; box-shadow: 0 0 8px rgba(34, 211, 238, 0.7); transition: opacity 320ms ease, top 120ms linear; }
 .rail-marker-up.is-on { opacity: 1; }
 .rail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; height: 104px; }
-.rail-list li { opacity: 0.35; transition: opacity 240ms ease, color 240ms ease; white-space: nowrap; }
-.rail-list li.is-lit { opacity: 1; }
-.rail-list li[data-tally="wellfi"].is-lit { color: #22D3EE; }
-.rail-caption { grid-column: 1 / -1; margin: 6px 0 0; font-size: 9px; letter-spacing: 0.06em; text-transform: none; opacity: 0.55; line-height: 1.4; max-width: 168px; }
+.rail-list li { color: rgba(179, 170, 154, 0.75); transition: color 240ms ease; white-space: nowrap; }
+.rail-list li.is-lit { color: var(--sand); }
+.rail-tally.is-signal .rail-list li[data-tally="wellfi"].is-lit { color: #22D3EE; } /* cyan only while chapter 3 is the chapter */
+/* Provenance caption: a world caption, not a nav item — pinned in the gutter above the motion toggle so it survives
+   the compact rail (round 2). */
+.rail-caption { position: fixed; left: 14px; bottom: 142px; margin: 0; width: 168px; font-size: 9.5px; letter-spacing: 0.04em; text-transform: none; color: var(--sand-mute, #b3aa9a); line-height: 1.4; pointer-events: none; }
 
 /* Legend: visible twins for the strata. */
 .rail-legend { display: flex; flex-direction: column; gap: 2px; opacity: 0; transform: translateX(-6px); transition: opacity 320ms ease, transform 320ms ease; }
 .rail-legend.is-visible { opacity: 1; transform: none; }
-.rail-legend-item { all: unset; cursor: pointer; color: var(--sand); opacity: 0.5; padding: 3px 8px; min-height: 22px; border-left: 1px solid rgba(232, 220, 200, 0.18); font: inherit; letter-spacing: inherit; text-transform: inherit; transition: opacity 200ms ease, border-color 200ms ease; }
-.rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { opacity: 1; border-left-color: var(--sand); }
+.rail-legend-item { all: unset; cursor: pointer; color: var(--sand-mute, #b3aa9a); padding: 3px 8px; min-height: 22px; border-left: 1px solid rgba(232, 220, 200, 0.18); font: inherit; letter-spacing: inherit; text-transform: inherit; transition: color 200ms ease, border-color 200ms ease; }
+.rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { color: var(--sand); border-left-color: var(--sand); }
 .rail-legend-item:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 
 /* Over the paper chapter the rail turns to ink on a paper-tinted ground: invisible on the paper itself, a light
    card where it overlaps the rise band above it. (A dark box here read as a grey tombstone — round 1.) */
 .rail[data-chapter="yotin"] { background: rgba(245, 240, 232, 0.9); padding: 10px 10px 10px 0; border-radius: 6px; color: #1b1f24; }
-.rail[data-chapter="yotin"] .rail-chapters a, .rail[data-chapter="yotin"] .rail-list li, .rail[data-chapter="yotin"] .rail-legend-item, .rail[data-chapter="yotin"] .rail-caption { color: #1b1f24; border-left-color: rgba(27, 31, 36, 0.25); }
+.rail[data-chapter="yotin"] .rail-chapters a, .rail[data-chapter="yotin"] .rail-list li, .rail[data-chapter="yotin"] .rail-legend-item, .rail[data-chapter="yotin"] .rail-caption { color: #4a4f56; border-left-color: rgba(27, 31, 36, 0.25); } /* ≈ 7.4:1 on the paper card */
+.rail[data-chapter="yotin"] .rail-list li.is-lit, .rail[data-chapter="yotin"] .rail-tally.is-signal .rail-list li[data-tally="wellfi"].is-lit { color: #1b1f24; }
+.rail[data-chapter="yotin"] .rail-marker-up { display: none; }
 .rail[data-chapter="yotin"] .rail-chapters a[aria-current="true"] { color: #9f470d; border-left-color: #9f470d; }
 .rail[data-chapter="yotin"] .rail-track { border-left-color: rgba(27, 31, 36, 0.3); }
 .rail[data-chapter="yotin"] .rail-marker-down { background: #1b1f24; }
 
 /* Reserved gutter: copy never enters the rail's column. */
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }
-@media (max-width: 1100px) { html.world-on .rail, html.stills-on .rail { display: none; } }
+/* ≤ 1100 px: the collapsed 36 px bar (spec §4 touch rule) — current chapter · lit tally item · "Formations" tap
+   target; the legend opens as a sheet under it. Chapters nav, tally track and caption stay desktop-only. */
+.rail-bar { display: none; }
+@media (max-width: 1100px) {
+  html.world-on .rail, html.stills-on .rail { display: flex; flex-direction: column; top: var(--header-h, 72px); left: 0; right: 0; width: auto; max-height: none; overflow: visible; gap: 0; z-index: 3; pointer-events: none; }
+  .rail-chapters, .rail-tally, .rail-caption { display: none; }
+  .rail-bar { all: unset; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: rgba(3, 7, 11, 0.82); border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
+  .rail-bar-current { color: var(--ember); }
+  .rail-bar-tally { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sand); }
+  .rail-bar-hint { color: var(--sand-mute, #b3aa9a); }
+  .rail-bar-hint::after { content: " ▾"; }
+  .rail.is-open .rail-bar-hint::after { content: " ▴"; }
+  .rail-legend { display: none; pointer-events: auto; background: rgba(3, 7, 11, 0.94); padding: 8px 16px 12px; border-bottom: 1px solid rgba(232, 220, 200, 0.12); opacity: 1; transform: none; }
+  .rail.is-open .rail-legend { display: flex; }
+  .rail-legend-item { min-height: 44px; display: flex; align-items: center; }
+  .rail[data-chapter="yotin"] { background: transparent; padding: 0; }
+  .rail[data-chapter="yotin"] .rail-bar { background: rgba(245, 240, 232, 0.92); color: #4a4f56; border-bottom-color: rgba(27, 31, 36, 0.15); }
+  .rail[data-chapter="yotin"] .rail-bar-current { color: #9f470d; }
+  .rail[data-chapter="yotin"] .rail-bar-tally { color: #1b1f24; }
+}
 @media (prefers-reduced-motion: reduce) { .rail *, .rail-tally, .rail-legend { transition: none !important; } }
 
 /* Fixed-layer arbitration (spec §4; round-1 P1): the rail is top-anchored under the header and bounded above the
    motion toggle's reserve, so the two never share a pixel at any height — 1366×768 included. Short viewports
    compact the rail first (smaller gaps, no caption, tighter legend), then shed legend and tally. */
-.rail { top: calc(var(--header-h, 72px) + 36px); transform: none; max-height: calc(100vh - var(--header-h, 72px) - 36px - 150px); overflow: hidden; }
+.rail { top: calc(var(--header-h, 72px) + 36px); transform: none; max-height: calc(100vh - var(--header-h, 72px) - 36px - 200px); overflow: hidden; }
 @media (max-height: 820px) {
   .rail { gap: 8px; font-size: 10px; }
-  .rail-caption { display: none; }
   .rail-track { height: 80px; }
   .rail-list { height: 88px; }
   .rail-legend-item { min-height: 18px; padding: 1px 8px; line-height: 1.5; }

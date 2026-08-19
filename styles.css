@@ -1202,7 +1202,8 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
 }
 .qualifier-badge i { font-size: 19px; }
-.qualifier-verdict[data-fit="strong"] .qualifier-badge { border: 1px solid rgba(125, 216, 106, 0.4); background: rgba(125, 216, 106, 0.1); color: #8fe07a; }
+/* Strong = the signal arrived: candle cyan, not green (no green in the palette; spec §6 licenses cyan at the verdict). */
+.qualifier-verdict[data-fit="strong"] .qualifier-badge { border: 1px solid rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.1); color: #22D3EE; }
 .qualifier-verdict[data-fit="review"] .qualifier-badge { border: 1px solid rgba(242, 118, 34, 0.4); background: rgba(242, 118, 34, 0.1); color: var(--ember-lit); }
 /* Not a rejection — a waitlist. Styled as sand/neutral rather than a warning,
    because "we're building that" should not read like "no". */

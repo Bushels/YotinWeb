@@ -94,14 +94,43 @@ export function mountRail() {
     const descent = Math.min(1, Math.max(0, p - 1));            // 0..1 across chapter 1
     const returned = Math.min(1, Math.max(0, (p - 3) / 1.0));  // 0..1 across chapter 3 (the reading returns)
     tallyItems.forEach((li, i) => li.classList.toggle('is-lit', p >= 1 && descent >= TALLY[i].at));
+    // cyan on the rail only while the signal chapter is the chapter (one-candle rule, spec §6 — round 2)
+    const inSignal = p >= 3 && p < 4;
+    tally.classList.toggle('is-signal', inSignal);
     // marker positions along the track: 0 = top (surface), 1 = bottom (tool)
     const downPos = p < 1 ? 0 : Math.min(1, descent);
     const upPos = p < 3 ? 1 : 1 - returned;
     down.style.setProperty('--pos', downPos.toFixed(3));
     up.style.setProperty('--pos', upPos.toFixed(3));
-    up.classList.toggle('is-on', p >= 3 && p < 5);
-    tally.classList.toggle('is-visible', p >= 0.6 && p < 5);
-    legend.classList.toggle('is-visible', p >= 0.6 && p < 4.6);
+    up.classList.toggle('is-on', inSignal);
+    // tally/legend live through the underground chapters; gate on the chapter INDEX so a 4.9999 landing cannot
+    // leave them on the paper
+    const index = Math.floor(p + 0.002);
+    tally.classList.toggle('is-visible', p >= 0.6 && index < 5);
+    legend.classList.toggle('is-visible', p >= 0.6 && index < 5);
+    if (current) current.textContent = LABELS[CHAPTERS[Math.min(CHAPTERS.length - 1, index)].id] || '';
+  });
+  // Phone / tablet (≤ 1100 px): the rail collapses to a 36 px bar under the header — current chapter + the lit
+  // tally item; tap opens the formation legend as a sheet (one transient at a time; closes on scroll) — spec §4.
+  const bar = document.createElement('button');
+  bar.type = 'button';
+  bar.className = 'rail-bar';
+  bar.setAttribute('aria-expanded', 'false');
+  bar.setAttribute('aria-controls', 'rail-legend');
+  const current = document.createElement('span'); current.className = 'rail-bar-current'; current.textContent = LABELS.surface;
+  const barTally = document.createElement('span'); barTally.className = 'rail-bar-tally'; barTally.setAttribute('aria-hidden', 'true');
+  const barHint = document.createElement('span'); barHint.className = 'rail-bar-hint'; barHint.textContent = 'Formations';
+  bar.append(current, barTally, barHint);
+  legend.id = 'rail-legend';
+  rail.insertBefore(bar, rail.firstChild);
+  const setOpen = (open) => { rail.classList.toggle('is-open', open); bar.setAttribute('aria-expanded', String(open)); };
+  bar.addEventListener('click', () => setOpen(!rail.classList.contains('is-open')));
+  window.addEventListener('scroll', () => { if (rail.classList.contains('is-open')) setOpen(false); }, { passive: true });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && rail.classList.contains('is-open')) setOpen(false); });
+  document.addEventListener('world:progress', () => {
+    const lit = tallyItems.filter((li) => li.classList.contains('is-lit')).pop();
+    const text = lit ? lit.textContent : '';
+    if (barTally.textContent !== text) barTally.textContent = text;
   });
   setActive('surface');
   return { rail, links, setActive, focusStratum };

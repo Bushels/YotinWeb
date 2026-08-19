@@ -54,7 +54,7 @@ export function buildWellSystem(paths, mats) {
     troughGeoms.push(squash(new THREE.TubeGeometry(b.curve, 48, b.r * 2.0, 6, false), my, b.r * 2.0 * SQ - 0.004));
     // the bore itself, buried past half: only a sliver of the flow material shows in the slot floor
     const bore = new THREE.Mesh(new THREE.TubeGeometry(b.curve, 56, b.r, 8, false), b.mat);
-    bore.position.y = -b.r * 0.7;
+    bore.position.y = -b.r * 0.88; // only the crown's sliver above the slot floor
     bore.name = b.name;
     bore.userData = { ...(b.meta || {}), bore: true };
     group.add(bore);
@@ -80,7 +80,7 @@ export function buildWellSystem(paths, mats) {
   const mouths = new THREE.Group();
   mouths.name = 'bore-mouths';
   paths.boreMouths.forEach((m) => {
-    const ring = new THREE.Mesh(new THREE.RingGeometry(RADII.lateral * 0.9, RADII.lateral * 1.25, 32), new THREE.MeshBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }));
+    const ring = new THREE.Mesh(new THREE.RingGeometry(RADII.lateral * 0.9, RADII.lateral * 1.25, 32), new THREE.MeshBasicMaterial({ color: '#b3aa9a', transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false }));
     const disc = new THREE.Mesh(new THREE.CircleGeometry(RADII.lateral * 0.9, 32), new THREE.MeshBasicMaterial({ color: '#05030a', side: THREE.DoubleSide }));
     [ring, disc].forEach((mesh) => { mesh.position.copy(m.point); mesh.position.z += 0.004; mesh.rotation.y = 0; }); // ring lies in the z = -0.6 plane, facing +z
     ring.name = `${m.id}-mouth-rim`; disc.name = `${m.id}-mouth`;

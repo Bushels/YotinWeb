@@ -58,8 +58,8 @@ export const COLORS = {
   sand: '#e8dcc8',
   casing: '#6b7d8a',
   casingShell: '#7dd3e8',
-  trough: '#1a120c',      // dark rock-walled open-hole bore (negative), not a pipe
-  boreRim: '#4a3a2a',     // rock lip along an exposed bore — darker than the bench so the slot reads as shadow, not a sand strip
+  trough: '#0f0a07',      // dark rock-walled open-hole bore (negative), not a pipe — darker than the bench (#3a2a1e)
+  boreRim: '#241911',     // rock lip along an exposed bore — ≈ 0.6× the bench albedo so the slot reads as shadow, not a sand strip
   void: '#03070b',
   sunWarm: '#ffd9a8',
   goldenHour: '#ffc98a',

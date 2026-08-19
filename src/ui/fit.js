@@ -64,7 +64,7 @@ export function drawSchematic(ctx, s, W = 1200, H = 630) {
   ctx.textAlign = 'left';
   // verdict badge
   const badge = VERDICT_LABEL[s.verdict] || 'Candidate well';
-  const bc = s.verdict === 'strong' ? '#8fe07a' : s.verdict === 'review' ? EMBER : SAND;
+  const bc = s.verdict === 'strong' ? CYAN : s.verdict === 'review' ? EMBER : SAND; // strong = the signal arrived (cyan is licensed at the verdict, spec §6); no green in the palette
   ctx.font = '600 16px system-ui, Segoe UI, sans-serif';
   const bw = ctx.measureText(badge).width + 28;
   ctx.strokeStyle = bc; ctx.lineWidth = 1.5; ctx.strokeRect(W - 48 - bw, 100, bw, 34);
@@ -153,10 +153,21 @@ export function mountFit() {
   const stageHost = document.querySelector('[data-qualifier-stage]');
   let state = null, world = null, builder = null, active = false, lastSaid = '';
 
+  // The visible caption states the CHANGE (one sentence — spec §4 "masked mono caption states the change");
+  // the full cumulative state goes to the aria-live channel as visually-hidden text (round 2: a log dump in a
+  // box read as a debug console).
+  let full = null;
   function say(text) {
     if (!caption || text === lastSaid) return;
+    const prevParts = lastSaid ? lastSaid.split(' · ') : [];
+    const parts = text ? text.split(' · ') : [];
     lastSaid = text;
-    caption.textContent = text;
+    const changed = parts.filter((x) => !prevParts.includes(x));
+    const visible = changed.length ? changed[changed.length - 1] : (parts[parts.length - 1] || '');
+    if (!full) { full = document.createElement('span'); full.className = 'sr-only'; full.setAttribute('data-fit-caption-full', ''); }
+    caption.textContent = visible ? visible.charAt(0).toUpperCase() + visible.slice(1) : '';
+    full.textContent = text ? ' — ' + text : '';
+    caption.appendChild(full);
     caption.hidden = !text;
   }
 
@@ -167,10 +178,28 @@ export function mountFit() {
     }
     return builder;
   }
+  // Standoff caption: "standoff — 10 % of intermediate" projected at the 0.9 line whenever the line is shown
+  // (spec §4 row 6; round 2). Uses toolViz's projected-caption channel; no digits beyond the public 10 % rule.
+  let standoffEl = null, vizRef = null;
+  function syncStandoffCaption(b) {
+    const show = active && state && (state.hasLength || state.landing) && b.objects && b.objects.standoff;
+    if (!standoffEl) {
+      standoffEl = document.createElement('p');
+      standoffEl.className = 'surface-caption standoff-caption';
+      standoffEl.setAttribute('data-standoff-caption', '');
+      standoffEl.textContent = 'standoff — 10 % of intermediate';
+      standoffEl.hidden = true;
+      document.body.appendChild(standoffEl);
+    }
+    const apply = (viz) => { if (!viz || !viz.setStandoffCaption) return; standoffEl.hidden = !show; viz.setStandoffCaption(show ? standoffEl : null, show ? b.objects.standoff : null); };
+    if (vizRef) apply(vizRef);
+    else import('./tool.js').then((m) => m.getToolViz(world)).then((viz) => { vizRef = viz; apply(viz); }).catch(() => {});
+  }
   function applyWorld() {
     const b = ensureBuilder();
     if (!b) return;
     if (active) b.apply(state); else b.reset();
+    syncStandoffCaption(b);
     world.requestRender();
   }
   function setActive(next) {

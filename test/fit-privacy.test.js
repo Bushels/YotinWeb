@@ -85,7 +85,7 @@ describe('fit modules stay local', () => {
       // dynamic import() is allowed ONLY for the first-party world module (spec §6: the stills path must not
       // request world bytes, so the builder loads after world:first-frame) — never a remote URL.
       const dyn = [...src.matchAll(/import\(([^)]*)\)/g)].map((m) => m[1].trim());
-      for (const arg of dyn) assert.match(arg, /^['"]\.\.\/world\/wellBuilder\.js['"]$/, `${name}: unexpected dynamic import ${arg}`);
+      for (const arg of dyn) assert.match(arg, /^['"](?:\.\.\/world\/wellBuilder\.js|\.\/tool\.js)['"]$/, `${name}: unexpected dynamic import ${arg}`); // + the UI's own tool module (standoff caption projection)
     }
   });
 

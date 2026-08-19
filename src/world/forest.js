@@ -118,16 +118,21 @@ export function buildForest(tier = 'high') {
       if (x > PAD_RECT.minX - 1.1 && x < PAD_RECT.maxX + 1.1 && z > PAD_RECT.minZ - 1.1 && rand() < 0.85) continue;
       const s = 0.8 + rand() * 0.7;
       dummy.position.set(x, 0, z);
-      dummy.scale.setScalar(s * (rand() < 0.25 ? 1.35 : 1));
-      dummy.rotation.set((rand() - 0.5) * 0.07, rand() * Math.PI * 2, (rand() - 0.5) * 0.07); // a slight lean breaks the perfectly vertical repetition
+      // anisotropic scale (height and girth vary independently) + a wider lean: no two silhouettes identical
+      // (round 2 — "identical cone stacks at different sizes")
+      const tall = rand() < 0.25 ? 1.35 : 1;
+      dummy.scale.set(s * (0.8 + rand() * 0.45), s * tall * (0.75 + rand() * 0.6), s * (0.8 + rand() * 0.45));
+      dummy.rotation.set((rand() - 0.5) * 0.16, rand() * Math.PI * 2, (rand() - 0.5) * 0.16);
       dummy.updateMatrix();
       mesh.setMatrixAt(placed, dummy.matrix);
-      // luminance ceiling below the pad (spec §14.2) AND distance falloff: the back rows recede into darkness
-      // instead of lighting as brightly as the front (round 1: "the forest reads as a strategy-game diorama").
-      const depth = (SLAB.maxZ - z) / (SLAB.maxZ - SLAB.minZ); // 0 = front edge, 1 = back edge
+      // luminance ceiling below the pad (spec §14.2) AND distance falloff — RADIAL from the camera-near corner of
+      // the three-quarter hero pose (+x, +z), so the back-right rows recede too (round 1/2: the forest read as a
+      // strategy-game diorama).
+      const dx = (SLAB.maxX - x) / (SLAB.maxX - SLAB.minX), dz = (SLAB.maxZ - z) / (SLAB.maxZ - SLAB.minZ);
+      const depth = Math.min(1, Math.hypot(dx, dz) / 1.2);
       const dt = Math.min(1, Math.max(0, (depth - 0.3) / 0.7));
-      const fall = 1 - 0.6 * dt * dt * (3 - 2 * dt);
-      mesh.setColorAt(placed, color.setHSL(0.31 + (rand() - 0.5) * 0.07, 0.3 * (0.6 + 0.4 * fall), (0.11 + rand() * 0.09) * fall));
+      const fall = 1 - 0.62 * dt * dt * (3 - 2 * dt);
+      mesh.setColorAt(placed, color.setHSL(0.31 + (rand() - 0.5) * 0.12, 0.3 * (0.6 + 0.4 * fall), (0.09 + rand() * 0.13) * fall));
       placed++;
     }
     mesh.count = placed;

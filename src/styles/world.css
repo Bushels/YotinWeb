@@ -82,11 +82,11 @@ html.world-on .hero-message h1 .w:nth-child(4) > span { animation-delay: 264ms; 
 /* Chapter 5: the rise band — a transparent sticky viewport over the world; the paper panel takes the lower stack. */
 .rise-band { display: none; }
 html.world-on .company-section { background: transparent; padding-top: 0; }
-html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 44vh; pointer-events: none; }
+html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; } /* spec §4 row 5: 60 vh rise (round 2) */
 html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
 html.world-on .rise-caption span:last-child { color: var(--ember); }
 html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(40px, 5vw, 64px); padding-bottom: clamp(40px, 5vw, 64px); position: relative; z-index: 1; }
-@media (max-height: 560px) { html.world-on .rise-band { height: 36vh; } }
+@media (max-height: 560px) { html.world-on .rise-band { height: 40vh; } }
 
 /* Phones (spec §4 S0 mobile): the island owns the upper half of the first screen — the mobile surface pose frames
    the pad there — and the copy seats on a dark lower band: wordmark, headline, the two CTAs, then the lede and
@@ -128,6 +128,7 @@ html.world-on .journey-list .journey-icon { width: 40px; height: 40px; font-size
 html.world-on .journey-list h3 { font-size: 16px; margin: 2px 0 4px; }
 html.world-on .journey-list p { font-size: 13px; line-height: 1.45; }
 html.world-on .signal-stage { margin-top: 16px; padding: 20px 22px; }
+@media (min-width: 901px) { html.world-on .signal-stage { max-width: min(720px, 60%); margin-right: auto; grid-template-columns: 1fr; } html.world-on .signal-stage .readout { max-width: 420px; } } /* the collar's side of the frame stays uncovered while the instrument is in use (round 2) */
 @media (max-width: 1100px) {
   html.world-on .journey-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -136,6 +137,13 @@ html.world-on .signal-stage { margin-top: 16px; padding: 20px 22px; }
   html.world-on .stage-tool { padding-top: 38vh; } /* chapter 2: the tool shows before the cards (S1 world band) */
 }
 html.world-on .insight-section { padding: clamp(48px, 5vw, 80px) 0; }
+@media (min-width: 1101px) {
+  html.world-on .insight-head, html.world-on .device-banner, html.world-on .deploy-controls, html.world-on .portal-note { max-width: 54%; margin-left: 0; }
+  html.world-on .insight-head { text-align: left; }
+  html.world-on .insight-head h2, html.world-on .insight-head p { margin-left: 0; }
+  html.world-on .application-chips { justify-content: flex-start; }
+  html.world-on .device-banner img { max-height: min(200px, 26vh); }
+}
 html.world-on .device-banner { margin-top: clamp(28px, 3vw, 44px); padding: clamp(20px, 2.5vw, 34px) 0 18px; background: rgba(3, 7, 11, 0.82); } /* ch4 panel scrim: the figure sits over the live tool */
 html.world-on .device-banner img { max-height: 220px; object-fit: contain; filter: saturate(0.22) brightness(0.82); transition: filter 600ms ease; } /* steel at rest; the x-ray view earns its colour */
 html.world-on.xray-on .device-banner img, html.world-on .device-banner:hover img, html.world-on .device-banner:focus-within img { filter: none; }
@@ -214,8 +222,9 @@ html.world-on .motion-toggle, html.stills-on .motion-toggle { display: inline-fl
 @media (min-width: 1101px) and (max-width: 1600px) {
   html.world-on .chatfi-launcher span, html.stills-on .chatfi-launcher span { display: none; }
   html.world-on .chatfi-launcher, html.stills-on .chatfi-launcher { width: 64px; min-width: 64px; height: 64px; padding: 0; }
-  html.world-on main, html.stills-on main { padding-right: 72px; }
+  html.world-on main, html.stills-on main, html.world-on .site-footer .shell, html.stills-on .site-footer .shell { padding-right: 96px; }
 }
+@media (min-width: 1601px) { html.world-on .site-footer .shell, html.stills-on .site-footer .shell { padding-right: 200px; } }
 @media print { .fixed-layer { display: none; } }
 
 /* Paused: no time-based motion anywhere (idles, load-ins). Scroll-linked reveals and the hero load-in are
@@ -243,10 +252,11 @@ html.world-on .contact-section h2 span { color: var(--sand); }
 /* Phone layout diet (spec §4 shed order, round 1): two-up channel cards and spec tiles at ≤ 560 px — the
    world carries the dwell, the DOM gets tighter rhythm. Tiles keep their 44 px twins. */
 @media (max-width: 560px) {
-  html.world-on .channel-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  html.world-on .channel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  html.world-on .channel-card .tool-chip { white-space: normal; line-height: 1.3; }
   html.world-on .channel-card { padding: 14px 12px; min-height: 0; }
   html.world-on .channel-card p { font-size: 12.5px; line-height: 1.4; }
-  html.world-on .spec-grid { grid-template-columns: repeat(2, 1fr); }
+  html.world-on .spec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   html.world-on .spec-grid > div { min-height: 0; padding: 18px 16px; }
   html.world-on .spec-grid dd { font-size: 30px; margin-top: 12px; }
   html.world-on .spec-grid dd.spec-output-value { font-size: 20px; }
@@ -258,3 +268,26 @@ html.world-on .contact-section h2 span { color: var(--sand); }
 @media (min-width: 1101px) {
   html.world-on .company-section .company-grid { margin-left: -196px; padding-left: calc(196px + var(--pad, 24px)); border-radius: 0 10px 0 0; }
 }
+
+/* Reveals over the world settle sooner and travel less (round 1: half-revealed cards at the chapter anchor read
+   as disabled). Same view() timeline; a gentler keyframe and a range that completes by the time the element's
+   top is ~82 % down the viewport. The signal strip keeps its authored sweep. */
+@keyframes reveal-rise-soft { from { opacity: 0.45; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html.world-on [data-motion]:not([data-motion="fade"]):not(.signal-step) { animation-name: reveal-rise-soft; animation-range: cover 0% cover 18%; }
+    html.world-on .journey-list li:nth-child(2)[data-motion], html.world-on .journey-list li:nth-child(4)[data-motion] { animation-range: cover 4% cover 22%; }
+  }
+}
+
+/* Chapter 6 (round 2): questions left, live well right — one column at ≤ 50 % so the right half stays the
+   world's; the H2 steps down so Q1 is on screen at the anchor on a 768-tall laptop. */
+@media (min-width: 1101px) {
+  html.world-on .contact-grid { grid-template-columns: minmax(0, 1fr); max-width: 50%; gap: 20px; align-items: start; }
+  html.world-on .contact-section h2 { font-size: clamp(38px, 4.2vw, 60px); }
+  html.world-on .contact-actions > p { font-size: 17px; margin-bottom: 14px; }
+  html.world-on .contact-section { padding-top: 40px; }
+}
+
+/* Units keep their casing inside uppercase mono chrome (kPa, mm/s RMS, 4-20 mA, °C) — round 2. */
+html.world-on .readout-list b, html.world-on .chip-out, html.world-on .tool-chip .unit, html.world-on [data-unit] { text-transform: none; }

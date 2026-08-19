@@ -19,11 +19,11 @@
 html.world-on .fit-stage { display: block; pointer-events: none; }
 html.world-on .fit-caption {
   display: inline-block;
-  max-width: 40rem;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: rgba(3, 7, 11, 0.72);
-  border: 1px solid rgba(232, 220, 200, 0.16);
+  max-width: 34rem;
+  padding: 0;
+  max-height: 3.2em;
+  overflow: hidden;
+  text-shadow: 0 1px 12px rgba(3, 7, 11, 0.9), 0 0 2px rgba(3, 7, 11, 0.9);
 }
 
 /* ≤ 1100 px — sticky band above the questions (the world shows through it; the caption rides its lower edge).
@@ -71,7 +71,7 @@ html.world-on .fit-caption {
     grid-column: 2;
     grid-row: 1;
     position: sticky;
-    top: calc(100vh - 150px);
+    top: calc(100vh - 96px);
     align-self: start;
     justify-self: start;
     max-width: min(38rem, calc(100% - 160px)); /* clear of the ChatFi launcher (bottom-right fixed layer) */

@@ -27,10 +27,15 @@ html.motion-paused .channel-card[data-icon-anim].is-visible .channel-icon i { an
 .spec-grid > div.is-hover, .spec-grid > div.is-active { background: rgba(232, 220, 200, 0.05); }
 
 /* Tool controls: the four hotspot twins + Inspect tool (the chapter's one invited action). */
-/* No panel ground here: the tool sits centred behind this row, so the controls keep their own small grounds and
-   the world reads through the middle. */
-.tool-controls { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 18px 28px; margin-top: 28px; min-height: 180px; }
-.tool-hotspots-wrap { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(3, 7, 11, 0.72); max-width: 560px; }
+/* The tool sits centre-left behind this row; the controls stack in the RIGHT column (Inspect above the four
+   chip twins) so the collar and the isolation gap — the chapter's thesis — are never under their own labels
+   (round 2). The world reads through the left ~60 % of the row. */
+.tool-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; margin-top: 28px; min-height: 180px; }
+.tool-hotspots-wrap { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(3, 7, 11, 0.72); max-width: 440px; }
+@media (max-width: 820px) { .tool-controls { align-items: stretch; } .tool-hotspots-wrap { max-width: none; } }
+/* While the orbit is open the cards and chips step back so the enlarged tool reads (Close/Esc restores). */
+html.tool-orbit .channel-card, html.tool-orbit .tool-hotspots-wrap, html.tool-orbit .spec-grid > div { opacity: 0.22; transition: opacity 240ms ease; }
+html.tool-orbit .tool-hotspots-wrap { pointer-events: none; }
 .tool-inspect { padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(3, 7, 11, 0.72); }
 .tool-hotspots { display: flex; flex-wrap: wrap; gap: 8px; }
 .tool-hotspot { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 6px; background: rgba(3, 7, 11, 0.5); color: var(--sand); font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; transition: border-color 200ms ease, background 200ms ease; }
