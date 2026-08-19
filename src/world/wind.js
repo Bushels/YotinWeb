@@ -10,7 +10,7 @@ export function buildWind({ count = 300, tier = 'high' } = {}) {
   // Streaks, not tiles (round 3: 0.16 x 0.035 additive bars read as confetti over grass and rock): long thin planes
   // with a comet-tail alpha, NORMAL blending so the sand -> ember ramp shows over bright surfaces, spawned only in
   // the air over the lease (pad + road + the near grass), never in front of the cut faces.
-  const geom = new THREE.PlaneGeometry(0.9, 0.022);
+  const geom = new THREE.PlaneGeometry(0.55, 0.018);
   const mat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.NormalBlending, toneMapped: false, side: THREE.DoubleSide });
   const uniforms = { uTime: { value: 0 }, uWind: { value: 0 }, uCamY: { value: 10 }, uPointer: { value: new THREE.Vector3(0, -99, 0) }, uSand: { value: new THREE.Color('#e8dcc8') }, uEmber: { value: new THREE.Color('#f27622') } };
   mat.customProgramCacheKey = () => 'wind-motes';
@@ -42,7 +42,7 @@ export function buildWind({ count = 300, tier = 'high' } = {}) {
           vA = edge * clamp(uWind * 1.4, 0.0, 1.0) * (0.35 + 0.65 * aSeed.y) * smoothstep(-0.5, 2.5, uCamY);
           vY = wp.y;
           // orient the stroke along the wind (x) with a little tilt
-          vec3 p = position; p.x *= (0.5 + 0.7 * aSeed.y) * (0.6 + 0.4 * uWind); // length tracks speed (≤ ~1.1 units)
+          vec3 p = position; p.x *= (0.45 + 0.95 * aSeed.y) * (0.6 + 0.4 * uWind); // length varies stroke to stroke so they never read as ruled speed lines
           vU = uv.x;
           transformed = wp + p; // strokes are pre-oriented planes; parent handles nothing else
         }`);
@@ -52,7 +52,7 @@ export function buildWind({ count = 300, tier = 'high' } = {}) {
         float ramp = smoothstep(-0.2, 0.9, vY);      // sand at the ground, ember as it lifts
         float tail = smoothstep(0.0, 0.35, vU) * (1.0 - smoothstep(0.75, 1.0, vU)); // comet tail
         diffuseColor.rgb = mix(uSand, uEmber, ramp * 0.7);
-        diffuseColor.a = vA * 0.5 * tail;`);
+        diffuseColor.a = vA * 0.34 * tail;`);
   };
   const mesh = new THREE.InstancedMesh(geom, mat, Math.max(1, count));
   mesh.name = 'wind-motes';
@@ -67,7 +67,7 @@ export function buildWind({ count = 300, tier = 'high' } = {}) {
     dummy.rotation.set(0, 0, 0); // all strokes parallel to the -x flow
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
-    seeds[i * 3] = rnd(); seeds[i * 3 + 1] = rnd(); seeds[i * 3 + 2] = 0.35 + rnd() * 1.4;
+    seeds[i * 3] = rnd(); seeds[i * 3 + 1] = rnd(); seeds[i * 3 + 2] = 0.22 + rnd() * 0.95; // hug the ground: wind over a lease, not bars in mid-air
   }
   mesh.count = count;
   mesh.instanceMatrix.needsUpdate = true;
