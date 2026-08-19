@@ -6,7 +6,9 @@
 //   · adds "Download schematic" beside Send / Copy once the verdict renders — a 1200 by 630 title-block PNG drawn
 //     client-side from the normalized state and saved through a temporary <a download>. Nothing leaves the page.
 import '../styles/fit.css';
-import { createWellBuilder } from '../world/wellBuilder.js';
+// wellBuilder is a world module: imported dynamically once the world is live so the stills path never
+// requests a world-chunk byte (spec §6, reduced-motion contract).
+let createWellBuilder = null;
 
 const CAPTION = {
   lift: { pcp: 'PCP drive head at surface', rod: 'beam pump at surface', esp: 'ESP — wellhead only at surface', flow: 'flowing well — wellhead only' },
@@ -160,7 +162,7 @@ export function mountFit() {
 
   // --- world side -------------------------------------------------------------------------------------------
   function ensureBuilder() {
-    if (!builder && world && world.island) {
+    if (!builder && world && world.island && createWellBuilder) {
       try { builder = createWellBuilder(world.island, world.THREE || null, { scene: world.scene }); } catch (e) { builder = null; }
     }
     return builder;
@@ -179,9 +181,12 @@ export function mountFit() {
   document.addEventListener('world:first-frame', () => {
     world = window.__yotinWorld || null;
     if (!world) return;
-    const st = world.state;
-    setActive(Boolean(st && st.index === 6));
-    applyWorld();
+    import('../world/wellBuilder.js').then((m) => {
+      createWellBuilder = m.createWellBuilder;
+      const st = world.state;
+      setActive(Boolean(st && st.index === 6));
+      applyWorld();
+    });
   });
   document.addEventListener('world:chapter', (e) => { setActive(Boolean(e.detail && e.detail.id === 'fit')); });
 

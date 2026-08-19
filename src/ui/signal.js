@@ -3,7 +3,6 @@
 // closes (tabular settle, no scramble); the conductive-bed chip on the seal; the probe on rock (click/tap or
 // 200 ms dwell — never a travelling pointer); and the logomark receiving the signal.
 import '../styles/signal.css';
-import { createCircuit } from '../world/circuit.js';
 
 export function mountSignal() {
   const stage = document.querySelector('[data-signal-stage]');
@@ -68,8 +67,10 @@ export function mountSignal() {
     world && world.requestRender();
   }
 
-  function attach(w) {
+  async function attach(w) {
     world = w;
+    // world module: dynamic import so the stills path never requests a world-chunk byte (spec §6)
+    const { createCircuit } = await import('../world/circuit.js');
     circuit = createCircuit(w.island, w.THREE);
     const I = w.interactions;
     const gate = [[2.6, 4.2]];
