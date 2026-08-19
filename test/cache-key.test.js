@@ -41,7 +41,9 @@ describe('cache keys', () => {
 
   test('index.html poster preload and <img> share one URL (same cache key)', () => {
     const html = pages[0].html;
-    const urls = [...new Set([...html.matchAll(/["'](\/assets\/wellfi-island-r3f-poster\.webp[^"']*)["']/g)].map((m) => m[1]))];
+    // The chapter-0 still IS the poster (spec §6): preload and <img> must reference the same single URL.
+    const urls = [...new Set([...html.matchAll(/["'](\/assets\/stills\/ch0\.webp[^"']*)["']/g)].map((m) => m[1]))];
     assert.equal(urls.length, 1, 'poster referenced with different keys: ' + urls.join(' | '));
+    assert.ok(!/wellfi-island-r3f-poster\.webp/.test(html), 'legacy poster still referenced in index.html');
   });
 });

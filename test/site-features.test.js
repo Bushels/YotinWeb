@@ -28,9 +28,10 @@ describe('Yotin website structure & feature presence', () => {
   });
 
   test('hero section contains headline, key metrics, and WellFi poster', () => {
-    assert.match(html, /<h1 id="hero-title"[^>]*>Know the<br>Unknown/i);
+    assert.match(html, /<h1 id="hero-title"[^>]*aria-label="Know the Unknown\."/i); // word-mask markup keeps the accessible name whole
+    assert.match(html, /<span>Know<\/span>[\s\S]*<span>the<\/span>[\s\S]*<span>Unknown<span class="dot">\.<\/span><\/span>/);
     assert.match(html, /160\+ Installed/i); // metric (spec §0: "160+")
-    assert.match(html, /assets\/wellfi-island-r3f-poster\.webp/);
+    assert.match(html, /\/assets\/stills\/ch0\.webp/); // the chapter-0 still is the poster (one URL, spec §6)
   });
 
   test('live R3F hero has visible motion and pointer parallax without trapping touch scroll', () => {

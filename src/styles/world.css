@@ -67,6 +67,26 @@ html.world-on .qualifier { background: rgba(3, 7, 11, 0.9); }
 
 /* Rail styles live in src/styles/rail.css (imported by src/ui/rail.js). */
 
+/* Chapter 0: hero H1 word-mask reveal (the only word-mask on the page; accessible name lives on aria-label). */
+.hero-message h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1.02; }
+.hero-message h1 .w > span { display: inline-block; transform: translateY(0); }
+.hero-message h1 .dot { color: var(--ember); }
+html.world-on .hero-message h1 .w > span { animation: word-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+html.world-on .hero-message h1 .w:nth-child(1) > span { animation-delay: 120ms; }
+html.world-on .hero-message h1 .w:nth-child(2) > span { animation-delay: 192ms; }
+html.world-on .hero-message h1 .w:nth-child(4) > span { animation-delay: 264ms; }
+@keyframes word-rise { from { transform: translateY(110%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .hero-message h1 .w > span { animation: none !important; } }
+
+/* Chapter 5: the rise band — a transparent sticky viewport over the world; the paper panel takes the lower stack. */
+.rise-band { display: none; }
+html.world-on .company-section { background: transparent; padding-top: 0; }
+html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; }
+html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
+html.world-on .rise-caption span:last-child { color: var(--ember); }
+html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(48px, 6vw, 88px); padding-bottom: clamp(48px, 6vw, 88px); position: relative; z-index: 1; }
+@media (max-height: 560px) { html.world-on .rise-band { height: 36vh; } }
+
 /* Reduced-motion / stills path: sections keep their own backgrounds; the world never loads. */
 html.stills-on #world { display: none; }
 

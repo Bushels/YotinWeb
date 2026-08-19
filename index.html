@@ -33,7 +33,7 @@
   <link rel="preconnect" href="https://mpsgroup.energy">
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
-  <link rel="preload" as="image" href="/assets/wellfi-island-r3f-poster.webp?v=20260723-4" fetchpriority="high">
+  <link rel="preload" as="image" href="/assets/stills/ch0.webp" fetchpriority="high">
   <link rel="stylesheet" href="/styles.css">
 
   <!--
@@ -290,10 +290,10 @@
         >
           <img
             class="hero-poster"
-            src="/assets/wellfi-island-r3f-poster.webp?v=20260723-4"
+            src="/assets/stills/ch0.webp"
             alt=""
-            width="1920"
-            height="1080"
+            width="1600"
+            height="900"
             fetchpriority="high"
             decoding="async"
             aria-hidden="true"
@@ -307,7 +307,7 @@
         <div class="hero-copy">
           <div class="hero-message">
             <img class="hero-wordmark" src="/assets/wellfi-logo.webp" alt="WellFi" width="868" height="191" fetchpriority="high" decoding="async" data-hero-step>
-            <h1 id="hero-title" data-hero-step>Know the<br>Unknown<span>.</span></h1>
+            <h1 id="hero-title" data-hero-step aria-label="Know the Unknown."><span class="w" aria-hidden="true"><span>Know</span></span> <span class="w" aria-hidden="true"><span>the</span></span><br><span class="w" aria-hidden="true"><span>Unknown<span class="dot">.</span></span></span></h1>
             <!-- The scene already shows pressure, temperature and vibration, so
                  the copy implies the channels rather than listing them again. -->
             <p class="hero-lede" data-hero-step>Every well is already telling you what is happening downhole. WellFi is how you hear it — wireless, no cable, no dedicated trip. Run it on a new completion, a planned changeout, or any producer worth watching.</p>
@@ -638,6 +638,11 @@
     </section>
 
     <section class="company-section" id="company" aria-labelledby="company-title">
+      <!-- Chapter 5 rise band (spec §4 row 5): the camera rises through the surface into the wind while this
+           transparent sticky band holds the viewport; the paper panel below takes the lower stack. -->
+      <div class="rise-band" data-rise-band>
+        <p class="rise-caption" data-motion="rise"><span>Two unseen fields.</span> <span>One visual language.</span></p>
+      </div>
       <div class="shell company-grid">
         <div>
           <p class="eyebrow eyebrow-ink" data-motion="rise">ABOUT YOTIN</p>
@@ -696,7 +701,13 @@
         that always says yes is a lead form with extra steps, and this audience
         spots that immediately. The 150 °C ceiling is a real product limit.
       -->
-      <div class="shell">
+      <div class="shell fit-shell">
+        <!-- Chapter 6 stage (spec §4 row 6): a transparent reserve the live well shows through — a right column
+             ≥ 1100 px, a 40 vh sticky band above the questions below that (src/styles/fit.css). The caption is
+             the accessible channel for the world's response: masked, because it is derived from answers
+             (words only, never a typed figure — src/ui/fit.js). -->
+        <div class="fit-stage" data-fit-stage aria-hidden="true" data-clarity-mask="true"></div>
+        <p class="fit-caption" data-fit-caption data-clarity-mask="true" aria-live="polite" hidden></p>
         <section class="qualifier" aria-labelledby="qualifier-title" data-qualifier hidden>
           <div class="qualifier-intro">
             <p class="eyebrow">60-second check</p>

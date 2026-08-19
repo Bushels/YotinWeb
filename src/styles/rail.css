@@ -50,3 +50,7 @@ html.world-on .rail { display: flex; }
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }
 @media (max-width: 1100px) { html.world-on .rail { display: none; } }
 @media (prefers-reduced-motion: reduce) { .rail *, .rail-tally, .rail-legend { transition: none !important; } }
+
+/* Short viewports: keep the rail clear of the motion toggle (bottom-left fixed layer). */
+@media (max-height: 720px) { .rail-legend { display: none; } }
+@media (max-height: 600px) { .rail-tally { display: none; } }
