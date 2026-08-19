@@ -1,0 +1,146 @@
+/* Stills path (spec §7): seven pre-rendered chapter stills in a fixed layer behind the DOM. Active under
+   html.stills-on (reduced motion / Save-Data / tier 0 / no WebGL2 / boot failure) and, after the opt-in, under
+   html.world-optin until the world's first frame paints. Bundled with the main CSS, so the capture helper class
+   (html.stills-capture) is available to scripts/stills.mjs in world mode too. */
+
+.stills {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  background: var(--void);
+  pointer-events: none;
+  overflow: hidden;
+}
+html.stills-on .stills,
+html.world-optin .stills { display: block; }
+html.world-live .stills {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 800ms ease, visibility 0s linear 800ms;
+}
+html.world-lost .stills { opacity: 1; visibility: visible; transition: none; }
+
+.stills-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 62% 50%;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.stills-img.is-current { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .stills-img { transition: none; }
+}
+@media (max-width: 820px) {
+  .stills-img { object-position: 50% 62%; }
+}
+
+/* Compositing under the stills — the same ledger as html.world-on in world.css (keep the two in step):
+   sections go transparent so the still shows through; local scrims keep copy ≥ 4.5:1. */
+html.stills-on body,
+html.world-optin body { position: relative; }
+html.stills-on main, html.stills-on .site-footer,
+html.world-optin main, html.world-optin .site-footer { position: relative; z-index: 1; }
+
+html.stills-on .hero,
+html.stills-on .wellfi-section,
+html.stills-on .drill-section,
+html.stills-on .insight-section,
+html.stills-on .faq-section,
+html.stills-on .contact-section,
+html.stills-on .site-footer { background: transparent; }
+
+/* The legacy hero scene (R3F poster slot) would put a second island over the chapter-0 still. */
+html.stills-on .hero-scene,
+html.world-optin .hero-scene { display: none; }
+
+html.stills-on .hero-copy,
+html.stills-on .section-intro,
+html.stills-on .channel-head,
+html.stills-on .journey-list > li,
+html.stills-on .insight-head,
+html.stills-on .portal-note,
+html.stills-on .drill-fallback,
+html.stills-on .faq-section .shell,
+html.stills-on .contact-grid > div { position: relative; }
+html.stills-on .section-intro::before,
+html.stills-on .insight-head::before,
+html.stills-on .drill-fallback-head::before,
+html.stills-on .contact-grid > div:first-child::before {
+  content: "";
+  position: absolute;
+  inset: -24px -28px;
+  z-index: -1;
+  border-radius: 6px;
+  background: rgba(3, 7, 11, 0.55);
+}
+html.stills-on .faq-section .shell { background: rgba(3, 7, 11, 0.92); border-radius: 8px; padding-top: 32px; padding-bottom: 32px; }
+html.stills-on .channel-card, html.stills-on .spec-grid > div { background: rgba(3, 7, 11, 0.82); }
+html.stills-on .journey-list > li { background: rgba(3, 7, 11, 0.6); border-radius: 6px; padding: 18px 20px; }
+html.stills-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.82); }
+html.stills-on .qualifier { background: rgba(3, 7, 11, 0.9); }
+
+/* Forced colours: the still is decoration; the text carries everything. */
+@media (forced-colors: active) {
+  .stills { display: none !important; }
+}
+
+/* Same reserved left gutter as the world path (rail.css) so the layout — and the copy safe zones the stills
+   were composed for — match between the two paths. */
+@media (min-width: 1101px) { html.stills-on main { padding-left: 196px; } }
+
+/* "Show the 3D world" — the single opt-in near the chapter-0 still: bottom-right corner of the hero grid,
+   mirroring the scroll cue. Sand ring, mono, ≥ 44 px hit target. */
+.stills-optin {
+  position: absolute;
+  right: var(--pad);
+  bottom: clamp(28px, 5vh, 48px);
+  z-index: 2;
+  margin: 0;
+}
+.stills-optin-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(3, 7, 11, 0.55);
+  color: var(--sand);
+  font: 500 12px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease;
+}
+.stills-optin-button::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--sand);
+  flex: none;
+}
+.stills-optin-button:hover { border-color: var(--sand); color: var(--white); }
+.stills-optin-button:active { transform: translateY(1px); }
+.stills-optin-button:disabled, .stills-optin-button.is-loading { cursor: progress; opacity: 0.7; }
+.stills-optin-button.is-loading::before { border-color: var(--ember); background: var(--ember); }
+
+/* Capture helper for scripts/stills.mjs: hide every DOM layer, keep layout (visibility, not display — the
+   conductor's anchors depend on the document height). */
+html.stills-capture main,
+html.stills-capture .site-header,
+html.stills-capture .site-footer,
+html.stills-capture .rail,
+html.stills-capture .fixed-layer,
+html.stills-capture .chatfi-launcher,
+html.stills-capture .chatfi-panel,
+html.stills-capture .scroll-rail,
+html.stills-capture .skip-link,
+html.stills-capture .stills { visibility: hidden !important; }
