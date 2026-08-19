@@ -1,0 +1,102 @@
+// Assembles the world (spec §3): terrain (bench topology), forest, well system, the WellFi tool at the
+// open-hole anchor (the candle), the wellhead receiver ring, the lease pad, and the candle field. Exposes a
+// pure update(t, elapsed, channels) so the conductor drives it from chapter state. No bullet pulse; the 12 s
+// island cycle only shapes ambient light. Flow chevrons are sand-tinted at the surface and muted where the
+// chapter's `flow` channel says so.
+import * as THREE from 'three';
+import { COLORS } from './layout.js';
+import { cycleState } from './cycle.js';
+import { DEFAULT_WELLFI_VIEW, buildWellPaths, getWellFiPlacement } from './wellPath.js';
+import { createPulseMaterial } from './pulseMaterial.js';
+import { buildTerrain } from './terrain.js';
+import { buildForest } from './forest.js';
+import { buildWellSystem } from './wellSystem.js';
+import { buildWellFiTool } from './wellfiTool.js';
+import { buildLeasePad, buildSignalRelay } from './props.js';
+import { buildField } from './field.js';
+
+export const SAND_FLOW = '#d9c39a';
+
+export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) {
+  const root = new THREE.Group();
+  root.name = 'island';
+  const parallax = new THREE.Group();
+  parallax.name = 'parallax';
+  root.add(parallax);
+
+  const paths = buildWellPaths();
+  const placement = getWellFiPlacement(paths, view);
+
+  // Flow materials: sand-tinted chevrons (no cyan at the surface). Pulse (bullet) never set.
+  const casedFlow = createPulseMaterial({ base: { color: COLORS.casing, roughness: 0.35, metalness: 0.85, transparent: true, opacity: 1 }, pulseColor: SAND_FLOW, flowCount: 10, flowColor: SAND_FLOW });
+  const trunkFlow = createPulseMaterial({ base: { color: '#4a3826', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 12, flowColor: SAND_FLOW });
+  const legFlow = createPulseMaterial({ base: { color: '#43321f', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 8, flowColor: SAND_FLOW });
+
+  const terrain = buildTerrain();
+  const forest = buildForest(tier);
+  const well = buildWellSystem(paths, { cased: casedFlow.material, openHole: trunkFlow.material, lateral: legFlow.material });
+  const tool = buildWellFiTool(placement, { glowColor: COLORS.emGlow });
+  const relay = buildSignalRelay(paths.wellhead);
+  const pad = buildLeasePad();
+  const field = buildField({ collar: tool.group.position, tier });
+
+  parallax.add(terrain.group, forest.group, well.group, tool.group, relay.mesh, pad.group, field.mesh);
+
+  // Lights: golden hour at the surface, driven per frame by the chapter light channel × the ambient cycle.
+  const hemi = new THREE.HemisphereLight(COLORS.skyFill, COLORS.ground, 0.7);
+  const sun = new THREE.DirectionalLight(COLORS.goldenHour, 2.0);
+  sun.position.set(-8, 6.5, 6);
+  const rim = new THREE.DirectionalLight('#5e86c4', 0.22);
+  rim.position.set(8, 4, -7);
+  root.add(hemi, sun, rim);
+
+  const state = { cycle: cycleState(1.5), elapsed: 0, view };
+  const pointer = { x: 0, y: 0 };
+  let compact = false;
+
+  // channels: { light, cutaway, candle, field, wind, flow, fog }
+  function update(t, elapsed, channels, { reducedMotion = false } = {}) {
+    const s = cycleState(t);
+    state.cycle = s;
+    state.elapsed = elapsed;
+    const L = channels.light;
+    sun.intensity = 0.1 + 2.7 * L * (0.55 + 0.45 * s.sun);
+    hemi.intensity = 0.16 + 0.75 * L * (0.6 + 0.4 * s.sky) + 0.05;
+    rim.intensity = 0.2 + 0.5 * (1 - L);
+    const flow = channels.flow ?? L;
+    const flowTime = elapsed % 20;
+    casedFlow.setFlow(0.9 * flow, flowTime);
+    trunkFlow.setFlow(0.9 * flow, flowTime);
+    legFlow.setFlow(0.9 * flow, flowTime);
+    const cut = Math.max(channels.cutaway, 0);
+    casedFlow.setCutaway(1 - 0.72 * cut, cut < 0.05);
+    tool.update(channels.candle, cut);
+    field.setReveal(channels.field);
+    field.update(1 / 60, elapsed);
+    forest.uniforms.wind.value = channels.wind;
+    forest.uniforms.windTime.value = elapsed;
+    if (!reducedMotion) {
+      const idleY = Math.sin(elapsed * 0.18) * (compact ? 0.018 : 0.026);
+      const idleX = Math.sin(elapsed * 0.13 + 0.8) * (compact ? 0.006 : 0.01);
+      const targetY = pointer.x * 0.05, targetX = -pointer.y * 0.025;
+      parallax.rotation.y += (targetY + idleY - parallax.rotation.y) * 0.04;
+      parallax.rotation.x += (targetX + idleX - parallax.rotation.x) * 0.04;
+    }
+  }
+
+  function setView(nextView) {
+    if (nextView === state.view) return;
+    state.view = nextView;
+    const p = getWellFiPlacement(paths, nextView);
+    tool.setPlacement(p);
+    field.setCollar(tool.group.position);
+  }
+
+  return {
+    root, parallax, paths, placement, terrain, forest, well, tool, relay, pad, field,
+    lights: { hemi, sun, rim }, materials: { casedFlow, trunkFlow, legFlow },
+    state, pointer, update, setView,
+    setCompact(v) { compact = v; },
+    setForestPointer(x, z, strength) { forest.uniforms.pointer.value.set(x, strength, z); },
+  };
+}
