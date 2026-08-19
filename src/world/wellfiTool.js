@@ -60,7 +60,7 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
 
   // Halo sprite (additive) — the candle glow, camera-facing, cheap.
   const haloTex = makeHaloTexture();
-  const haloMat = new THREE.SpriteMaterial({ map: haloTex, color: glowColor, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+  const haloMat = new THREE.SpriteMaterial({ map: haloTex, color: glowColor, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, toneMapped: false });
   const halo = new THREE.Sprite(haloMat);
   halo.scale.setScalar(0.9); halo.position.x = L * 0.16; halo.renderOrder = 27; halo.name = 'collar-halo';
   group.add(halo);
@@ -74,8 +74,8 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
     sleeveMat.color.copy(base).multiplyScalar(0.35 + 1.4 * k);
     haloMat.opacity = Math.min(0.55, 0.05 + 0.5 * k);
     witnessMat.opacity = Math.min(0.75, 0.08 + 0.82 * k);
-    inspectionSleeveMat.opacity = 0.03 + 0.21 * focus;
-    const ringOpacity = 0.08 + 0.72 * focus;
+    inspectionSleeveMat.opacity = 0.03 + 0.1 * focus;
+    const ringOpacity = 0.06 + 0.3 * focus;
     ringMatA.opacity = ringOpacity; ringMatB.opacity = ringOpacity;
     light.intensity = 1.6 * k;
   }

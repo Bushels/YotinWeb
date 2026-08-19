@@ -75,13 +75,28 @@ export function bootWorld() {
   resize();
 
   // Pointer parallax (fine pointers) — additive micro-parallax only; the probe is a separate module.
+  // The same pointer parts the wind and the spruce at the surface (chapters 0 and 5): project it onto the
+  // ground plane y = 0 in parallax-local space.
+  const groundRay = new THREE.Raycaster(), groundNdc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), groundHit = new THREE.Vector3(), groundInv = new THREE.Matrix4();
+  let partStrength = 0, partTarget = 0;
   window.addEventListener('pointermove', (e) => {
     if (gate.coarse) return;
     rig.parallax.x = (e.clientX / window.innerWidth) * 2 - 1;
     rig.parallax.y = -((e.clientY / window.innerHeight) * 2 - 1);
     island.pointer.x = rig.parallax.x; island.pointer.y = rig.parallax.y;
+    const p = (lastState || conductor.getState()).exact;
+    if (p < 0.7 || (p > 4.7 && p < 5.8)) {
+      const r = canvas.getBoundingClientRect();
+      groundNdc.set(((e.clientX - r.left) / r.width) * 2 - 1, ((e.clientY - r.top) / r.height) * -2 + 1);
+      groundRay.setFromCamera(groundNdc, camera);
+      groundInv.copy(island.parallax.matrixWorld).invert();
+      const lr = groundRay.ray.clone().applyMatrix4(groundInv);
+      if (lr.intersectPlane(groundPlane, groundHit)) { partTarget = 1; island.setForestPointer(groundHit.x, groundHit.z, partStrength); }
+    } else partTarget = 0;
     dirty = true;
   }, { passive: true });
+  window.addEventListener('pointerleave', () => { partTarget = 0; });
+  document.addEventListener('world:candle', (e) => { island.state.candleBoost = Math.max(island.state.candleBoost, (e.detail && e.detail.boost) || 1); dirty = true; });
 
   // Formation legend twins → light the stratum (emissive lift on the band's shared material).
   const stratumMats = new Map();
@@ -120,6 +135,9 @@ export function bootWorld() {
     const p = st.smooth;
     const w = worldAt(p);
     interactions.update();
+    // spring the parting strength toward its target so the wind/spruce ease in and out
+    partStrength += (partTarget - partStrength) * (1 - Math.exp(-4 * dt));
+    if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
     rig.apply(poseProgress(p), dt, camera.aspect);
     island.update(elapsed % 12, elapsed, w);
     scene.fog.density = (w.fog || 0) * 0.6;

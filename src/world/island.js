@@ -14,6 +14,7 @@ import { buildWellSystem } from './wellSystem.js';
 import { buildWellFiTool } from './wellfiTool.js';
 import { buildLeasePad, buildSignalRelay } from './props.js';
 import { buildField } from './field.js';
+import { buildWind } from './wind.js';
 
 export const SAND_FLOW = '#d9c39a';
 
@@ -39,8 +40,9 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   const relay = buildSignalRelay(paths.wellhead);
   const pad = buildLeasePad();
   const field = buildField({ collar: tool.group.position, tier });
+  const wind = buildWind({ tier });
 
-  parallax.add(terrain.group, forest.group, well.group, tool.group, relay.mesh, pad.group, field.mesh);
+  parallax.add(terrain.group, forest.group, well.group, tool.group, relay.mesh, pad.group, field.mesh, wind.mesh);
 
   // Lights: golden hour at the surface — low, raking key from the west so long shadows cross the strata and
   // the pad owns the brightest non-sky pixel (spec §14.2). Driven per frame by the chapter light channel ×
@@ -65,7 +67,7 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     // the surface plane (topsoil top face) receives; strata already do
   }
 
-  const state = { cycle: cycleState(1.5), elapsed: 0, view };
+  const state = { cycle: cycleState(1.5), elapsed: 0, view, candleBoost: 0 };
   const pointer = { x: 0, y: 0 };
   let compact = false;
 
@@ -90,6 +92,9 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     field.update(1 / 60, elapsed);
     forest.uniforms.wind.value = channels.wind;
     forest.uniforms.windTime.value = elapsed;
+    wind.update(elapsed, channels.wind);
+    // candle boost from the qualifier verdict (world:candle) decays on its own
+    if (state.candleBoost > 0) { state.candleBoost = Math.max(0, state.candleBoost - 0.004); tool.update(Math.min(1, channels.candle + state.candleBoost), cut); }
     if (!reducedMotion) {
       const idleY = Math.sin(elapsed * 0.18) * (compact ? 0.018 : 0.026);
       const idleX = Math.sin(elapsed * 0.13 + 0.8) * (compact ? 0.006 : 0.01);
@@ -108,10 +113,10 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   }
 
   return {
-    root, parallax, paths, placement, terrain, forest, well, tool, relay, pad, field,
+    root, parallax, paths, placement, terrain, forest, well, tool, relay, pad, field, wind,
     lights: { hemi, sun, rim }, materials: { casedFlow, trunkFlow, legFlow },
     state, pointer, update, setView,
     setCompact(v) { compact = v; },
-    setForestPointer(x, z, strength) { forest.uniforms.pointer.value.set(x, strength, z); },
+    setForestPointer(x, z, strength) { forest.uniforms.pointer.value.set(x, strength, z); wind.setPointer(x, z, strength); },
   };
 }
