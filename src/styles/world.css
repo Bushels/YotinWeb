@@ -314,3 +314,10 @@ html.world-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color:
 @media (max-width: 820px) {
   html.world-on .drill-fallback ul { grid-template-columns: minmax(0, 1fr); } /* one column: a 3-up grid widened the document at 390 (round 3; placed after the desktop rule it overrides) */
 }
+
+/* Small finishes from the review P2s: the string-valued spec tile stays on one line; the rail legend never wraps;
+   a placed reference says so; the X-ray toggle shows its pressed state. */
+html.world-on .spec-grid dd.spec-output-value { white-space: nowrap; font-size: clamp(20px, 2.1vw, 30px); }
+.rail-legend-item { white-space: nowrap; font-size: 10px; }
+.circuit-ref[aria-pressed="true"]::after { content: "· placed"; margin-left: 6px; color: var(--sand-mute, #b3aa9a); letter-spacing: 0.04em; }
+.tool-secondary[aria-pressed="true"] { background: rgba(232, 220, 200, 0.14); border-color: var(--sand); color: var(--sand); }
