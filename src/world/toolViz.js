@@ -14,8 +14,10 @@ export const EMBER = '#f27622';
 export const FLOW_TINTS = { light: '#e9dcc0', heavy: '#d9c39a', gas: '#c9d4da', thermal: '#d9c39a' };
 export const FLOW_STEP = '#f0e6d2'; // "one step" lighter than the sand default
 
-const FLUID_U = { above: 0.3, pumpOff: 0.55 };
-const PUMP_U = 0.5;
+// Instrument on the part of the cased string that rides the FRONT FACE (z ≥ 5, u ≤ ~0.42): below that the string
+// is buried in rock and the level marker left the casing (round 4). Pump-off is AT the pump.
+const FLUID_U = { above: 0.18, pumpOff: 0.41 };
+const PUMP_U = 0.42;
 
 export function createToolViz(world) {
   const { island, camera, rig, scene } = world;
@@ -127,10 +129,20 @@ export function createToolViz(world) {
   // a short horizontal sand tick across the string at the level — the ring alone reads as a hairline at distance
   const levelTick = new THREE.Mesh(new THREE.PlaneGeometry(RADII.cased * 4.2, 0.026), levelMat);
   levelTick.name = 'fluid-level-tick'; levelTick.renderOrder = 31; levelTick.visible = false;
-  root.add(levelTick);
+  const earlierTick = new THREE.Mesh(new THREE.PlaneGeometry(RADII.cased * 4.2, 0.016), earlierMat);
+  earlierTick.name = 'fluid-level-earlier-tick'; earlierTick.renderOrder = 31; earlierTick.visible = false;
+  root.add(levelTick, earlierTick);
   let drawdown = 0, earlier = null, levelShown = false;
-  function setLevel(d) { drawdown = Math.min(1, Math.max(0, d)); const u = FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * drawdown; placeOnCased(levelRing, u); levelTick.position.copy(cased.getPointAt(u)); levelTick.position.z += 0.16; levelTick.visible = levelShown; }
-  function setEarlier(d) { earlier = d; if (d == null) { earlierRing.visible = false; return; } placeOnCased(earlierRing, FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * d); earlierRing.visible = levelShown; }
+  function placeRule(obj, u) {
+    // a horizontal rule across the string, lying in the front face plane (z = face + ε), perpendicular to the tangent
+    const pt = cased.getPointAt(u), t = cased.getTangentAt(u).normalize();
+    obj.position.copy(pt); obj.position.z += 0.16;
+    const across = new THREE.Vector3().crossVectors(t, new THREE.Vector3(0, 0, 1)).normalize(); // in-plane, perpendicular to the string
+    if (across.lengthSq() < 1e-6) across.set(1, 0, 0);
+    obj.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), across);
+  }
+  function setLevel(d) { drawdown = Math.min(1, Math.max(0, d)); const u = FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * drawdown; placeOnCased(levelRing, u); placeRule(levelTick, u); levelTick.visible = levelShown; }
+  function setEarlier(d) { earlier = d; if (d == null) { earlierRing.visible = false; earlierTick.visible = false; return; } const u = FLUID_U.above + (FLUID_U.pumpOff - FLUID_U.above) * d; placeOnCased(earlierRing, u); placeRule(earlierTick, u); earlierRing.visible = levelShown; earlierTick.visible = levelShown; }
   setLevel(0);
 
   // ---- benefit focus halo (one sprite, sand, additive, ≤ .5) ---------------------------------------------------
@@ -313,8 +325,8 @@ export function createToolViz(world) {
     else if (chapterActive.deployment) { island.materials.casedFlow.setCutaway(0.6, false); }
     ghost.visible = xray && chapterActive.deployment;
     // fluid level + pump warm (+ visibility gated to chapter 4)
-    pump.visible = levelRing.visible = chapterActive.deployment; levelTick.visible = chapterActive.deployment && levelShown;
-    earlierRing.visible = chapterActive.deployment && earlier != null;
+    pump.visible = chapterActive.deployment; levelRing.visible = false; earlierRing.visible = false; // the rules carry the level; the rings stay as proxies only
+    levelTick.visible = chapterActive.deployment && levelShown; earlierTick.visible = chapterActive.deployment && levelShown && earlier != null;
     pumpMat.emissiveIntensity = 0.12 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9; // a readable body before pump-off
     // drive head keeps turning at one constant rate (chapter 4)
     if (chapterActive.deployment && !world.paused && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
@@ -335,8 +347,15 @@ export function createToolViz(world) {
       let x = (_ndc.x * 0.5 + 0.5) * W, y = (-_ndc.y * 0.5 + 0.5) * H;
       if (behind) { x = W - x; y = H - y; }
       const minX = (W > 1100 ? 210 : 16) + 90, maxX = W - 110, minY = 84 + 40, maxY = H - 24;
-      const cx = Math.min(maxX, Math.max(minX, x)), cy = Math.min(maxY, Math.max(minY, y));
       const el = cap.el;
+      if (cap.side) {
+        // level labels: flush right of the rule's end, never clamped — hidden when the point is off-screen or behind
+        const off = behind || x < minX - 60 || x > maxX || y < minY || y > maxY;
+        el.style.visibility = off ? 'hidden' : '';
+        if (!off) el.style.transform = `translate(${(x + 42).toFixed(1)}px, ${y.toFixed(1)}px) translate(0, -50%)`;
+        continue;
+      }
+      const cx = Math.min(maxX, Math.max(minX, x)), cy = Math.min(maxY, Math.max(minY, y));
       el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px) translate(-50%, -100%)`;
       el.classList.toggle('is-clamped', cx !== x || cy !== y);
     }
@@ -356,13 +375,13 @@ export function createToolViz(world) {
     setLevel(d) { setLevel(d); pump_(); },
     get drawdown() { return drawdown; },
     setEarlier(d) { setEarlier(d); pump_(); },
-    setLevelShown(v) { levelShown = Boolean(v); earlierRing.visible = levelShown && earlier != null; levelTick.visible = levelShown && chapterActive.deployment; pump_(); },
+    setLevelShown(v) { levelShown = Boolean(v); levelTick.visible = levelShown && chapterActive.deployment; earlierTick.visible = levelShown && chapterActive.deployment && earlier != null; pump_(); },
     focusHalo(pos) { focusHalo(pos); pump_(); },
     liftBench(on) { benchTarget = on ? 1 : 0; pump_(); },
     brightenCut(on) { cutTarget = on ? 1 : 0; pump_(); },
     setSurfaceCaption(el) { surfaceCaption = el ? { el } : null; if (el) pump_(); },
     setStandoffCaption(el, obj) { standoffCaption = el && obj ? { el, obj } : null; if (el) pump_(); },
-    setLevelCaptions(nowEl, earlierEl) { levelCaption = nowEl ? { el: nowEl, obj: levelTick } : null; earlierCaption = earlierEl ? { el: earlierEl, obj: earlierRing } : null; pump_(); },
+    setLevelCaptions(nowEl, earlierEl) { levelCaption = nowEl ? { el: nowEl, obj: levelTick, side: true } : null; earlierCaption = earlierEl ? { el: earlierEl, obj: earlierTick, side: true } : null; pump_(); },
     setChapter(name, on) { chapterActive[name] = Boolean(on); world.requestRender(); pump_(); },
     points: {
       pump: () => pump.position.clone(),

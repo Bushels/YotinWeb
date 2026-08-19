@@ -60,8 +60,21 @@
     return document.querySelector(link.getAttribute("href"));
   }).filter(Boolean);
 
+  // With the world on, the conductor is the single source of truth for "where am I": the header follows the
+  // chapter event (round 4: the band-based observer lagged a section at one viewport and not another). The
+  // observer stays as the no-world fallback.
+  var chapterNav = { surface: null, descent: "#wellfi", tool: "#wellfi", signal: "#wellfi", deployment: "#benefits", yotin: "#company", fit: "#contact" };
+  var conductorDrivesNav = false;
+  document.addEventListener("world:chapter", function (e) {
+    var id = e && e.detail && e.detail.id;
+    if (!(id in chapterNav)) return;
+    conductorDrivesNav = true;
+    var href = chapterNav[id];
+    sectionLinks.forEach(function (link) { link.classList.toggle("is-active", Boolean(href) && link.getAttribute("href") === href); });
+  });
   if (sections.length && "IntersectionObserver" in window) {
     var sectionObserver = new IntersectionObserver(function (entries) {
+      if (conductorDrivesNav) return;
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
         sectionLinks.forEach(function (link) {

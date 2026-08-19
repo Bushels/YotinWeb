@@ -29,6 +29,7 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
       // data-anchor="top": the chapter arrives when the section's top reaches the header (the yôtin chapter: its
       // sticky rise band must be fully on screen at arrival, not already scrolled under the paper — round 2)
       if (el.dataset && el.dataset.anchor === 'top') return clamp(docTop(el) - headerH(), 0, max);
+      if (el.dataset && el.dataset.anchor === 'top-mobile' && innerWidth <= 820) return clamp(docTop(el) - headerH() - 36, 0, max); // phones: arrive at the top of the chapter's world band (under header + bar)
       const v = docTop(el) + el.offsetHeight * 0.5 - innerHeight * 0.5;
       return clamp(v, 0, max);
     });

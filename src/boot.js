@@ -1,6 +1,7 @@
 // World boot (spec §2): renderer, scene, the world, the scroll conductor and camera rig, world channels,
 // on-demand rendering with visibility pausing. Loaded only after the capability gate passes.
 import * as THREE from 'three';
+const _camWorld = new THREE.Vector3();
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildIsland } from './world/island.js';
 import { COLORS } from './world/layout.js';
@@ -140,7 +141,7 @@ export function bootWorld() {
     partStrength += (partTarget - partStrength) * (1 - Math.exp(-4 * dt));
     if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
     rig.apply(poseProgress(p), dt, camera.aspect);
-    island.wind.setCameraHeight(camera.position.y); // the wind is only seen from above ground (the rise surfaces into it)
+    island.wind.setCameraHeight(camera.getWorldPosition(_camWorld).y); // WORLD height (the camera sits inside the rig): the wind is only seen from above ground
     island.update(elapsed % 12, elapsed, w);
     scene.fog.density = (w.fog || 0) * 0.6;
     renderer.render(scene, camera);

@@ -4,7 +4,7 @@
 // The casing telescope reads 0.175 (surface collar) > 0.127 (7-in shell) > 0.100 (cased) > 0.086 > 0.070.
 import * as THREE from 'three';
 import { COLORS } from './layout.js';
-import { RADII } from './wellPath.js';
+import { RADII, Z_FACE as Z_FRONT } from './wellPath.js';
 import { mergeIndexed } from './forest.js';
 
 export function buildWellSystem(paths, mats) {
@@ -15,15 +15,18 @@ export function buildWellSystem(paths, mats) {
   const collarCurve = new THREE.CatmullRomCurve3([paths.cased.getPointAt(0), paths.cased.getPointAt(0.09), paths.cased.getPointAt(0.18)], false, 'catmullrom', 0.5);
   const surfaceCollar = new THREE.Mesh(
     new THREE.TubeGeometry(collarCurve, 12, RADII.surfaceCollar, 16, false),
-    new THREE.MeshStandardMaterial({ color: '#7d8a94', roughness: 0.42, metalness: 0.75, transparent: true, opacity: 0.55, depthWrite: false }),
+    new THREE.MeshStandardMaterial({ color: '#7d8a94', roughness: 0.42, metalness: 0.75, transparent: true, opacity: 0.35, depthWrite: false }),
   );
   surfaceCollar.name = 'surface-casing';
   group.add(surfaceCollar);
 
-  // 7-in intermediate shell — translucent so the production string reads inside it.
+  // 7-in intermediate shell — a matte ghost (not a specular glass barrel: it read as a syringe, round 4) so the
+  // production string reads inside it; it stops short of the heel so it never butts into the shoe.
+  const shellPts = []; for (let i = 0; i <= 48; i++) shellPts.push(paths.cased.getPointAt((i / 48) * 0.93));
+  const shellCurve = new THREE.CatmullRomCurve3(shellPts, false, 'catmullrom', 0.5);
   const shell = new THREE.Mesh(
-    new THREE.TubeGeometry(paths.cased, 64, RADII.casedShell, 12, false),
-    new THREE.MeshStandardMaterial({ color: COLORS.casingShell, transparent: true, opacity: 0.16, depthWrite: false, roughness: 0.3, metalness: 0.6 }),
+    new THREE.TubeGeometry(shellCurve, 60, RADII.casedShell, 12, false),
+    new THREE.MeshStandardMaterial({ color: COLORS.casingShell, transparent: true, opacity: 0.1, depthWrite: false, roughness: 0.85, metalness: 0.1 }),
   );
   shell.name = 'casing-shell';
   group.add(shell);
@@ -68,9 +71,9 @@ export function buildWellSystem(paths, mats) {
 
   // Casing shoe — the OD step engineers look for, at the heel.
   const shoe = new THREE.Mesh(
-    new THREE.TorusGeometry(RADII.cased * 1.2, 0.03, 10, 24),
-    new THREE.MeshStandardMaterial({ color: '#d7e3ea', roughness: 0.35, metalness: 0.85, emissive: new THREE.Color('#d7e3ea'), emissiveIntensity: 0.2 }),
-  ); // the OD step at the heel — readable at ch3 light (round 3); tighter than before so it does not read as a syringe flange
+    new THREE.TorusGeometry(RADII.cased * 1.1, 0.018, 8, 24),
+    new THREE.MeshStandardMaterial({ color: '#8a949b', roughness: 0.6, metalness: 0.6 }),
+  ); // the OD step at the heel — a dull thin step, not a glowing collar (round 4: the bright ring was the syringe flange)
   shoe.position.copy(paths.shoe);
   shoe.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), paths.cased.getTangentAt(1).normalize());
   shoe.name = 'shoe';
@@ -88,9 +91,20 @@ export function buildWellSystem(paths, mats) {
     const ring = new THREE.RingGeometry(r * 0.9, r * 1.25, 32);
     const disc = new THREE.CircleGeometry(r * 0.9, 32);
     // back wall (z = -0.6): the ring lies in that plane facing +z; left wall (x = -1.6): facing +x
-    [ring, disc].forEach((g) => { if (m.plane === 'left') { g.rotateY(Math.PI / 2); g.translate(m.point.x + 0.004, m.point.y, m.point.z); } else { g.translate(m.point.x, m.point.y, m.point.z + 0.004); } });
+    [ring, disc].forEach((g) => { if (m.plane === 'left') { g.rotateY(Math.PI / 2); g.translate(m.point.x + 0.004, m.point.y, m.point.z); } else if (m.plane === 'front') { g.translate(m.point.x, m.point.y, Z_FRONT + 0.004); } else { g.translate(m.point.x, m.point.y, m.point.z + 0.004); } });
     rimGeoms.push(ring); discGeoms.push(disc);
   });
+  // The buried run of the cased string (where it leaves the front face and travels through rock to the notch
+  // wall) is drawn as a ghost hairline that reads through the rock, so the eye can follow casing → mouth → heel
+  // (round 4: the hand-off did not read — the string vanished for ~400 px).
+  if (paths.casedBuried) {
+    const { u0, u1 } = paths.casedBuried;
+    const pts = []; const N = 24; for (let i = 0; i <= N; i++) pts.push(paths.cased.getPointAt(u0 + (u1 - u0) * (i / N)));
+    const ghostCurve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+    const ghost = new THREE.Mesh(new THREE.TubeGeometry(ghostCurve, 32, 0.014, 6, false), new THREE.MeshBasicMaterial({ color: '#d9cfbd', transparent: true, opacity: 0.38, depthTest: false, depthWrite: false, toneMapped: false }));
+    ghost.name = 'cased-ghost'; ghost.renderOrder = 22;
+    group.add(ghost);
+  }
   if (rimGeoms.length) {
     const rims = new THREE.Mesh(mergeIndexed(rimGeoms), mouthRimMat); rims.name = 'bore-mouth-rims';
     const discs = new THREE.Mesh(mergeIndexed(discGeoms), discMat); discs.name = 'bore-mouths-discs';

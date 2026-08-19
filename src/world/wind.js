@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { SLAB, PAD_RECT } from './layout.js';
 
 export function buildWind({ count = 300, tier = 'high' } = {}) {
-  if (tier === 'low') count = 0;
+  if (tier === 'low') count = 90; // fewer instances on phones (spec §4), not none
   // Streaks, not tiles (round 3: 0.16 x 0.035 additive bars read as confetti over grass and rock): long thin planes
   // with a comet-tail alpha, NORMAL blending so the sand -> ember ramp shows over bright surfaces, spawned only in
   // the air over the lease (pad + road + the near grass), never in front of the cut faces.

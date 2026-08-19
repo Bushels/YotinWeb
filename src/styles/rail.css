@@ -19,7 +19,7 @@ html.world-on .rail, html.stills-on .rail { display: flex; } /* the rail is DOM-
 /* Gutter ground (round 3): the rail must read at ≥ 4.5:1 over whatever stratum the risen world puts behind it, so
    the gutter gets a backdrop — a soft dark wash that fades out before the content column — not just a token. */
 @media (min-width: 1101px) {
-  html.world-on .rail::before, html.stills-on .rail::before { content: ""; position: fixed; top: 0; bottom: 0; left: 0; width: 196px; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgba(3, 7, 11, 0.9) 0, rgba(3, 7, 11, 0.9) 120px, rgba(3, 7, 11, 0) 196px); }
+  html.world-on .rail::before, html.stills-on .rail::before { content: ""; position: fixed; top: 0; bottom: 0; left: 0; width: 196px; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgba(3, 7, 11, 0.94) 0, rgba(3, 7, 11, 0.94) 120px, rgba(3, 7, 11, 0) 196px); }
 }
 html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform: none; }
 .rail > * { pointer-events: auto; }
@@ -39,7 +39,7 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-marker-up { background: #22D3EE; opacity: 0; box-shadow: 0 0 8px rgba(34, 211, 238, 0.7); transition: opacity 320ms ease, top 120ms linear; }
 .rail-marker-up.is-on { opacity: 1; }
 .rail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; height: 104px; }
-.rail-list li { color: rgba(179, 170, 154, 0.75); transition: color 240ms ease; white-space: nowrap; }
+.rail-list li { color: rgba(179, 170, 154, 0.92); transition: color 240ms ease; white-space: nowrap; } /* ≥ 5.7:1 over the washed casing on the stills path (round 4) */
 .rail-list li.is-lit { color: var(--sand); }
 .rail-tally.is-signal .rail-list li[data-tally="wellfi"].is-lit { color: #22D3EE; } /* cyan only while chapter 3 is the chapter */
 /* Provenance caption: a world caption, not a nav item — pinned in the gutter above the motion toggle so it survives
@@ -66,7 +66,8 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 @media (max-width: 1100px) {
   html.world-on .rail, html.stills-on .rail { display: flex; flex-direction: column; top: var(--header-h, 72px); left: 0; right: 0; width: auto; max-height: none; overflow: visible; gap: 0; z-index: 3; pointer-events: none; }
   .rail-chapters, .rail-tally, .rail-caption { display: none; }
-  .rail-bar { all: unset; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: rgba(3, 7, 11, 0.82); border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
+  html.world-on, html.stills-on { scroll-padding-top: calc(var(--header-h, 72px) + 36px); } /* anchor arrivals clear header + bar */
+  .rail-bar { all: unset; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: #03070b; /* opaque: never text over text (round 4 P0) */ border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
   .rail-bar-current { color: var(--ember); }
   .rail-bar-tally { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sand); }
   .rail-bar-hint { color: var(--sand-mute, #b3aa9a); }

@@ -97,12 +97,18 @@ export function buildWellPaths() {
   });
   // The cased string enters the notch through the x = -1.6 wall (spec §3: "name that bore mouth too") — the
   // hand-off the eye needs between the front-face casing and the heel (round 3).
+  let casedBuried = null;
   {
     const hit = crossing(cased, NOTCH.minX, 200, 'x');
     if (hit) boreMouths.push({ id: 'cased', plane: 'left', r: RADII.cased, ...hit });
+    // where the string leaves the front face (z < Z_FACE - r) and dives into rock: a rim there too, and the u-range
+    // of the buried run for the ghost hairline (round 4)
+    const dive = crossing(cased, Z_FACE - RADII.cased * 0.5, 200, 'z');
+    if (dive) boreMouths.push({ id: 'cased-dive', plane: 'front', r: RADII.cased, ...dive });
+    if (dive && hit) casedBuried = { u0: dive.u, u1: hit.u };
   }
 
-  return { cased, openHole, laterals, shoe, wellhead, wellfiTools, boreMouths };
+  return { cased, openHole, laterals, shoe, wellhead, wellfiTools, boreMouths, casedBuried };
 }
 
 export function getWellFiPlacement(paths, view) {

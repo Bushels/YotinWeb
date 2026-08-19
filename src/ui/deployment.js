@@ -76,7 +76,8 @@ export function mountDeployment() {
     const mkLabel = (text, cls) => { const el = document.createElement('p'); el.className = 'surface-caption level-caption ' + cls; el.textContent = text; el.hidden = true; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); return el; };
     const nowLabel = mkLabel('fluid level · now', 'is-now');
     const earlierLabel = mkLabel('earlier', 'is-earlier');
-    const showLabels = (on, withEarlier) => { nowLabel.hidden = !on; earlierLabel.hidden = !(on && withEarlier); viz.setLevelCaptions(on ? nowLabel : null, on && withEarlier ? earlierLabel : null); };
+    const wide = () => window.matchMedia('(min-width: 1101px)').matches; // on phones the range + its own caption carry now/earlier
+    const showLabels = (on, withEarlier) => { on = on && wide(); nowLabel.hidden = !on; earlierLabel.hidden = !(on && withEarlier); viz.setLevelCaptions(on ? nowLabel : null, on && withEarlier ? earlierLabel : null); };
     if (range) {
       viz.setLevel(lastReleased);
       I.register('fluid-level', { proxy: viz.levelRing, twin: range, chapters: DEPLOY_GATE, cursor: 'ns-resize', apply3D() {} });

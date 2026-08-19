@@ -41,29 +41,33 @@ export function createCircuit(island, THREE) {
   group.add(whRing, whProxy);
 
   // The loop: wellhead → stake along the ground, drawn only when both references are placed.
-  const loopGeom = new THREE.BufferGeometry();
-  const loopPts = new Float32Array(3 * 24);
-  loopGeom.setAttribute('position', new THREE.BufferAttribute(loopPts, 3));
-  const loopMat = new THREE.LineBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0, depthWrite: false });
-  const loop = new THREE.Line(loopGeom, loopMat);
+  // A thin sand tube (a 1 px GL line was invisible at any distance under a software renderer — round 4);
+  // its geometry is rebuilt when the stake moves and drawn progressively via drawRange.
+  const loopMat = new THREE.MeshBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false });
+  let loopGeom = new THREE.BufferGeometry();
+  const loop = new THREE.Mesh(loopGeom, loopMat);
   loop.visible = false; // drawn only once both references are placed
-  loop.frustumCulled = false;
+  loop.frustumCulled = false; loop.renderOrder = 23;
   group.add(loop);
+  const LOOP_SEGS = 24;
   function updateLoop() {
     const a = new THREE.Vector3(wellhead.x, 0.36, wellhead.z);
     const b = new THREE.Vector3(stake.position.x, 0.38, stake.position.z);
-    for (let i = 0; i < 24; i++) {
-      const t = i / 23;
+    const pts = [];
+    for (let i = 0; i <= LOOP_SEGS; i++) {
+      const t = i / LOOP_SEGS;
       const p = a.clone().lerp(b, t);
       p.y += Math.sin(t * Math.PI) * 0.12; // slight arc so it reads as a hairline in air, not a road stripe
-      loopPts[i * 3] = p.x; loopPts[i * 3 + 1] = p.y; loopPts[i * 3 + 2] = p.z;
+      pts.push(p);
     }
-    loopGeom.attributes.position.needsUpdate = true;
+    const next = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5), LOOP_SEGS, 0.012, 5, false);
+    loop.geometry = next; loopGeom.dispose(); loopGeom = next;
+    loopGeom.setDrawRange(0, Math.round(loopDraw * loopGeom.index.count));
   }
+  let loopDraw = 0; // 0..1 draw progress
   updateLoop();
 
   const state = { wellhead: false, ground: false, closed: false, dashes: false };
-  let loopDraw = 0; // 0..1 draw progress
   function set(next) {
     Object.assign(state, next);
     state.closed = state.wellhead && state.ground && sep > 0.06;
@@ -75,7 +79,7 @@ export function createCircuit(island, THREE) {
   function update(dt) {
     const target = state.closed ? 1 : 0;
     loopDraw += (target - loopDraw) * (1 - Math.exp(-4 * dt));
-    loopGeom.setDrawRange(0, Math.max(0, Math.round(loopDraw * 24)));
+    loopGeom.setDrawRange(0, Math.max(0, Math.round(loopDraw * loopGeom.index.count)));
     loopMat.opacity = 0.75 * Math.min(1, loopDraw * 1.4);
     loop.visible = loopDraw > 0.02;
   }

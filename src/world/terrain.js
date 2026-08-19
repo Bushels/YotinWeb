@@ -63,13 +63,26 @@ export function makeBeddingMaterial(color, roughness, freq, depth, phase, bump, 
         uniform vec3 uCorner; uniform float uCornerRadius; uniform float uBenchY;
         const float BED_FREQ = ${freq.toFixed(1)};
         const float BED_DEPTH = ${depth.toFixed(2)};
-        const float BED_PHASE = ${phase.toFixed(2)};`)
+        const float BED_PHASE = ${phase.toFixed(2)};
+        float vhash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float vnoise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(vhash(i), vhash(i + vec2(1.0, 0.0)), f.x), mix(vhash(i + vec2(0.0, 1.0)), vhash(i + vec2(1.0, 1.0)), f.x), f.y); }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
-        float bed = abs(sin(vBedWorld.y * BED_FREQ + BED_PHASE));
-        float line = smoothstep(0.45, 0.97, bed);
-        float lam = 0.5 + 0.5 * sin(vBedWorld.y * BED_FREQ * 0.31);
+        // Bedding that reads as rock, not corrugated siding (round 4): the bed phase drifts along strike with a cheap
+        // 2-octave value noise, amplitude varies bed to bed, and the lamination fades with screen-space density so it
+        // never aliases into a uniform stripe field at distance.
+        vec2 wp = vBedWorld.xz + vBedWorld.y * 0.37;
+        float n1 = vnoise(wp * 0.8), n2 = vnoise(wp * 3.1);
+        float warp = (n1 - 0.5) * 0.35 + (n2 - 0.5) * 0.12;
+        float amp = 0.55 + 0.45 * n1;
+        float y = vBedWorld.y + warp;
+        float bed = abs(sin(y * BED_FREQ + BED_PHASE));
+        float fw = fwidth(y * BED_FREQ);                    // how many radians one pixel spans
+        float atten = 1.0 - smoothstep(0.6, 2.2, fw);       // fade the lamination where beds are sub-pixel
+        float line = smoothstep(0.45, 0.97, bed) * atten * amp;
+        float lam = 0.5 + 0.5 * sin(y * BED_FREQ * 0.31 + n2 * 2.0);
         diffuseColor.rgb *= (1.0 - BED_DEPTH * line);
-        diffuseColor.rgb *= (0.90 + 0.18 * lam);
+        diffuseColor.rgb *= (0.92 + 0.14 * lam * atten);
         // contact darkening: inner notch corner + wall/bench junction (only below the cap, near the bench)
         float dCorner = length(vec2(vBedWorld.x - uCorner.x, vBedWorld.z - uCorner.z));
         float nearBench = 1.0 - smoothstep(0.0, 0.9, abs(vBedWorld.y - uBenchY));
