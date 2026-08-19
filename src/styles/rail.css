@@ -44,8 +44,13 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { opacity: 1; border-left-color: var(--sand); }
 .rail-legend-item:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 
-/* Over the paper section the rail needs its own ground. */
-.rail[data-chapter="yotin"] { background: rgba(3, 7, 11, 0.78); padding: 10px 10px 10px 0; border-radius: 6px; }
+/* Over the paper chapter the rail turns to ink on a paper-tinted ground: invisible on the paper itself, a light
+   card where it overlaps the rise band above it. (A dark box here read as a grey tombstone — round 1.) */
+.rail[data-chapter="yotin"] { background: rgba(245, 240, 232, 0.9); padding: 10px 10px 10px 0; border-radius: 6px; color: #1b1f24; }
+.rail[data-chapter="yotin"] .rail-chapters a, .rail[data-chapter="yotin"] .rail-list li, .rail[data-chapter="yotin"] .rail-legend-item, .rail[data-chapter="yotin"] .rail-caption { color: #1b1f24; border-left-color: rgba(27, 31, 36, 0.25); }
+.rail[data-chapter="yotin"] .rail-chapters a[aria-current="true"] { color: #9f470d; border-left-color: #9f470d; }
+.rail[data-chapter="yotin"] .rail-track { border-left-color: rgba(27, 31, 36, 0.3); }
+.rail[data-chapter="yotin"] .rail-marker-down { background: #1b1f24; }
 
 /* Reserved gutter: copy never enters the rail's column. */
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }
