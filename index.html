@@ -237,8 +237,12 @@
   <!-- The persistent world: one fixed canvas behind the semantic DOM (spec §2). Decorative — every word,
        control and claim lives in the DOM below. Hidden unless the capability gate stamps html.world-on. -->
   <div id="world" aria-hidden="true"><canvas tabindex="-1"></canvas></div>
+  <!-- Stills path (spec §7): seven pre-rendered chapter stills behind the DOM when the world does not load. Filled by src/ui/stills.js. -->
+  <div class="stills" data-stills aria-hidden="true"></div>
   <!-- Chapter rail: real anchors from first paint (spec §5). Filled by src/ui/rail.js. -->
   <nav id="rail" class="rail" aria-label="Chapters"></nav>
+  <!-- Fixed layer (spec §4 arbitration): the motion control (src/ui/motionToggle.js) and other fixed controls. -->
+  <div class="fixed-layer" data-fixed-layer></div>
 
   <header class="site-header" data-header>
     <div class="shell header-inner">
@@ -460,6 +464,40 @@
             <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 or 4-20 mA for the existing RTU or SCADA system.</p></div>
           </li>
         </ol>
+
+        <!--
+          Chapter 3 — the signal stage (spec §4 row 3, §12). Close the Circuit is a state machine, not a model:
+          one reference placed → "one point is not a measurement — voltage is a difference"; both → the loop
+          draws and the surface readout resolves; drag the stake back onto the wellhead → "no difference, no
+          reading". Digits appear for the first time here. Every value is representative. Nothing here is a
+          WellFi figure and no timing is implied.
+        -->
+        <div class="signal-stage" data-signal-stage data-chapter-ui="signal">
+          <div class="circuit" role="group" aria-label="Close the circuit — the surface reads a potential difference between two references">
+            <p class="circuit-lede">The receiver reads a difference between two points on the lease. Place both.</p>
+            <div class="circuit-refs">
+              <button type="button" class="circuit-ref" data-hotspot="ref-wellhead" aria-pressed="false"><span class="circuit-ref-tag">V₁</span> Wellhead reference</button>
+              <button type="button" class="circuit-ref" data-hotspot="ref-ground" aria-pressed="false"><span class="circuit-ref-tag">V₂</span> Remote ground reference</button>
+            </div>
+            <label class="circuit-stake" data-hotspot="stake">
+              <span>Reference separation <small>(qualitative — no distance is shown)</small></span>
+              <input type="range" min="0" max="100" value="60" step="1" aria-label="Reference separation along the lease road">
+            </label>
+            <p class="circuit-caption" data-circuit-caption aria-live="polite">One point is not a measurement — voltage is a difference.</p>
+          </div>
+          <div class="readout" data-readout aria-label="Surface readout — representative values, visual timing not representative">
+            <p class="readout-head"><span class="readout-diff" data-readout-diff>V₁ − V₂</span><span class="chip">representative values</span><span class="chip">visual timing not representative</span></p>
+            <ul class="readout-list">
+              <li><span>Pressure</span><b data-readout-value data-final="158" data-unit="kPa" data-decimals="0">— kPa</b></li>
+              <li><span>Temperature</span><b data-readout-value data-final="26" data-unit="°C" data-decimals="0">— °C</b></li>
+              <li><span>Vibration</span><b data-readout-value data-final="4.2" data-unit="mm/s RMS" data-decimals="1">— mm/s RMS</b></li>
+            </ul>
+            <p class="readout-foot"><span class="chip chip-out">MODBUS RS-485 / 4-20 mA</span></p>
+          </div>
+          <p class="seal-chip" data-seal-chip hidden data-source="Generic half-space skin-depth relation; see e.g. Wu et al. 2024, Geoenergy Sci. &amp; Eng. 233:212573 — not a WellFi figure">
+            δ ≈ 503·√(ρ/f) — δ [m], ρ [Ω·m], f [Hz] — generic half-space relation, not a WellFi figure. Conductive beds shorten the reach; placement matters.
+          </p>
+        </div>
       </div>
     </section>
 

@@ -9,13 +9,20 @@ import { gate } from './gate.js';
 import '../qualifier-logic.js';
 import '../main.js';
 import { mountRail } from './ui/rail.js';
+import { mountSignal } from './ui/signal.js';
+import { mountMotionToggle } from './ui/motionToggle.js';
+import { mountStills } from './ui/stills.js';
 
 mountRail();
+mountSignal();
+mountMotionToggle(); // always: applies the persisted motion choice before the world (or the stills) paint
+if (!gate.world) mountStills();
 
 if (gate.world) {
   import('./boot.js').then(({ bootWorld }) => bootWorld()).catch((err) => {
     document.documentElement.classList.remove('world-on');
     document.documentElement.classList.add('stills-on', 'world-failed');
+    mountStills(); // asset failure (spec §7): the stills take over
     if (typeof console !== 'undefined') console.warn('world failed to boot', err);
   });
 }
