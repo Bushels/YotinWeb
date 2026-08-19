@@ -1,0 +1,8 @@
+/* Probe cursor: additive ring, transform-only, native cursor untouched. */
+.probe { position: fixed; left: 0; top: 0; width: 28px; height: 28px; pointer-events: none; z-index: 4; opacity: 0; transition: opacity 160ms ease; will-change: transform; mix-blend-mode: screen; }
+.probe::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(232, 220, 200, 0.85); box-shadow: 0 0 0 1px rgba(3, 7, 11, 0.35); }
+.probe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 2px; margin: -1px 0 0 -1px; border-radius: 50%; background: rgba(232, 220, 200, 0.9); }
+.probe-arc { position: absolute; inset: 4px; border-radius: 50%; border: 1px solid transparent; border-top-color: transparent; transition: border-color 200ms ease; }
+.probe.is-field .probe-arc { border-top-color: #22D3EE; border-right-color: #22D3EE; transform: rotate(-45deg); }
+.probe.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce), (pointer: coarse), (max-width: 1099px) { .probe { display: none !important; } }
