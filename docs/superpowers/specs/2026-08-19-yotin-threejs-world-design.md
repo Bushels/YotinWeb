@@ -193,4 +193,10 @@ changed that the spec did not anticipate, and which is now binding:
    - the contact H1 repeating the hero's "Know the Unknown." (Fable: a contact headline of its own);
    - the approved ghost render staying as the chapter-4 figure (kept per §4; it now reads steel until X-ray/hover);
    - h2 second lines over the world are now **sand** (ember stays for eyebrows, CTAs, the hero's full stop and the paper italic) — two of three critics called solid-ember two-line headlines a 2016 landing-page tell; revert is one CSS rule in `src/styles/world.css` if you prefer the ember lines.
-9. **Accepted by the lead in round 1 (recorded in §6):** scroll length at measured (≈ 10 / 11 / 13.7 viewports) with the one-click conversion path; runtime caps re-baselined with the shadow pass counted (≤ 80 / 130 k desktop, ≤ 56 / 62 k phone) and asserted.
+9. **Open tension the loop surfaced three times, and your call (round 6):** §4 puts the chapter-0 copy in the left
+   46 % and the §13 addendum says the lease pad owns the brightest non-sky pixel — but at the authored hero angle
+   the pad projects at x ≈ 527 of 1366, i.e. behind the headline. Moving the pad clear needs a materially different
+   camera azimuth, and the hero's composition is the one frame every critic has praised in every round. Options:
+   (a) keep the hero as authored and drop the "pad is brightest" line for ch. 0 (my recommendation), (b) re-author
+   the hero angle, (c) move the copy right. Nothing else in the build depends on the answer.
+10. **Accepted by the lead in round 1 (recorded in §6):** scroll length at measured (≈ 10 / 11 / 13.7 viewports) with the one-click conversion path; runtime caps re-baselined with the shadow pass counted (≤ 80 / 130 k desktop, ≤ 56 / 62 k phone) and asserted.
