@@ -317,7 +317,7 @@ html.world-on .readout-list b, html.world-on .chip-out, html.world-on .tool-chip
 
 /* Chapter 3 step numbers: sand-on-ink, so saturated ember is reserved for the Close-the-Circuit control and
    cyan for the candle (round 2). */
-html.world-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color: var(--sand); border: 1px solid rgba(232, 220, 200, 0.35); }
+html.world-on .journey-icon span, html.stills-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color: var(--sand); border: 1px solid rgba(232, 220, 200, 0.35); } /* both paths look the same (round 5) */
 
 /* Phones: the local scrims' negative insets stay inside the viewport (a -28 px bleed on a flush block widened the
    document by 28 px — round 3). */

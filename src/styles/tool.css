@@ -84,7 +84,7 @@ html.tool-orbit.tool-orbit-drag main { cursor: grabbing; }
 .fluid-level input[type="range"] { display: block; width: 100%; margin-top: 8px; accent-color: var(--ember); min-height: 44px; cursor: pointer; }
 .fluid-level input[type="range"]:focus-visible { outline: 1px solid var(--ember); outline-offset: 4px; }
 .fluid-level-ends { display: flex; justify-content: space-between; margin-top: 2px; font: 500 10px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
-.fluid-level-trend { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.fluid-level-trend { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; }
 .fluid-level-trend .tool-caption { margin: 0; }
 .fluid-level-trend[hidden] { display: none; }
 
