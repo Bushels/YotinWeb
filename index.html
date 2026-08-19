@@ -364,7 +364,7 @@
           <p data-motion="rise">Five channels · one tool</p>
         </div>
         <div class="channel-grid" data-channels>
-          <article class="channel-card" data-channel>
+          <article class="channel-card" data-channel data-hotspot="ch-01" data-icon-anim role="button" tabindex="0">
             <span class="channel-sweep" aria-hidden="true"></span>
             <div class="channel-top">
               <span class="channel-icon"><i class="ph ph-gauge" aria-hidden="true"></i></span>
@@ -372,8 +372,10 @@
             </div>
             <h4>Pressure</h4>
             <p>Pump-intake and reservoir response pressure at the lift point.</p>
+            <p class="channel-hud" aria-hidden="true"><span class="channel-hud-value" data-hud-value data-final="158" data-unit="kPa" data-decimals="0">— kPa</span><span class="tool-chip">representative values</span></p>
+            <span class="sr-only">Representative value: ≈ 158 kPa (representative values, not a live reading).</span>
           </article>
-          <article class="channel-card" data-channel>
+          <article class="channel-card" data-channel data-hotspot="ch-02" data-icon-anim role="button" tabindex="0">
             <span class="channel-sweep" aria-hidden="true"></span>
             <div class="channel-top">
               <span class="channel-icon"><i class="ph ph-thermometer-simple" aria-hidden="true"></i></span>
@@ -381,8 +383,10 @@
             </div>
             <h4>Temperature</h4>
             <p>Temperature trends at the tool depth and operating interval.</p>
+            <p class="channel-hud" aria-hidden="true"><span class="channel-hud-value" data-hud-value data-final="26" data-unit="°C" data-decimals="0">— °C</span><span class="tool-chip">representative values</span></p>
+            <span class="sr-only">Representative value: ≈ 26 °C (representative values, not a live reading).</span>
           </article>
-          <article class="channel-card" data-channel>
+          <article class="channel-card" data-channel data-hotspot="ch-03" data-icon-anim role="button" tabindex="0">
             <span class="channel-sweep" aria-hidden="true"></span>
             <div class="channel-top">
               <span class="channel-icon"><i class="ph ph-waveform" aria-hidden="true"></i></span>
@@ -390,8 +394,10 @@
             </div>
             <h4>Vibration</h4>
             <p>Pump and string vibration changes before abnormal operation escalates.</p>
+            <p class="channel-hud" aria-hidden="true"><span class="channel-hud-value" data-hud-value data-final="4.2" data-unit="mm/s RMS" data-decimals="1">— mm/s RMS</span><span class="tool-chip">representative values</span></p>
+            <span class="sr-only">Representative value: ≈ 4.2 mm/s RMS (representative values, not a live reading).</span>
           </article>
-          <article class="channel-card" data-channel>
+          <article class="channel-card" data-channel data-hotspot="ch-04" data-icon-anim role="button" tabindex="0">
             <span class="channel-sweep" aria-hidden="true"></span>
             <div class="channel-top">
               <span class="channel-icon"><i class="ph ph-drop-half" aria-hidden="true"></i></span>
@@ -399,8 +405,10 @@
             </div>
             <h4>Fluid Composition</h4>
             <p>Produced-fluid composition changes from the tool location or paired layouts.</p>
+            <p class="channel-hud" aria-hidden="true"><span class="channel-hud-value" data-hud-value data-final="38" data-unit="% water cut" data-decimals="0">— % water cut</span><span class="tool-chip">representative values</span></p>
+            <span class="sr-only">Representative value: ≈ 38 % water cut (representative values, not a live reading).</span>
           </article>
-          <article class="channel-card" data-channel>
+          <article class="channel-card" data-channel data-hotspot="ch-05" data-icon-anim role="button" tabindex="0">
             <span class="channel-sweep" aria-hidden="true"></span>
             <div class="channel-top">
               <span class="channel-icon"><i class="ph ph-trend-up" aria-hidden="true"></i></span>
@@ -408,37 +416,63 @@
             </div>
             <h4>Flow Insight</h4>
             <p>Interval behaviour interpreted from paired pressure and fluid-condition trends.</p>
+            <p class="channel-hud" aria-hidden="true"><span class="channel-hud-value" data-hud-value data-final="0.96" data-unit="× baseline" data-decimals="2">— × baseline</span><span class="tool-chip">representative values</span></p>
+            <span class="sr-only">Representative value: ≈ 0.96 × baseline (representative values, not a live reading).</span>
           </article>
         </div>
 
 
+        <!--
+          Chapter 2 — tool controls (spec §4 row 2, §5, §12). The four chip-buttons are the visible twins of the
+          tool's named volumes (collar · gap · sensors · battery); "Inspect tool" is the chapter's one invited
+          action — a contained orbit whose pose persists until Close or Esc. Every value shown near the tool is
+          representative; no number lives in the 3D scene. Schematic — see the tool figure below (#insight).
+        -->
+        <div class="tool-controls" data-tool-controls>
+          <div class="tool-hotspots-wrap">
+            <div class="tool-hotspots" role="group" aria-label="Tool volumes — schematic">
+              <button type="button" class="tool-hotspot" data-hotspot="collar">Collar</button>
+              <button type="button" class="tool-hotspot" data-hotspot="gap">Gap</button>
+              <button type="button" class="tool-hotspot" data-hotspot="sensors">Sensors</button>
+              <button type="button" class="tool-hotspot" data-hotspot="battery">Battery</button>
+            </div>
+            <p class="tool-caption" data-tool-caption aria-live="polite">electrical separation creates the transmitting geometry</p>
+            <span class="tool-chip">schematic — see the tool figure below</span>
+          </div>
+          <div class="tool-inspect">
+            <button type="button" class="tool-primary" data-hotspot="inspect" aria-pressed="false">Inspect tool</button>
+            <button type="button" class="tool-secondary" data-tool-close hidden>Close</button>
+            <span class="tool-hint" data-tool-hint hidden>drag to rotate · Esc closes</span>
+          </div>
+        </div>
+
         <dl class="spec-grid" aria-label="WellFi public specifications">
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-pressure" role="button" tabindex="0">
             <i class="ph ph-gauge" aria-hidden="true"></i>
             <dt>Pressure rating</dt>
             <dd><span data-count="10000" data-count-format="comma">10,000</span> <small>psia</small></dd>
           </div>
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-temperature" role="button" tabindex="0">
             <i class="ph ph-thermometer-simple" aria-hidden="true"></i>
             <dt>Temperature rating</dt>
             <dd><span data-count="150">150</span> <small>°C</small></dd>
           </div>
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-od" role="button" tabindex="0">
             <i class="ph ph-ruler" aria-hidden="true"></i>
             <dt>Tool outer diameter</dt>
             <dd><span data-count="46">46</span> <small>mm</small></dd>
           </div>
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-battery" role="button" tabindex="0">
             <i class="ph ph-battery-high" aria-hidden="true"></i>
             <dt>Battery life</dt>
             <dd><span data-count="5" data-count-suffix="+">5+</span> <small>years</small></dd>
           </div>
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-installs" role="button" tabindex="0">
             <i class="ph ph-globe-hemisphere-west" aria-hidden="true"></i>
             <dt>International installs</dt>
             <dd><span data-count="160" data-count-suffix="+">160+</span></dd>
           </div>
-          <div data-motion="rise">
+          <div data-motion="rise" data-hotspot="spec-output" role="button" tabindex="0">
             <i class="ph ph-plugs" aria-hidden="true"></i>
             <dt>Surface output</dt>
             <dd class="spec-output-value">RS-485 / 4-20 mA</dd>
@@ -507,12 +541,13 @@
           <p class="eyebrow" data-motion="rise">THE TOOL</p>
           <h2 id="insight-title" data-motion="rise">Inside the string.<br><span>Out of the way.</span></h2>
           <p data-motion="rise">WellFi attaches to the interior or exterior of the tubing, on new installs or pump changes. It reports over wireless electromagnetic telemetry, which removes the risk that comes with running a cable.</p>
-          <ul class="application-chips" data-motion="rise">
-            <li><i class="ph ph-drop" aria-hidden="true"></i> Light Oil</li>
-            <li><i class="ph ph-drop-half" aria-hidden="true"></i> Heavy Oil</li>
-            <li><i class="ph ph-flame" aria-hidden="true"></i> Gas</li>
-            <li><i class="ph ph-thermometer-hot" aria-hidden="true"></i> Thermal</li>
+          <ul class="application-chips" data-motion="rise" aria-label="Applications — chips retint the schematic flow">
+            <li><button type="button" class="app-chip" data-hotspot="app-light" aria-pressed="false"><i class="ph ph-drop" aria-hidden="true"></i> Light Oil</button></li>
+            <li><button type="button" class="app-chip" data-hotspot="app-heavy" aria-pressed="false"><i class="ph ph-drop-half" aria-hidden="true"></i> Heavy Oil</button></li>
+            <li><button type="button" class="app-chip" data-hotspot="app-gas" aria-pressed="false"><i class="ph ph-flame" aria-hidden="true"></i> Gas</button></li>
+            <li><button type="button" class="app-chip" data-hotspot="app-thermal" aria-pressed="false"><i class="ph ph-thermometer-hot" aria-hidden="true"></i> Thermal · in development</button></li>
           </ul>
+          <span class="tool-chip app-chip-note" data-app-note hidden>Thermal · in development</span>
         </div>
 
         <figure class="device-banner" data-motion="fade">
@@ -528,6 +563,29 @@
           >
           <figcaption class="device-caption">WellFi in the tubing — EM isolator collar and sensor package</figcaption>
         </figure>
+
+        <!--
+          Chapter 4 — deployment controls (spec §4 row 4, §12). X-ray ghosts the tubing so the collar and sensor
+          package read through and reveals where two legs continue into rock; the fluid-level instrument is the
+          chapter's one invited action — qualitative, no values: a line between above-pump and pump-off, a pump
+          that warms toward pump-off, the previous position kept as a trend ghost ("earlier · now"), and at
+          pump-off the only thing that changes is a caption at the pad: "surface looks the same".
+        -->
+        <div class="deploy-controls" data-deploy-controls>
+          <div class="deploy-xray">
+            <button type="button" class="tool-secondary" data-hotspot="xray" aria-pressed="false">X-ray</button>
+            <p class="tool-caption" data-xray-caption hidden>two legs continue beyond the section</p>
+          </div>
+          <div class="fluid-level-wrap">
+            <label class="fluid-level">
+              <span>Fluid level (representative)</span>
+              <input type="range" min="0" max="100" value="15" step="1" data-hotspot="fluid-level" aria-valuetext="above pump" aria-describedby="fluid-level-ends">
+            </label>
+            <div class="fluid-level-ends" id="fluid-level-ends" aria-hidden="true"><span>above pump</span><span>pump-off</span></div>
+            <div class="fluid-level-trend" data-fluid-trend hidden><span class="tool-caption">earlier · now</span><span class="tool-chip">qualitative — no values</span></div>
+            <p class="surface-caption" data-surface-caption hidden aria-live="polite">surface looks the same</p>
+          </div>
+        </div>
 
         <aside class="portal-note" data-motion="rise">
           <span class="portal-icon"><i class="ph ph-chart-line-up" aria-hidden="true"></i></span>
@@ -554,32 +612,32 @@
           <h2 id="benefits-title">Benefits of WellFi</h2>
         </div>
         <ul data-drill-benefits>
-          <li data-icon="ph-gear">
+          <li data-icon="ph-gear" data-hotspot="benefit-pump" role="button" tabindex="0">
             <i class="ph ph-gear" aria-hidden="true"></i>
             <h3>Extend Pump Life</h3>
             <p>Know your hydrostatic, understand vibration, avoid pump failure.</p>
           </li>
-          <li data-icon="ph-trend-up">
+          <li data-icon="ph-trend-up" data-hotspot="benefit-production" role="button" tabindex="0">
             <i class="ph ph-trend-up" aria-hidden="true"></i>
             <h3>Increase Production</h3>
             <p>Run closer to optimal without flying blind.</p>
           </li>
-          <li data-icon="ph-bell-ringing">
+          <li data-icon="ph-bell-ringing" data-hotspot="benefit-drawdown" role="button" tabindex="0">
             <i class="ph ph-bell-ringing" aria-hidden="true"></i>
             <h3>Drawdown Management</h3>
             <p>Set notifications to ensure your drawdown stays consistent.</p>
           </li>
-          <li data-icon="ph-waves">
+          <li data-icon="ph-waves" data-hotspot="benefit-reservoir" role="button" tabindex="0">
             <i class="ph ph-waves" aria-hidden="true"></i>
             <h3>Reservoir Monitoring</h3>
             <p>See reservoir response at the lift point.</p>
           </li>
-          <li data-icon="ph-drop-half">
+          <li data-icon="ph-drop-half" data-hotspot="benefit-fluid" role="button" tabindex="0">
             <i class="ph ph-drop-half" aria-hidden="true"></i>
             <h3>Track Fluid Changes</h3>
             <p>Spot produced-fluid changes as they happen.</p>
           </li>
-          <li data-icon="ph-target">
+          <li data-icon="ph-target" data-hotspot="benefit-optimization" role="button" tabindex="0">
             <i class="ph ph-target" aria-hidden="true"></i>
             <h3>Well Optimization</h3>
             <p>Reservoir-fluid monitoring that turns data into production efficiencies.</p>

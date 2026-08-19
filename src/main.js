@@ -11,6 +11,8 @@ import '../qualifier-logic.js';
 import '../main.js';
 import { mountRail } from './ui/rail.js';
 import { mountSignal } from './ui/signal.js';
+import { mountTool } from './ui/tool.js';
+import { mountDeployment } from './ui/deployment.js';
 import { mountDescent } from './ui/descent.js';
 import { mountProbe } from './ui/probe.js';
 import { mountMotionToggle } from './ui/motionToggle.js';
@@ -19,6 +21,8 @@ import { mountFit } from './ui/fit.js';
 
 mountRail();
 mountSignal();
+mountTool();
+mountDeployment();
 mountDescent();
 if (gate.world) mountProbe();
 mountMotionToggle(); // always: applies the persisted motion choice before the world (or the stills) paint

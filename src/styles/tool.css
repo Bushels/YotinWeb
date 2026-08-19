@@ -1,0 +1,101 @@
+/* Chapters 2 (tool) and 4 (deployment) twins — spec §4 rows 2/4, §5. Sand/ember chrome only; every raycast
+   target has a visible twin ≥ 44 px; no cyan. Mono captions, tabular digits, "representative values" chips. */
+
+/* Shared chip + caption */
+.tool-chip { display: inline-block; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 10px/1.6 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); white-space: nowrap; }
+.tool-caption { margin: 10px 0 0; font: 500 11px/1.6 var(--font-mono); letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); transition: color 240ms ease, opacity 240ms ease; }
+.tool-caption.is-lit { color: var(--sand); }
+.tool-caption[hidden] { display: none; }
+
+/* Channel cards as twins: HUD value line settles in; sr text keeps the static value. */
+.channel-card[data-hotspot] { cursor: pointer; }
+.channel-card[data-hotspot]:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
+.channel-card.is-hover, .channel-card.is-active { border-color: rgba(232, 220, 200, 0.45); }
+.channel-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.04em; color: var(--sand); font-variant-numeric: tabular-nums; }
+.channel-hud-value { min-width: 7ch; opacity: 0.55; transition: opacity 240ms ease; }
+.channel-card.is-hover .channel-hud-value, .channel-card.is-active .channel-hud-value, .channel-card.has-value .channel-hud-value { opacity: 1; }
+/* icon settle: once per enter (IntersectionObserver toggles .is-visible); webfont glyphs, so opacity + scale, not stroke. */
+.channel-card[data-icon-anim] .channel-icon i { display: inline-block; }
+.channel-card[data-icon-anim].is-visible .channel-icon i { animation: tool-icon-settle 500ms var(--ease) both; }
+@keyframes tool-icon-settle { from { opacity: 0.25; transform: scale(0.88); } to { opacity: 1; transform: none; } }
+html.motion-paused .channel-card[data-icon-anim].is-visible .channel-icon i { animation: none; }
+@media (prefers-reduced-motion: reduce) { .channel-card[data-icon-anim].is-visible .channel-icon i { animation: none; } }
+
+/* Spec tiles as twins: the value stays in the DOM; hover/focus draws a dimension line on the tool. */
+.spec-grid > div[data-hotspot] { cursor: pointer; }
+.spec-grid > div[data-hotspot]:focus-visible { outline: 1px solid var(--ember); outline-offset: -2px; }
+.spec-grid > div.is-hover, .spec-grid > div.is-active { background: rgba(232, 220, 200, 0.05); }
+
+/* Tool controls: the four hotspot twins + Inspect tool (the chapter's one invited action). */
+/* No panel ground here: the tool sits centred behind this row, so the controls keep their own small grounds and
+   the world reads through the middle. */
+.tool-controls { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 18px 28px; margin-top: 28px; min-height: 180px; }
+.tool-hotspots-wrap { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(3, 7, 11, 0.72); max-width: 560px; }
+.tool-inspect { padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(3, 7, 11, 0.72); }
+.tool-hotspots { display: flex; flex-wrap: wrap; gap: 8px; }
+.tool-hotspot { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 6px; background: rgba(3, 7, 11, 0.5); color: var(--sand); font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; transition: border-color 200ms ease, background 200ms ease; }
+.tool-hotspot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sand-mute); transition: background 200ms ease, box-shadow 200ms ease; }
+.tool-hotspot:hover, .tool-hotspot.is-hover { border-color: var(--sand); }
+.tool-hotspot:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
+.tool-hotspot.is-active, .tool-hotspot[data-active] { background: rgba(232, 220, 200, 0.12); border-color: var(--sand); }
+.tool-hotspot.is-hover::before, .tool-hotspot.is-active::before { background: var(--sand); box-shadow: 0 0 8px rgba(232, 220, 200, 0.6); }
+.tool-hotspot[data-hotspot="gap"]::before { background: #2a2622; border: 1px solid var(--sand-mute); width: 5px; height: 5px; }
+.tool-hotspot[data-unavailable] { opacity: 0.55; }
+.tool-hotspots-wrap { display: flex; flex-direction: column; gap: 0; }
+.tool-hotspots-wrap .tool-caption { margin-top: 10px; min-height: 1.6em; }
+.tool-hotspots-wrap .tool-chip { margin-top: 8px; align-self: flex-start; }
+
+.tool-inspect { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.tool-primary { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--ember); border-radius: 999px; background: var(--ember); color: #1a0c04; font: 600 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; transition: background 200ms ease, color 200ms ease, border-color 200ms ease; }
+.tool-primary:hover { background: var(--ember-lit); border-color: var(--ember-lit); }
+.tool-primary:focus-visible { outline: 1px solid var(--sand); outline-offset: 3px; }
+.tool-primary:active { transform: translateY(1px); }
+.tool-primary.is-armed { box-shadow: 0 0 0 3px rgba(242, 118, 34, 0.35); }
+.tool-primary[aria-pressed="true"] { background: transparent; color: var(--ember); }
+.tool-secondary { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--sand); font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; transition: border-color 200ms ease; }
+.tool-secondary:hover { border-color: var(--sand); }
+.tool-secondary:focus-visible { outline: 1px solid var(--ember); outline-offset: 3px; }
+.tool-secondary[hidden] { display: none; }
+.tool-secondary[aria-pressed="true"] { background: rgba(232, 220, 200, 0.12); border-color: var(--sand); }
+.tool-hint { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); }
+.tool-hint[hidden] { display: none; }
+.tool-primary[data-unavailable], .tool-secondary[data-unavailable] { opacity: 0.6; }
+
+/* Orbit: the visible Close + hint live beside Inspect (one transient at a time — spec §4 arbitration); the pose
+   persists until Close / Esc; the chapter gate closes it when the visitor scrolls on. */
+html.tool-orbit { user-select: none; -webkit-user-select: none; }
+html.tool-orbit main { cursor: grab; }
+html.tool-orbit.tool-orbit-drag main { cursor: grabbing; }
+
+/* Chapter 4: x-ray + fluid-level instrument beside the ghost render. */
+.deploy-controls { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 18px 32px; align-items: start; margin-top: 22px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 8px; background: rgba(3, 7, 11, 0.62); text-align: left; }
+@media (max-width: 820px) { .deploy-controls { grid-template-columns: 1fr; } }
+.deploy-xray { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+.fluid-level { display: block; font: 500 11px/1.6 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.fluid-level > span { display: block; }
+.fluid-level input[type="range"] { display: block; width: 100%; margin-top: 8px; accent-color: var(--ember); min-height: 44px; cursor: pointer; }
+.fluid-level input[type="range"]:focus-visible { outline: 1px solid var(--ember); outline-offset: 4px; }
+.fluid-level-ends { display: flex; justify-content: space-between; margin-top: 2px; font: 500 10px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
+.fluid-level-trend { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.fluid-level-trend .tool-caption { margin: 0; }
+.fluid-level-trend[hidden] { display: none; }
+
+/* "surface looks the same" — a DOM caption projected to the wellhead while the level sits at pump-off. */
+.surface-caption { position: fixed; left: 0; top: 0; z-index: 2; margin: 0; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(3, 7, 11, 0.72); font: 500 11px/1.5 var(--font-mono); letter-spacing: 0.06em; color: var(--sand); pointer-events: none; white-space: nowrap; transition: opacity 240ms ease; }
+.surface-caption[hidden] { display: none; }
+.surface-caption.is-clamped { border-style: dashed; }
+
+/* Application chips as twins (retint the flow). */
+.application-chips li:has(> .app-chip) { padding: 0; }
+.app-chip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 18px; border-radius: 999px; color: inherit; font: inherit; transition: background 200ms ease; }
+.app-chip:hover, .application-chips li.is-hover > .app-chip, .app-chip.is-hover { background: rgba(232, 220, 200, 0.08); }
+.app-chip:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
+.application-chips li:has(> .app-chip.is-active), .application-chips li:has(> .app-chip[aria-pressed="true"]) { border-color: var(--sand); background: rgba(232, 220, 200, 0.1); }
+.app-chip i { color: var(--ember); font-size: 17px; }
+.app-chip-note { display: block; margin: 12px auto 0; width: fit-content; }
+.app-chip-note[hidden] { display: none; }
+
+/* Benefits: one focus rig, keyboard in list order. */
+[data-drill-benefits] li[data-hotspot] { cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
+[data-drill-benefits] li[data-hotspot]:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
+[data-drill-benefits] li.is-hover, [data-drill-benefits] li.is-active { border-color: var(--sand); background: rgba(232, 220, 200, 0.06); }
