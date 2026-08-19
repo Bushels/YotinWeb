@@ -235,6 +235,11 @@
 <body id="top" data-chatfi-api="https://chatfi-server-851855129205.us-central1.run.app">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="scroll-rail" aria-hidden="true"></div>
+  <!-- The persistent world: one fixed canvas behind the semantic DOM (spec §2). Decorative — every word,
+       control and claim lives in the DOM below. Hidden unless the capability gate stamps html.world-on. -->
+  <div id="world" aria-hidden="true"><canvas tabindex="-1"></canvas></div>
+  <!-- Chapter rail: real anchors from first paint (spec §5). Filled by src/ui/rail.js. -->
+  <nav id="rail" class="rail" aria-label="Chapters"></nav>
 
   <header class="site-header" data-header>
     <div class="shell header-inner">
@@ -276,7 +281,7 @@
       <div class="hero-visual" aria-label="WellFi wireless telemetry cutaway">
         <div
           class="hero-scene"
-          data-wellfi-live
+          data-wellfi-live-legacy
           data-live-src="https://mpsgroup.energy/wellfi/animation"
           data-live-src-local="http://127.0.0.1:3001/wellfi/animation"
         >
@@ -326,22 +331,22 @@
       <div class="shell signal-strip" aria-label="WellFi signal path">
         <article class="signal-step" data-motion="rise">
           <span class="signal-icon"><i class="ph ph-broadcast" aria-hidden="true"></i><span class="signal-number">01</span></span>
-          <div><h2>Signal</h2><p>WellFi sends a low-power wireless pulse from deep inside the well.</p></div>
+          <div><h3>Signal</h3><p>WellFi sends a low-power wireless pulse from deep inside the well.</p></div>
         </article>
         <article class="signal-step" data-motion="rise">
           <span class="signal-icon"><i class="ph ph-wave-sine" aria-hidden="true"></i><span class="signal-number">02</span></span>
-          <div><h2>Measure</h2><p>Pressure, temperature, vibration, and fluid-condition data are captured.</p></div>
+          <div><h3>Measure</h3><p>Pressure, temperature, vibration, and fluid-condition data are captured.</p></div>
         </article>
         <article class="signal-step" data-motion="rise">
           <span class="signal-icon"><i class="ph ph-monitor" aria-hidden="true"></i><span class="signal-number">03</span></span>
-          <div><h2>Insight</h2><p>Live telemetry lands in the control system operators already use.</p></div>
+          <div><h3>Insight</h3><p>Live telemetry lands in the control system operators already use.</p></div>
         </article>
       </div>
     </section>
 
     <section class="wellfi-section" id="wellfi" aria-labelledby="wellfi-title">
       <div class="shell">
-        <div class="section-intro">
+        <div class="section-intro" data-chapter="descent">
           <p class="eyebrow" data-motion="rise">REAL-TIME WIRELESS DOWNHOLE TELEMETRY</p>
           <h2 id="wellfi-title" data-motion="rise">Data Below.<br><span>Insight Above.</span></h2>
           <div class="section-summary" data-motion="rise">
@@ -350,6 +355,7 @@
           </div>
         </div>
 
+        <div class="stage stage-tool" data-chapter="tool">
         <div class="channel-head">
           <h3 data-motion="rise">Explore your data</h3>
           <p data-motion="rise">Five channels · one tool</p>
@@ -402,24 +408,6 @@
           </article>
         </div>
 
-        <ol class="journey-list" aria-label="How WellFi works">
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-link-break" aria-hidden="true"></i><span>01</span></span>
-            <div><h3>Create the antenna gap</h3><p>An isolation sub electrically separates the tubing string.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-wifi-high" aria-hidden="true"></i><span>02</span></span>
-            <div><h3>Transmit through the formation</h3><p>The downhole tool sends a low-power electromagnetic signal without a new cable.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-cpu" aria-hidden="true"></i><span>03</span></span>
-            <div><h3>Decode at surface</h3><p>A surface receiver and ground reference recover the telemetry.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-plugs-connected" aria-hidden="true"></i><span>04</span></span>
-            <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 or 4-20 mA for the existing RTU or SCADA system.</p></div>
-          </li>
-        </ol>
 
         <dl class="spec-grid" aria-label="WellFi public specifications">
           <div data-motion="rise">
@@ -453,6 +441,64 @@
             <dd class="spec-output-value">RS-485 / 4-20 mA</dd>
           </div>
         </dl>
+        </div>
+
+        <ol class="journey-list" data-chapter="signal" aria-label="How WellFi works">
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-link-break" aria-hidden="true"></i><span>01</span></span>
+            <div><h3>Create the antenna gap</h3><p>An isolation sub electrically separates the tubing string.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-wifi-high" aria-hidden="true"></i><span>02</span></span>
+            <div><h3>Transmit through the formation</h3><p>The downhole tool sends a low-power electromagnetic signal without a new cable.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-cpu" aria-hidden="true"></i><span>03</span></span>
+            <div><h3>Decode at surface</h3><p>A surface receiver and ground reference recover the telemetry.</p></div>
+          </li>
+          <li data-motion="rise">
+            <span class="journey-icon"><i class="ph ph-plugs-connected" aria-hidden="true"></i><span>04</span></span>
+            <div><h3>Connect to operations</h3><p>Readings land on MODBUS RS-485 or 4-20 mA for the existing RTU or SCADA system.</p></div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="insight-section" id="insight" aria-labelledby="insight-title">
+      <div class="shell">
+        <div class="insight-head">
+          <p class="eyebrow" data-motion="rise">THE TOOL</p>
+          <h2 id="insight-title" data-motion="rise">Inside the string.<br><span>Out of the way.</span></h2>
+          <p data-motion="rise">WellFi attaches to the interior or exterior of the tubing, on new installs or pump changes. It reports over wireless electromagnetic telemetry, which removes the risk that comes with running a cable.</p>
+          <ul class="application-chips" data-motion="rise">
+            <li><i class="ph ph-drop" aria-hidden="true"></i> Light Oil</li>
+            <li><i class="ph ph-drop-half" aria-hidden="true"></i> Heavy Oil</li>
+            <li><i class="ph ph-flame" aria-hidden="true"></i> Gas</li>
+            <li><i class="ph ph-thermometer-hot" aria-hidden="true"></i> Thermal</li>
+          </ul>
+        </div>
+
+        <figure class="device-banner" data-motion="fade">
+          <span class="device-glow" aria-hidden="true"></span>
+          <img
+            src="/assets/wellfi-internal-ghost.webp"
+            alt="The WellFi tool deployed inside production tubing, with the housing ghosted to reveal the electromagnetic isolator collar and the internal sensor package."
+            width="1800"
+            height="392"
+            loading="lazy"
+            decoding="async"
+            data-device-img
+          >
+          <figcaption class="device-caption">WellFi in the tubing — EM isolator collar and sensor package</figcaption>
+        </figure>
+
+        <aside class="portal-note" data-motion="rise">
+          <span class="portal-icon"><i class="ph ph-chart-line-up" aria-hidden="true"></i></span>
+          <div>
+            <h3>WellFi Access Portal</h3>
+            <p>The readings do not stop at raw numbers. The Access Portal analyzes the data coming off each well and turns it into recommendations — surfacing drawdown drift, vibration changes, and produced-fluid shifts while there is still time to act on them.</p>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -505,43 +551,6 @@
       </div>
     </section>
 
-    <section class="insight-section" id="insight" aria-labelledby="insight-title">
-      <div class="shell">
-        <div class="insight-head">
-          <p class="eyebrow" data-motion="rise">THE TOOL</p>
-          <h2 id="insight-title" data-motion="rise">Inside the string.<br><span>Out of the way.</span></h2>
-          <p data-motion="rise">WellFi attaches to the interior or exterior of the tubing, on new installs or pump changes. It reports over wireless electromagnetic telemetry, which removes the risk that comes with running a cable.</p>
-          <ul class="application-chips" data-motion="rise">
-            <li><i class="ph ph-drop" aria-hidden="true"></i> Light Oil</li>
-            <li><i class="ph ph-drop-half" aria-hidden="true"></i> Heavy Oil</li>
-            <li><i class="ph ph-flame" aria-hidden="true"></i> Gas</li>
-            <li><i class="ph ph-thermometer-hot" aria-hidden="true"></i> Thermal</li>
-          </ul>
-        </div>
-
-        <figure class="device-banner" data-motion="fade">
-          <span class="device-glow" aria-hidden="true"></span>
-          <img
-            src="/assets/wellfi-internal-ghost.webp"
-            alt="The WellFi tool deployed inside production tubing, with the housing ghosted to reveal the electromagnetic isolator collar and the internal sensor package."
-            width="1800"
-            height="392"
-            loading="lazy"
-            decoding="async"
-            data-device-img
-          >
-          <figcaption class="device-caption">WellFi in the tubing — EM isolator collar and sensor package</figcaption>
-        </figure>
-
-        <aside class="portal-note" data-motion="rise">
-          <span class="portal-icon"><i class="ph ph-chart-line-up" aria-hidden="true"></i></span>
-          <div>
-            <h3>WellFi Access Portal</h3>
-            <p>The readings do not stop at raw numbers. The Access Portal analyzes the data coming off each well and turns it into recommendations — surfacing drawdown drift, vibration changes, and produced-fluid shifts while there is still time to act on them.</p>
-          </div>
-        </aside>
-      </div>
-    </section>
 
 
     <!-- These five answers already existed in the FAQPage JSON-LD above but

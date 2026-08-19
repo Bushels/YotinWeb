@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { buildIsland } from '../src/world/island.js';
 import { COLORS } from '../src/world/layout.js';
-import { CHAPTERS } from '../src/chapters.js';
+import { CHAPTERS, POSES } from '../src/chapters.js';
 
 const q = new URLSearchParams(location.search);
 const ch = Number(q.get('ch') ?? 0);
@@ -18,7 +18,8 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(COLORS.void);
 const c = CHAPTERS[Math.min(CHAPTERS.length - 1, ch)];
-const camDef = innerWidth <= 820 && c.camera.mobile ? c.camera.mobile : c.camera;
+const pose = POSES[Math.min(POSES.length - 1, Number(q.get('pose') ?? (ch >= 5 ? ch + 1 : ch)))];
+const camDef = innerWidth <= 820 && pose.mobile ? pose.mobile : pose;
 const camera = new THREE.PerspectiveCamera(camDef.fov, innerWidth / innerHeight, 0.3, 120);
 camera.position.set(...camDef.position);
 camera.lookAt(...camDef.target);

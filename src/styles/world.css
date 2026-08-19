@@ -1,0 +1,89 @@
+/* World layer (spec §2, §4). Every rule is scoped to html.world-on so the stills/no-JS page is untouched.
+   The fixed canvas sits behind the semantic DOM; sections become transparent so the world shows through,
+   with local scrims per chapter (compositing ledger). The company (paper) section keeps its own ground. */
+
+#world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: none;
+  background: var(--void);
+}
+#world canvas { display: block; width: 100%; height: 100%; }
+html.world-on #world { display: block; }
+
+/* Layering: page content above the canvas. */
+html.world-on body { position: relative; }
+html.world-on main, html.world-on .site-footer { position: relative; z-index: 1; }
+/* header, ChatFi launcher/panel and the rail keep their own fixed/sticky stacking from styles.css */
+
+/* Canvas exposure per section (compositing ledger). */
+html.world-on .hero,
+html.world-on .wellfi-section,
+html.world-on .drill-section,
+html.world-on .insight-section,
+html.world-on .faq-section,
+html.world-on .contact-section,
+html.world-on .site-footer { background: transparent; }
+
+/* The legacy hero scene (poster + iframe slot) fades out once the world is live; the poster stays as LCP
+   and as the fallback for a lost context. */
+html.world-on .hero-scene { transition: opacity 800ms ease; }
+html.world-live .hero-scene { opacity: 0; pointer-events: none; }
+html.world-lost .hero-scene { opacity: 1; }
+html.world-on .hero { background: transparent; }
+
+/* Local scrims: copy stays readable regardless of what renders behind it (contrast ≥ 4.5:1). */
+html.world-on .hero-copy,
+html.world-on .section-intro,
+html.world-on .channel-head,
+html.world-on .journey-list > li,
+html.world-on .insight-head,
+html.world-on .portal-note,
+html.world-on .drill-fallback,
+html.world-on .faq-section .shell,
+html.world-on .contact-grid > div {
+  position: relative;
+}
+html.world-on .section-intro::before,
+html.world-on .insight-head::before,
+html.world-on .drill-fallback-head::before,
+html.world-on .contact-grid > div:first-child::before {
+  content: "";
+  position: absolute;
+  inset: -24px -28px;
+  z-index: -1;
+  border-radius: 6px;
+  background: rgba(3, 7, 11, 0.55);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html.world-on .faq-section .shell { background: rgba(3, 7, 11, 0.92); border-radius: 8px; padding-top: 32px; padding-bottom: 32px; }
+html.world-on .channel-card, html.world-on .spec-grid > div { background: rgba(3, 7, 11, 0.82); }
+html.world-on .journey-list > li { background: rgba(3, 7, 11, 0.6); border-radius: 6px; padding: 18px 20px; }
+html.world-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.82); }
+html.world-on .qualifier { background: rgba(3, 7, 11, 0.9); }
+
+/* Rail (chapters + tally): DOM from first paint, reserved left gutter copy never enters. */
+.rail {
+  position: fixed;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  font: 500 11px/1.7 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+html.world-on .rail { display: flex; }
+.rail a { color: var(--sand); opacity: 0.45; text-decoration: none; padding: 2px 6px; border-left: 1px solid rgba(232, 220, 200, 0.28); transition: opacity 240ms ease, color 240ms ease; }
+.rail a:hover, .rail a:focus-visible { opacity: 0.9; outline: none; }
+.rail a[aria-current="true"] { opacity: 1; color: var(--ember); border-left-color: var(--ember); }
+@media (max-width: 1100px) { html.world-on .rail { display: none; } }
+
+/* Reduced-motion / stills path: sections keep their own backgrounds; the world never loads. */
+html.stills-on #world { display: none; }

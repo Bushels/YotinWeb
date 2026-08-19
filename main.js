@@ -710,6 +710,9 @@
      narrow screens keep the static grid, which carries the same content. */
   function drillIsEligible() {
     if (reduceMotion) return false;
+    // The persistent three.js world replaces the pinned drill sequence; the static grid stays as the DOM
+    // source of truth (spec §4, chapter 4).
+    if (document.documentElement.classList.contains("world-on")) return false;
     if (!document.querySelector("[data-drill]")) return false;
     return window.matchMedia("(pointer: fine)").matches &&
       window.innerWidth >= 900 &&

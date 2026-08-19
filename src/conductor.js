@@ -15,10 +15,11 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
   function measure() {
     const max = maxScroll();
     widthAtMeasure = innerWidth;
+    const docTop = (el) => el.getBoundingClientRect().top + (scrollY || 0); // document space, not offsetParent space
     anchors = els.map((el, i) => {
       if (i === 0) return 0;
-      if (i === els.length - 1) return Math.min(max, el.offsetTop - innerHeight * 0.15);
-      const v = el.offsetTop + el.offsetHeight * 0.5 - innerHeight * 0.5;
+      if (i === els.length - 1) return Math.min(max, docTop(el) - innerHeight * 0.15);
+      const v = docTop(el) + el.offsetHeight * 0.5 - innerHeight * 0.5;
       return clamp(v, 0, max);
     });
     for (let i = 1; i < anchors.length; i++) anchors[i] = Math.max(anchors[i], anchors[i - 1] + 1);
@@ -41,7 +42,7 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
 
   function segment(p) {
     const last = els.length - 1;
-    const index = clamp(Math.floor(p), 0, last);
+    const index = clamp(Math.floor(p + 0.002), 0, last); // tolerance: a scrollTo that lands 0.02 px shy of an anchor still counts
     const next = Math.min(last, index + 1);
     return { index, next, local: next === index ? 0 : clamp(p - index, 0, 1) };
   }

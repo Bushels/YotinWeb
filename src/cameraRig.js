@@ -15,7 +15,8 @@ export function createCameraRig(camera, chapters, { mobile = false } = {}) {
   const parallax = { x: 0, y: 0, strength: 1 };
   const smoothParallax = { x: 0, y: 0 };
 
-  function endpoint(ch) { return useMobile && ch.camera.mobile ? ch.camera.mobile : ch.camera; }
+  function endpoint(ch) { const c = ch.camera || ch; return useMobile && c.mobile ? c.mobile : c; }
+  function hasAuthoredMobile() { return useMobile && chapters.every((c) => (c.camera || c).mobile); }
 
   function build() {
     const P = chapters.map((c) => new THREE.Vector3(...endpoint(c).position));
@@ -42,7 +43,8 @@ export function createCameraRig(camera, chapters, { mobile = false } = {}) {
     let fov = THREE.MathUtils.lerp(fovs[i], fovs[Math.min(fovs.length - 1, i + 1)], t);
 
     // Tall-aspect emergency: pull back and open the fov so the landmark stays in frame.
-    const tall = Math.max(0, 1 / aspect - 1.15);
+    // Tall-aspect emergency: only when no mobile pose is authored (authored mobile poses already compose the tall frame).
+    const tall = hasAuthoredMobile() ? 0 : Math.max(0, 1 / aspect - 1.15);
     _dir.copy(_pos).sub(_tgt).normalize();
     if (tall > 0) { _pos.addScaledVector(_dir, tall * 8.2); fov = Math.min(80, fov * (1 + tall * 0.4)); }
 

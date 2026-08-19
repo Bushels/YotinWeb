@@ -21,3 +21,4 @@ Thumbs.db
 # Build output and dependencies
 node_modules/
 dist/
+scratch/

@@ -12,6 +12,7 @@
     "test": "node --test test/*.test.js"
   },
   "devDependencies": {
+    "playwright": "^1.60.0",
     "three": "0.185.1",
     "vite": "8.2.1"
   }
