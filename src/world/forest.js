@@ -40,7 +40,7 @@ function spruceGeometry(v) {
 
 // Minimal indexed-geometry merge (position/normal/uv + index) — avoids pulling BufferGeometryUtils (37 KB of
 // source) into the world chunk for three cones and a trunk.
-function mergeIndexed(geoms) {
+export function mergeIndexed(geoms) {
   let vCount = 0, iCount = 0;
   geoms.forEach((g) => { vCount += g.attributes.position.count; iCount += g.index.count; });
   const pos = new Float32Array(vCount * 3), nor = new Float32Array(vCount * 3), uv = new Float32Array(vCount * 2);
@@ -119,10 +119,15 @@ export function buildForest(tier = 'high') {
       const s = 0.8 + rand() * 0.7;
       dummy.position.set(x, 0, z);
       dummy.scale.setScalar(s * (rand() < 0.25 ? 1.35 : 1));
-      dummy.rotation.y = rand() * Math.PI * 2;
+      dummy.rotation.set((rand() - 0.5) * 0.07, rand() * Math.PI * 2, (rand() - 0.5) * 0.07); // a slight lean breaks the perfectly vertical repetition
       dummy.updateMatrix();
       mesh.setMatrixAt(placed, dummy.matrix);
-      mesh.setColorAt(placed, color.setHSL(0.31 + (rand() - 0.5) * 0.07, 0.3, 0.11 + rand() * 0.09)); // luminance ceiling below the pad (spec §14.2)
+      // luminance ceiling below the pad (spec §14.2) AND distance falloff: the back rows recede into darkness
+      // instead of lighting as brightly as the front (round 1: "the forest reads as a strategy-game diorama").
+      const depth = (SLAB.maxZ - z) / (SLAB.maxZ - SLAB.minZ); // 0 = front edge, 1 = back edge
+      const dt = Math.min(1, Math.max(0, (depth - 0.3) / 0.7));
+      const fall = 1 - 0.6 * dt * dt * (3 - 2 * dt);
+      mesh.setColorAt(placed, color.setHSL(0.31 + (rand() - 0.5) * 0.07, 0.3 * (0.6 + 0.4 * fall), (0.11 + rand() * 0.09) * fall));
       placed++;
     }
     mesh.count = placed;

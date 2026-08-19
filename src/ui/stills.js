@@ -53,6 +53,9 @@ export function mountStills() {
       if (current !== i) return; // moved on while this one was loading
       imgs.forEach((im, j) => im.classList.toggle('is-current', j === i));
       html.dataset.still = CHAPTERS[i].id;
+      // the rail tracks chapters through the same event the conductor dispatches on the world path
+      html.dataset.chapter = CHAPTERS[i].id;
+      document.dispatchEvent(new CustomEvent('world:chapter', { detail: { index: i, id: CHAPTERS[i].id } }));
     };
     if (img.complete && img.naturalWidth > 0) go();
     else {

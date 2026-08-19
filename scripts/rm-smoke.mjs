@@ -32,7 +32,15 @@ async function pass(label, { launchArgs, contextOptions }) {
     reason: document.documentElement.dataset.worldTier,
     preloads: Array.from(document.querySelectorAll('link[rel="modulepreload"]')).map((l) => l.getAttribute('href') || ''),
     canvases: document.querySelectorAll('canvas').length,
+    // the rail is part of the complete page (spec §4/§7): present, seven anchors, one aria-current
+    railShown: (() => { const r = document.getElementById('rail'); return Boolean(r) && getComputedStyle(r).display !== 'none'; })(),
+    railAnchors: document.querySelectorAll('#rail .rail-chapters a').length,
+    railCurrent: Array.from(document.querySelectorAll('#rail .rail-chapters a[aria-current="true"]')).map((a) => a.dataset.railChapter),
   }));
+  // scroll to the second chapter and confirm aria-current follows on the stills path
+  await page.evaluate(() => { const el = document.querySelector('[data-chapter="descent"]'); if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.3); });
+  await page.waitForTimeout(900);
+  const after = await page.evaluate(() => Array.from(document.querySelectorAll('#rail .rail-chapters a[aria-current="true"]')).map((a) => a.dataset.railChapter));
   await browser.close();
   const worldRequests = requests.filter((u) => WORLD_RE.test(u));
   const worldPreloads = dom.preloads.filter((h) => WORLD_RE.test(h));
@@ -40,6 +48,12 @@ async function pass(label, { launchArgs, contextOptions }) {
   if (!dom.stillsOn) problems.push('html.stills-on not set' + (dom.worldOn ? ' (html.world-on is set)' : ''));
   if (worldRequests.length) problems.push(`world bucket requested: ${worldRequests.join(', ')}`);
   if (worldPreloads.length) problems.push(`modulepreload for world bucket in DOM: ${worldPreloads.join(', ')}`);
+  { // 1366×768 context: the rail is shown ≥ 1101 px
+    if (!dom.railShown) problems.push('rail hidden on the stills path (spec §4: the rail exists from first paint)');
+    if (dom.railAnchors !== 7) problems.push(`rail has ${dom.railAnchors} chapter anchors, expected 7`);
+    if (dom.railCurrent.join() !== 'surface') problems.push(`rail aria-current at top = [${dom.railCurrent}] (expected surface)`);
+    if (after.join() !== 'descent') problems.push(`rail aria-current after scrolling to descent = [${after}] (expected descent)`);
+  }
   console.log(`\n[${label}] ${problems.length ? 'FAIL' : 'PASS'} — ${requests.length} requests, ${dom.preloads.length} modulepreload link(s), stills-on=${dom.stillsOn}, world-on=${dom.worldOn}, tier=${dom.reason}, canvases=${dom.canvases}`);
   for (const p of problems) console.log('  - ' + p);
   if (errors.length) console.log('  page errors: ' + errors.join(' | '));

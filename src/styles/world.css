@@ -202,8 +202,18 @@ html.world-on .motion-toggle, html.stills-on .motion-toggle { display: inline-fl
 .motion-toggle.is-paused .motion-toggle-tri { display: block; }
 .motion-toggle.is-paused .motion-toggle-bars { display: none; }
 .motion-toggle.is-paused { border-color: rgba(242, 118, 34, 0.55); }
+/* Phones: the toggle lives in the header cluster beside the menu button (icon only, 44 px) so it never sits on
+   content; the ChatFi launcher keeps the bottom-right and the page reserves its footprint at the end. */
 @media (max-width: 820px) {
-  .motion-toggle { left: 12px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .motion-toggle { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); right: 66px; left: auto; bottom: auto; z-index: 101; width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
+  .motion-toggle .motion-toggle-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  html.world-on body, html.stills-on body { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+}
+/* Laptops: the launcher goes icon-only and the content column reserves its footprint. */
+@media (min-width: 1101px) and (max-width: 1600px) {
+  html.world-on .chatfi-launcher span, html.stills-on .chatfi-launcher span { display: none; }
+  html.world-on .chatfi-launcher, html.stills-on .chatfi-launcher { width: 64px; min-width: 64px; height: 64px; padding: 0; }
+  html.world-on main, html.stills-on main { padding-right: 72px; }
 }
 @media print { .fixed-layer { display: none; } }
 

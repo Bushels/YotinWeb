@@ -15,7 +15,8 @@
   color: var(--sand);
   pointer-events: none;
 }
-html.world-on .rail { display: flex; }
+html.world-on .rail, html.stills-on .rail { display: flex; } /* the rail is DOM-only: it exists on the stills path too (spec §4/§7) */
+html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform: none; }
 .rail > * { pointer-events: auto; }
 .rail-chapters { display: flex; flex-direction: column; gap: 2px; }
 .rail-chapters a { color: var(--sand); opacity: 0.45; text-decoration: none; padding: 2px 8px; border-left: 1px solid rgba(232, 220, 200, 0.28); transition: opacity 240ms ease, color 240ms ease, border-color 240ms ease; }
@@ -48,9 +49,19 @@ html.world-on .rail { display: flex; }
 
 /* Reserved gutter: copy never enters the rail's column. */
 @media (min-width: 1101px) { html.world-on main { padding-left: 196px; } }
-@media (max-width: 1100px) { html.world-on .rail { display: none; } }
+@media (max-width: 1100px) { html.world-on .rail, html.stills-on .rail { display: none; } }
 @media (prefers-reduced-motion: reduce) { .rail *, .rail-tally, .rail-legend { transition: none !important; } }
 
-/* Short viewports: keep the rail clear of the motion toggle (bottom-left fixed layer). */
-@media (max-height: 720px) { .rail-legend { display: none; } }
-@media (max-height: 600px) { .rail-tally { display: none; } }
+/* Fixed-layer arbitration (spec §4; round-1 P1): the rail is top-anchored under the header and bounded above the
+   motion toggle's reserve, so the two never share a pixel at any height — 1366×768 included. Short viewports
+   compact the rail first (smaller gaps, no caption, tighter legend), then shed legend and tally. */
+.rail { top: calc(var(--header-h, 72px) + 36px); transform: none; max-height: calc(100vh - var(--header-h, 72px) - 36px - 150px); overflow: hidden; }
+@media (max-height: 820px) {
+  .rail { gap: 8px; font-size: 10px; }
+  .rail-caption { display: none; }
+  .rail-track { height: 80px; }
+  .rail-list { height: 88px; }
+  .rail-legend-item { min-height: 18px; padding: 1px 8px; line-height: 1.5; }
+}
+@media (max-height: 680px) { .rail-legend { display: none; } }
+@media (max-height: 560px) { .rail-tally { display: none; } }

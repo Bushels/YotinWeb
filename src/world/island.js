@@ -59,7 +59,7 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     sun.shadow.camera.near = 1; sun.shadow.camera.far = 40;
     sun.shadow.camera.left = -11; sun.shadow.camera.right = 11; sun.shadow.camera.top = 9; sun.shadow.camera.bottom = -9;
     sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
-    terrain.strataMeshes.forEach((m) => { m.receiveShadow = true; m.castShadow = true; });
+    terrain.strataMeshes.forEach((m) => { m.receiveShadow = true; m.castShadow = false; }); // receivers only: casting re-rendered ~40 k tris into the shadow map for a corner shadow the baked contact darkening already paints
     terrain.bench.receiveShadow = true;
     forest.meshes.forEach((m) => { m.castShadow = true; m.receiveShadow = false; });
     pad.group.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });

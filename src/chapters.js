@@ -20,7 +20,7 @@ export const CHAPTERS = [
 // Camera poses (8): one per chapter, two for deployment. Targets: the candle at the heel ≈ (-0.67,-2.43,3.32)
 // (chapters 2 and 4 aim here — the tool lives at the open-hole anchor), wellhead (-5.2, 0.05, 5).
 export const POSES = [
-  { id: 'surface',      position: [25.1, 19.9, 28.3], target: [-1.8, -1.5, 2.2],  fov: 20, mobile: { position: [24.0, 22.5, 30.5], target: [-1.2, -3.2, 2.2], fov: 30 } },
+  { id: 'surface',      position: [27.8, 22.0, 30.9], target: [-1.8, -1.3, 2.2],  fov: 20, mobile: { position: [24.0, 22.5, 30.5], target: [-1.2, -3.2, 2.2], fov: 30 } },
   { id: 'descent',      position: [-1.4, 1.2, 12.5],  target: [-4.9, -1.6, 5.0],  fov: 28, mobile: { position: [-0.6, 1.4, 16.5], target: [-4.9, -2.4, 5.0], fov: 38 } },
   { id: 'tool',         position: [1.6, -1.3, 7.4],   target: [-0.55, -2.45, 3.3], fov: 24, mobile: { position: [1.9, -1.0, 9.8], target: [-0.55, -2.7, 3.3], fov: 34 } },
   { id: 'signal',       position: [2.4, -0.2, 15.5],  target: [-0.4, -2.4, 3.2],  fov: 27, mobile: { position: [2.0, 0.6, 21.0], target: [-0.6, -2.6, 3.2], fov: 36 } },

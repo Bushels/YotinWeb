@@ -23,14 +23,19 @@ function decide() {
     // Tier: 0 = stills, 1 = phone, 2 = tablet, 3 = desktop. Weak-GPU regex from the island's quality.ts.
     const weak = /Mali-4|Mali-T[0-6]|Adreno [1-4]\d\d|PowerVR SGX|Intel\(R\) HD Graphics [2-4]\d{3}|SwiftShader|llvmpipe|Software/i.test(out.renderer);
     const w = window.innerWidth;
+    const params = new URLSearchParams(location.search);
+    const software = /SwiftShader|llvmpipe|Software/i.test(out.renderer);
+    const byForm = () => (w <= 820 ? 1 : (out.coarse ? 2 : 3)); // phone / tablet / desktop, by width then pointer
     if (!out.webgl2) out.tier = 0;
-    else if (weak && !/SwiftShader|llvmpipe|Software/i.test(out.renderer)) out.tier = 1;
-    else if (/SwiftShader|llvmpipe|Software/i.test(out.renderer)) out.tier = new URLSearchParams(location.search).has('world') ? 3 : 0; // headless/software: stills unless ?world (our own frame jobs)
+    else if (weak && !software) out.tier = 1;
+    else if (software) out.tier = params.has('world') ? byForm() : 0; // headless/software: stills unless ?world (our own frame jobs) — and then the SAME form-factor tier a real GPU would get, so a 390 px frame job measures the phone tier
     else if (out.coarse && w <= 820) out.tier = 1;
     else if (out.coarse) out.tier = 2;
     else out.tier = 3;
-    const forced = new URLSearchParams(location.search).get('world');
+    const forced = params.get('world');
     if (forced === '1') { out.tier = Math.max(out.tier, 1); }
+    const tierOverride = Number(params.get('tier'));
+    if (tierOverride >= 1 && tierOverride <= 3 && out.webgl2) out.tier = tierOverride; // frame jobs: ?tier=1|2|3
     if (out.reduce && forced !== '1') { out.reason = 'reduced-motion'; }
     else if (out.saveData) { out.reason = 'save-data'; }
     else if (!out.webgl2) { out.reason = 'no-webgl2'; }
