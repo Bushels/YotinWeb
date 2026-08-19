@@ -40,7 +40,10 @@ export function bootWorld() {
     sections,
     damping: 5.2,
     reducedMotion: false,
-    onUpdate(st) { lastState = st; dirty = true; },
+    onUpdate(st) {
+      lastState = st; dirty = true;
+      document.dispatchEvent(new CustomEvent('world:progress', { detail: { exact: st.exact, smooth: st.smooth, index: st.index } }));
+    },
     onChapterChange(i, st) {
       html.dataset.chapter = CHAPTERS[i].id;
       document.dispatchEvent(new CustomEvent('world:chapter', { detail: { index: i, id: CHAPTERS[i].id } }));
@@ -68,6 +71,18 @@ export function bootWorld() {
     island.pointer.x = rig.parallax.x; island.pointer.y = rig.parallax.y;
     dirty = true;
   }, { passive: true });
+
+  // Formation legend twins → light the stratum (emissive lift on the band's shared material).
+  const stratumMats = new Map();
+  Object.entries(island.terrain.byName).forEach(([name, meshes]) => stratumMats.set(name, meshes[0].material));
+  let focusedStratum = null;
+  document.addEventListener('world:focus-stratum', (e) => {
+    const name = e.detail && e.detail.name;
+    if (focusedStratum && stratumMats.get(focusedStratum)) { const m = stratumMats.get(focusedStratum); m.emissive.setRGB(0, 0, 0); m.emissiveIntensity = 0; }
+    focusedStratum = name && stratumMats.has(name) ? name : null;
+    if (focusedStratum) { const m = stratumMats.get(focusedStratum); m.emissive.set('#e8dcc8'); m.emissiveIntensity = 0.16; }
+    dirty = true;
+  });
 
   const timer = new THREE.Timer();
   timer.connect(document);

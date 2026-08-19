@@ -65,25 +65,7 @@ html.world-on .journey-list > li { background: rgba(3, 7, 11, 0.6); border-radiu
 html.world-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.82); }
 html.world-on .qualifier { background: rgba(3, 7, 11, 0.9); }
 
-/* Rail (chapters + tally): DOM from first paint, reserved left gutter copy never enters. */
-.rail {
-  position: fixed;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 3;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  font: 500 11px/1.7 "IBM Plex Mono", ui-monospace, monospace;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-html.world-on .rail { display: flex; }
-.rail a { color: var(--sand); opacity: 0.45; text-decoration: none; padding: 2px 6px; border-left: 1px solid rgba(232, 220, 200, 0.28); transition: opacity 240ms ease, color 240ms ease; }
-.rail a:hover, .rail a:focus-visible { opacity: 0.9; outline: none; }
-.rail a[aria-current="true"] { opacity: 1; color: var(--ember); border-left-color: var(--ember); }
-@media (max-width: 1100px) { html.world-on .rail { display: none; } }
+/* Rail styles live in src/styles/rail.css (imported by src/ui/rail.js). */
 
 /* Reduced-motion / stills path: sections keep their own backgrounds; the world never loads. */
 html.stills-on #world { display: none; }
