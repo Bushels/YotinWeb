@@ -42,8 +42,8 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-caption { position: fixed; left: 14px; bottom: 142px; margin: 0; width: 168px; font-size: 9.5px; letter-spacing: 0.04em; text-transform: none; color: var(--sand-mute, #b3aa9a); line-height: 1.4; pointer-events: none; }
 
 /* Legend: visible twins for the strata. */
-.rail-legend { display: flex; flex-direction: column; gap: 2px; opacity: 0; transform: translateX(-6px); transition: opacity 320ms ease, transform 320ms ease; }
-.rail-legend.is-visible { opacity: 1; transform: none; }
+.rail-legend { display: flex; flex-direction: column; gap: 2px; opacity: 0.55; transform: none; transition: opacity 320ms ease; } /* exists from first paint, dim; lights by name as the descent passes (spec §4 row 1) */
+.rail-legend.is-visible { opacity: 1; }
 .rail-legend-item { all: unset; cursor: pointer; color: var(--sand-mute, #b3aa9a); padding: 3px 8px; min-height: 22px; border-left: 1px solid rgba(232, 220, 200, 0.18); font: inherit; letter-spacing: inherit; text-transform: inherit; transition: color 200ms ease, border-color 200ms ease; }
 .rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { color: var(--sand); border-left-color: var(--sand); }
 .rail-legend-item:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }

@@ -296,3 +296,7 @@ html.world-on .contact-section h2 span { color: var(--sand); }
 
 /* Units keep their casing inside uppercase mono chrome (kPa, mm/s RMS, 4-20 mA, °C) — round 2. */
 html.world-on .readout-list b, html.world-on .chip-out, html.world-on .tool-chip .unit, html.world-on [data-unit] { text-transform: none; }
+
+/* Chapter 3 step numbers: sand-on-ink, so saturated ember is reserved for the Close-the-Circuit control and
+   cyan for the candle (round 2). */
+html.world-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color: var(--sand); border: 1px solid rgba(232, 220, 200, 0.35); }
