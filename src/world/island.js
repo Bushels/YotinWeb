@@ -41,7 +41,9 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   const tool = buildWellFiTool(placement, { glowColor: COLORS.emGlow });
   const relay = buildSignalRelay(paths.wellhead);
   const pad = buildLeasePad();
-  const field = buildField({ collar: tool.group.position, tier });
+  // the cased string, heel → surface, so the field can show the return current climbing it (spec §3, plane D)
+  const returnPath = Array.from({ length: 26 }, (_, i) => paths.cased.getPointAt(1 - i / 25));
+  const field = buildField({ collar: tool.group.position, tier, returnPath });
   const wind = buildWind({ tier });
 
   parallax.add(terrain.group, forest.group, well.group, tool.group, relay.mesh, pad.group, field.mesh, wind.mesh);

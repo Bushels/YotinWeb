@@ -334,7 +334,7 @@ export function createToolViz(world) {
     levelTick.visible = chapterActive.deployment && levelShown; earlierTick.visible = chapterActive.deployment && levelShown && earlier != null;
     pumpMat.emissiveIntensity = 0.12 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9; // a readable body before pump-off
     // drive head keeps turning at one constant rate (chapter 4)
-    if (chapterActive.deployment && !world.paused && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
+    if (chapterActive.deployment && !world.paused && island.pad && island.pad.motor) island.pad.motor.rotateY(dt * 1.6);
     if (casedGhost) {
       const d = camera.getWorldPosition(_ghostA).distanceTo(tool.group.getWorldPosition(_ghostB));
       casedGhost.material.opacity = orbit.active ? 0 : 0.38 * THREE.MathUtils.smoothstep(d, 4.5, 9);

@@ -18,15 +18,35 @@ function mulberry32(seed) {
   return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
+// The circuit has two halves and the picture has to show both (spec §3): the emitter's quasi-static field around
+// the collar, AND the return travelling up the cased string to surface. A single radial falloff from the collar
+// culled the whole outer front face, so the chapter read as a glow bursting into rock with nothing tying it to
+// the wellhead (round 8). `returnPts` is the cased string sampled from heel to surface; the return term is a line
+// source around it that thins as it climbs, because the formation takes its cut on the way up.
+let RETURN_PTS = null;
+function returnTerm(p) {
+  if (!RETURN_PTS) return 0;
+  let best = Infinity, bestT = 0;
+  for (let i = 0; i < RETURN_PTS.length; i++) {
+    const q = RETURN_PTS[i];
+    const d = Math.hypot(p.x - q.x, (p.y - q.y) * 0.8, (p.z - q.z) * 1.4);
+    if (d < best) { best = d; bestT = i / (RETURN_PTS.length - 1); }
+  }
+  // bestT: 0 at the wellhead, 1 at the heel. Strongest where the current enters the casing, thinning to surface.
+  const climb = 0.35 + 0.65 * bestT;
+  return Math.pow(best + 0.22, -2.4) * 0.055 * climb; // a tight sheath ON the casing, not a wash across the face
+}
+
 // Anisotropic potential used on the CPU (for placement/orientation) — mirrored in the vertex shader.
 function potentialAt(p, collar) {
   const dx = p.x - collar.x, dy = (p.y - collar.y) * 0.55, dz = (p.z - collar.z) * 1.15;
   const r = Math.hypot(dx, dy, dz) + 0.3;
   const aboveSeal = THREE.MathUtils.smoothstep(p.y, SEAL.bottomY, SEAL.topY);
-  return Math.pow(r, -1.6) * 1.15 * (1 - 0.65 * aboveSeal);
+  return Math.pow(r, -1.6) * 1.15 * (1 - 0.65 * aboveSeal) + returnTerm(p) * (1 - 0.5 * aboveSeal);
 }
 
-export function buildField({ collar, tier = 'high', color = '#22D3EE' } = {}) {
+export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPath = null } = {}) {
+  RETURN_PTS = returnPath && returnPath.length ? returnPath : null;
   const dense = tier !== 'low';
   const spacing = dense ? 0.16 : 0.32;
   const strokeLen = dense ? 0.15 : 0.24;

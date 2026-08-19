@@ -124,9 +124,17 @@ function makeCutEdges() {
   seg([nx, yb, sz], [nx, yb, nz]); seg([nx, yb, nz], [sx, yb, nz]);
   // outer top edges of the slab
   seg([smx, y0, sz], [nx, y0, sz]); seg([smx, y0, smz], [sx, y0, smz]); seg([smx, y0, sz], [smx, y0, smz]); seg([sx, y0, smz], [sx, y0, nz]);
+  // The slab's own silhouette is a cut boundary too, and it was the only one left undressed: against the black
+  // void it read as a raw polygon edge stepping from L 7 to L 52 in one pixel (round 8). Vertical corners…
+  const yb2 = SLAB.baseY;
+  seg([smx, y0, sz], [smx, yb2, sz]); seg([smx, y0, smz], [smx, yb2, smz]);
+  seg([sx, y0, smz], [sx, yb2, smz]); seg([sx, yb, nz], [sx, yb2, nz]); seg([nx, yb, sz], [nx, yb2, sz]);
+  // …and the base outline.
+  seg([smx, yb2, sz], [nx, yb2, sz]); seg([nx, yb2, sz], [sx, yb2, sz]); seg([sx, yb2, sz], [sx, yb2, smz]);
+  seg([sx, yb2, smz], [smx, yb2, smz]); seg([smx, yb2, smz], [smx, yb2, sz]);
   const geom = new THREE.BufferGeometry();
   geom.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-  const mat = new THREE.LineBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0.35, depthWrite: false });
+  const mat = new THREE.LineBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0.42, depthWrite: false });
   const lines = new THREE.LineSegments(geom, mat);
   lines.name = 'cut-edges';
   lines.renderOrder = 5;

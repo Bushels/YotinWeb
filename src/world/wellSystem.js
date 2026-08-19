@@ -15,7 +15,7 @@ export function buildWellSystem(paths, mats) {
   const collarCurve = new THREE.CatmullRomCurve3([paths.cased.getPointAt(0), paths.cased.getPointAt(0.09), paths.cased.getPointAt(0.18)], false, 'catmullrom', 0.5);
   const surfaceCollar = new THREE.Mesh(
     new THREE.TubeGeometry(collarCurve, 12, RADII.surfaceCollar, 16, false),
-    new THREE.MeshStandardMaterial({ color: '#7d8a94', roughness: 0.42, metalness: 0.75, transparent: true, opacity: 0.35, depthWrite: false }),
+    new THREE.MeshStandardMaterial({ color: '#5d666d', roughness: 0.7, metalness: 0.45, transparent: true, opacity: 0.32, depthWrite: false }),
   );
   surfaceCollar.name = 'surface-casing';
   group.add(surfaceCollar);

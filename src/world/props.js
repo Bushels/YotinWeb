@@ -1,6 +1,7 @@
 // Ports of SignalRelay.tsx and LeasePad.tsx.
 import * as THREE from 'three';
 import { COLORS, PAD_RECT, ROAD_RECT } from './layout.js';
+import { mergeIndexed } from './forest.js';
 
 export function buildSignalRelay(wellhead) {
   const base = new THREE.Color(COLORS.emGlow);
@@ -36,14 +37,25 @@ export function buildLeasePad() {
   road.position.set(roadCx, 0.025, ROAD_RECT.minZ + roadLen / 2); road.name = 'lease-road';
   group.add(pad, road);
 
+  // The drive head sits ON the wellhead — it drives the rod string through it. It used to stand 0.4 units in
+  // front, so the surface end of the well read as an unfinished stub with a box beside it (round 8).
   const drive = new THREE.Group();
   drive.name = 'pcp-drive-head';
-  drive.position.set(-5.2, 0, 4.6);
-  const driveBox = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.34, 0.2), steel);
-  driveBox.position.y = 0.5;
+  drive.position.set(-5.2, 0, 5.0);
+  // All the static steel merges into ONE mesh — a wellhead is five small parts and five draw calls is a bad trade.
+  const stackGeoms = [];
+  const push = (g, tf) => { tf(g); stackGeoms.push(g); };
+  push(new THREE.CylinderGeometry(0.15, 0.17, 0.06, 12), (g) => g.translate(0, 0.2, 0));           // flange
+  push(new THREE.CylinderGeometry(0.1, 0.13, 0.16, 12), (g) => g.translate(0, 0.31, 0));           // bonnet
+  push(new THREE.BoxGeometry(0.2, 0.34, 0.2), (g) => g.translate(0, 0.56, 0));                      // drive housing
+  push(new THREE.CylinderGeometry(0.035, 0.035, 0.26, 8), (g) => { g.rotateZ(Math.PI / 2); g.translate(-0.13, 0.26, 0); }); // wing valve
+  push(new THREE.TorusGeometry(0.05, 0.014, 6, 14), (g) => { g.rotateY(Math.PI / 2); g.translate(-0.27, 0.26, 0); });        // handwheel
+  const stack = new THREE.Mesh(mergeIndexed(stackGeoms), steel);
+  stack.name = 'wellhead-stack';
+  stackGeoms.forEach((g) => g.dispose());
   const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.18, 10), new THREE.MeshStandardMaterial({ color: '#6d281d', roughness: 0.6, metalness: 0.3 }));
-  motor.position.set(0.16, 0.62, 0); motor.rotation.z = Math.PI / 2;
-  drive.add(driveBox, motor);
+  motor.position.set(0.16, 0.68, 0); motor.rotation.z = Math.PI / 2; motor.name = 'drive-motor';
+  drive.add(stack, motor);
   group.add(drive);
 
   const tanks = new THREE.Group();
@@ -61,5 +73,5 @@ export function buildLeasePad() {
   flare.position.set(-3.95, 0.48, 2.8); flare.name = 'flare-stack';
   group.add(separator, flare);
 
-  return { group, drive, tanks, separator, flare };
+  return { group, drive, motor, tanks, separator, flare };
 }

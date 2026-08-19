@@ -96,7 +96,10 @@ html.world-on .company-section { background: transparent; padding-top: 0; }
 html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; } /* spec §4 row 5: 60 vh rise (round 2) */
 html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: clamp(72px, 12vh, 120px); margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
 html.world-on .rise-caption span:last-child { color: var(--ember); }
-html.world-on .rise-caption span { background: rgba(3, 7, 11, 0.78); padding: 3px 10px; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; } /* ≥ 4.5:1 for the ember half over the lit slab face (round 5) */
+/* One quiet ground under the whole line, not a black plate plus an ember plate — two solid highlighter blocks
+   read as the most dated element on the site (round 8). The line keeps ≥ 4.5:1 over the lit slab. */
+html.world-on .rise-caption { background: linear-gradient(to right, rgba(3, 7, 11, 0.82) 0, rgba(3, 7, 11, 0.78) 62%, rgba(3, 7, 11, 0) 100%); padding: 10px clamp(22px, 4vw, 60px) 12px; }
+html.world-on .rise-caption span { background: none; padding: 0; }
 html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(40px, 5vw, 64px); padding-bottom: clamp(40px, 5vw, 64px); position: relative; z-index: 1; }
 @media (max-height: 560px) { html.world-on .rise-band { height: 40vh; } }
 
