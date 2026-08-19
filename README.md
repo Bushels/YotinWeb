@@ -1,6 +1,6 @@
 # Yotin Energy — website
 
-Static marketing site for **Yotin Energy**, an Indigenous energy services company based in Pierceland, Saskatchewan. The public v1 focuses on **WellFi wireless downhole telemetry** and the Yotin company story.
+Marketing site for **Yotin Energy**, an Indigenous energy services company based in Pierceland, Saskatchewan. The public site focuses on **WellFi wireless downhole telemetry** and the Yotin company story, told through one persistent three.js world — a sectioned lease with a real well in it — that the page scrolls through in seven chapters.
 
 ## Public scope
 
@@ -13,33 +13,69 @@ Future equipment is intentionally not included in the deployed site until it is 
 
 ## Stack
 
-- Plain **HTML + CSS + JavaScript** — no framework or build step.
-- Reveals use **native CSS scroll-driven animation** (`animation-timeline: view()`). No library, no main-thread scroll handlers, and progress is bound to scroll position rather than fired once on a threshold.
-- GSAP 3.15.0 + ScrollTrigger, integrity-pinned from jsDelivr, is loaded **only** for the scrubbed drill sequence, or as the reveal fallback on browsers without native scroll-driven animation. Phones download none of it.
-- Phosphor Icons 2.1.2, pinned from jsDelivr.
-- Space Grotesk for the WellFi hero, plus Archivo, IBM Plex Sans, and IBM Plex Mono via Google Fonts.
-- The hero embeds the canonical live WellFi R3F scene from `mpsgroup.energy/wellfi/animation`; the local WebP poster is first paint, and the permanent fallback for reduced-motion, Save-Data, and any load failure.
-- Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when the panel opens, keeping its roughly 400 KB bundle off the initial page load.
-- A custom stream adapter preserves the existing `{ messages: [{ role, content }] }` Cloud Run contract; requests abort when the panel closes or the visitor presses stop.
-- Model credentials remain server-side. The browser never connects directly to Gemini.
+- **three.js 0.185 (WebGLRenderer) + vanilla ES modules + Vite 8.** One persistent canvas, one world, seven camera chapters driven by native scroll (no scroll-jacking). No framework, no R3F, no WebGPU.
+- `index.html` is still the page: every claim, FAQ, number and form lives in the DOM. The world is an enhancement layered under it and can be absent without losing a sentence.
+- **Capability gate before any three.js byte** (`src/gate.js`): reduced motion, Save-Data, no WebGL2, or a tier-0 GPU → the *stills path* (seven pre-rendered chapter stills, lazy, zero world requests). Visitors can also pause motion (`Pause motion`, remembered in `localStorage`).
+- Phosphor Icons 2.1.2 (jsDelivr). Archivo, IBM Plex Sans and IBM Plex Mono. GSAP 3.15 + ScrollTrigger load **only** on the stills path as the desktop drill-sequence fallback; the world path never requests it.
+- Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when ChatFi opens; model credentials stay server-side.
+- Analytics: GA4 + Microsoft Clarity, both guarded off on localhost; anything echoing a qualifier answer carries `data-clarity-mask`.
+
+Design spec (panel-converged, authoritative): `docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`. Plan: `docs/superpowers/plans/2026-08-19-yotin-threejs-world.md`.
+
+### Spec sheet — measured, CI-enforced
+
+`npm run check` builds, writes `dist/asset-manifest.json` (every shipped byte in a bucket) and fails the build when a cap is exceeded (`scripts/budget.mjs`). Figures are gzip, from the current build:
+
+| Bucket | Cap | Measured |
+| --- | --- | --- |
+| `critical` (HTML, CSS, fonts, ch-0 still, marks) | 290 KB | 227 KB |
+| `ui` (one chunk; never imports three) | 60 KB | 21 KB |
+| `world` (three + world modules, one chunk, dynamic import) | 215 KB | 201 KB |
+| stills (ch 0–6, lazy) | ≤ 22 KB each after ch-0 | 103 KB total |
+| Reduced-motion first paint (excl. fonts/marks/ui) | 127 KB | 73 KB |
+| Reduced-motion full scroll, all-in | 470 KB | 223 KB — **zero world requests** (`scripts/rm-smoke.mjs`) |
+
+World at chapter anchors under headless SwiftShader: ~45–50 draw calls, ~65–75 k triangles. Scroll length (`npm run check:scroll`): 9.2 viewports desktop · 10.3 laptop · 13.8 phone — the page *is* the content; the conversion path (hero → header **Check your well fit** → qualifier Q1) is one click.
+
+### Before / after
+
+| | Before (Aug 2026) | After |
+| --- | --- | --- |
+| Hero | cross-origin iframe of the WellFi R3F scene, postMessage pointer bridge, CSS idle drift | same-origin three.js world under the whole page; pointer parallax + forest parting; poster = chapter-0 still |
+| Scroll | native reveals + one pinned GSAP drill sequence | native scroll conductor; seven chapters; hard-cut arrival on anchor links |
+| Interaction | hover reveals | hotspot registry: every 3D object has a ≥ 44 px DOM twin; hover/focus/tap/keyboard all reach the same state; Close-the-Circuit, tool channels, deployment, qualifier → schematic |
+| Accessibility | reduced-motion = fewer reveals | reduced-motion / Save-Data / no-WebGL2 → complete page with stills, no world bytes; print stylesheet |
+| Build | none (`python -m http.server`) | Vite multi-page build to `dist/`, hashed `/_app/` immutable, asset manifest + budgets in CI |
+| Tests | 2 suites | 14 suites / 120 tests: geometry ledger, ids resolve, claims ("160+", no metres), physics sources, stills path, tool twins, fit privacy, routes allow-list, cache keys, privacy notice |
 
 ## Structure
 
 ```text
-index.html          page content, SEO, JSON-LD, and ChatFi shell
-styles.css          Yotin design system and responsive layouts
-main.js             navigation, motion enhancement, drill sequence, Deep Chat adapter
-assets/             approved brand, WellFi, and current social-card assets
-robots.txt
-sitemap.xml
-vercel.json         caching and security headers
+index.html, privacy.html   the pages (all copy, FAQ/JSON-LD, qualifier config)
+styles.css, main.js        legacy design system + progressive layer (nav, qualifier, ChatFi, stills-path drill)
+src/main.js                entry: gate → legacy → UI mounts → dynamic import('./boot.js') when the world is on
+src/gate.js                synchronous capability decision (world vs stills)
+src/boot.js                renderer, rig, island, conductor, interactions, pointer, hard cuts, pause/visibility
+src/chapters.js            CHAPTERS (anchors, channels) and camera POSES
+src/conductor.js           native-scroll progress (exact + damped), chapter events, jumpTo
+src/cameraRig.js           Catmull-Rom camera through POSES (camera-convention lookAt)
+src/interactions.js        hotspot registry: raycast FSM + DOM twins, chapter gating, analytics
+src/world/                 layout ledger, well paths, terrain bench, well system, WellFi tool, field, forest, wind, circuit, props
+src/ui/                    rail, signal (circuit), descent, probe, tool, deployment, fit, motion toggle, stills
+src/styles/                world, rail, signal, probe, tool, fit, stills, print
+public/                    copied verbatim: assets (stills, marks, fonts), robots, sitemap, operator routes
+scripts/                   manifest, budget, scroll-length, rm-smoke, stills (Playwright + sharp), frames, capture-all
+test/                      node:test suites (npm test)
+docs/superpowers/          design spec and plan
+vercel.json                build command, immutable /assets and /_app, security headers
 ```
 
 ## Design system
 
 The accent family is **ember + sand**. Cyan is retired from all UI chrome — it
-survives only inside the embedded R3F well scene and the EM transmission glow,
-where it reads as *signal* rather than as brand. Hairlines are sand-tinted
+survives only as *transmission* inside the world (the EM candle at the open-hole
+anchor, the field strokes, a closed measurement loop), where it reads as
+*signal* rather than as brand (the one-candle rule, spec §2). Hairlines are sand-tinted
 (`rgba(232,220,200,…)`) rather than white; a cold white rule on near-black was
 the strongest "generic dark template" tell on the page.
 
@@ -51,57 +87,15 @@ the strongest "generic dark template" tell on the page.
 
 ## Motion
 
-Motion is an enhancement, never a dependency. Modern browsers animate reveals
-purely in CSS. Only browsers **without** `animation-timeline: view()` get the
-`motion-ready` class from the inline `<head>` script, and that class — not CSS
-alone — is what hides elements for the GSAP fallback. If GSAP fails to load,
-`main.js` removes the class and the page renders fully and statically. Verified
-by deliberately corrupting the GSAP SRI hash: all 43 animated elements stayed
-visible.
+Motion is an enhancement, never a dependency. The world renders on demand (a frame when scroll, pointer or a
+wind tick asks for one), pauses when the tab is hidden, survives context loss, and is gated by `src/gate.js`
+before a byte of three.js is requested. One-candle colour rule: cyan is *transmission only* (the EM candle at
+the open-hole anchor, the field strokes, a closed circuit), ember is surface, sand is readable light.
 
-The `#benefits` drill sequence keeps its six benefits in the DOM once, as the
-static fallback grid. When the viewport is wide enough, has a fine pointer, and
-motion is allowed, `main.js` promotes that same content into a 260 vh pinned
-cutaway and **removes** the fallback. Mobile, touch, reduced-motion, and no-JS
-all keep the static grid.
-
-### Travelling spotlight pattern
-
-Several groups (signal strip, telemetry channels, spec tiles, company marks)
-use a sweep rather than a plain reveal: each item rises out of a dim rest
-state, peaks, then settles back as the next takes over. The keyframe floor is
-~0.3 and the settle is ~0.75 — **never 0** — because an item on screen has to
-stay readable whether or not it currently holds the highlight.
-
-Items that share a grid row get identical `view()` progress, so the cascade
-only exists because each item's `animation-range` is offset by 5–9% of the
-cover phase. Those offsets are scoped to the breakpoint whose layout needs
-them: once a grid wraps, rows stagger naturally and keeping the offsets would
-leave the last item dim well after it is on screen.
-
-### Three traps in scroll-driven animation (all hit on this site)
-
-1. **`overflow: hidden` creates a scroll container.** A `view()` timeline binds
-   to its nearest scroll-container ancestor, so any `overflow: hidden` between
-   the element and the document silently freezes it — no error, just a stuck
-   animation. Worse, `body { overflow-x: hidden }` computes `overflow-y` to
-   `auto`, making `<body>` a scroll container even though the *document*
-   scrolls. That put `.company-mark` at −461% progress. **Use `overflow: clip`**
-   (with a `hidden` line before it as the fallback). Applies to `body`,
-   `.hero`, `.channel-card`, `.device-banner`.
-2. **The range must resolve to 100% while the element is comfortably visible.**
-   Ending at `cover 46%` left the signal strip stuck at 0.76 opacity on a
-   1440px-tall monitor, because an element already on screen at load never
-   reaches that point. `cover 30%` puts the element's top at ~66% down the
-   viewport, and that ratio barely moves between 720px and 1440px tall.
-3. **Prefer `cover` over `entry` for reveals.** An `entry`-based end is scaled
-   by the *element's* height, so it drifts badly between a 130px card and a
-   500px block. `cover` is scaled by the viewport.
-
-A fire-and-forget tween has a fourth failure mode worth remembering: triggering
-at `top 88%` meant the 0.7s animation finished while the element was still in
-the bottom 13% of the screen, so nothing ever appeared to respond to scrolling.
-Scroll-*linked* beats scroll-*triggered* for anything the reader is looking at.
+On the stills path the seven chapter stills (`public/assets/stills/ch0–6.webp`, regenerated by
+`node scripts/stills.mjs`) sit where the canvas would be, reveals are plain CSS, and the desktop drill
+sequence in `#benefits` keeps its GSAP fallback. Mobile, touch, reduced-motion and no-JS all keep the
+static grids.
 
 ## Candidate-well qualifier
 
@@ -163,23 +157,13 @@ The direct address stays visible above the widget regardless.
 Without JavaScript the widget stays `hidden` and the direct email remains the
 contact path.
 
-## Cache keys — read before editing CSS or JS
+## Cache keys
 
-`vercel.json` serves `styles.css` and `main.js` with
-`Cache-Control: public, max-age=86400, must-revalidate`, and `index.html`
-references them with a manual key: `styles.css?v=YYYYMMDD-N`.
-
-**Any commit that changes either file must bump that key in the same commit.**
-Without it, anyone who loaded the site in the previous 24 hours gets the *new*
-HTML against the *old* cached CSS and JS. The origin and CDN are correct, so
-this is invisible in a fresh browser or behind a cache-busted URL — it only
-hits real returning visitors. It has bitten this project twice.
-
-To verify a deploy landed, check the **asset** under its new key, not the HTML:
-
-```bash
-curl -s "https://yotinenergy.com/styles.css?v=20260724-3" | grep -c animation-timeline
-```
+No manual keys any more. Vite hashes every bundle into `/_app/` and `vercel.json` serves `/_app/` and
+`/assets/` as `immutable`; `index.html` is never cached for more than a revalidation. `styles.css` and
+`main.js` are bundled through the same pipeline (`test/cache-key.test.js` asserts nothing is referenced
+by an unhashed URL). Regenerated stills are new bytes at the *same* URL — bump the still file names
+(or `scripts/stills.mjs` output names) if a still changes after launch.
 
 ## Analytics
 
@@ -255,35 +239,30 @@ Two rules if you extend this, both enforced by convention rather than by code:
 ## Tests
 
 ```bash
-node --test test/qualifier-logic.test.js test/faq-parity.test.js
+npm test
 ```
 
-Node's built-in runner. No dependencies, no `package.json`, no build step — the
-site keeps its plain HTML/CSS/JS property, and `test/` is excluded from the
-deploy. (Pass the files explicitly; `node --test test/` does not resolve the
-directory reliably on Windows.)
+```bash
+npm run check
+```
 
-Two things are covered, and the choice is deliberate. Layout bugs are visible
-the moment you look at the page; **wrong numbers are not**. The qualifier
-decides what an operator is told about their own well, and its constants are
-real product limits — the 150 °C rating, the ~10% standoff rule. A wrong
-threshold does not throw or look broken. It returns a confident, wrong answer.
+`npm test` runs fourteen `node:test` suites (120 tests). `npm run check` builds, runs the resource budgets
+and the suites. Two more checks run on demand: `npm run check:rm` (Playwright, reduced-motion smoke —
+zero world requests, all stills present) and `npm run check:scroll` (scroll-length ratios per viewport).
 
-- `qualifier-logic.test.js` — thresholds and rounding, casing-length bounds and
-  their error text, flag-to-note coverage, and all three verdict paths
-  including that above-150 °C outranks everything else.
-- `faq-parity.test.js` — the FAQ exists twice in `index.html`, as JSON-LD for
-  crawlers and as rendered `<details>` for people. This fails if they drift.
+Layout bugs are visible the moment you look at the page; **wrong numbers are not**. So the suites bias
+toward things a human would not notice: the qualifier's thresholds (`qualifier-logic.test.js`), FAQ ↔
+JSON-LD parity, the claims contract ("160+", no manufacturer, no printed metres — `claims.test.js`),
+physics figures with sources (`physics-sources.test.js`), the world's geometry ledger
+(`world-geometry.test.js`), every `href="#…"` and `data-hotspot` resolving (`ids-resolve.test.js`), the
+stills path importing no world module (`stills-path.test.js`, `fit-privacy.test.js`), tool/deployment
+twins ≥ 44 px with labels (`tool-twins.test.js`), the operator routes allow-list, and the privacy notice
+naming exactly the third parties the page contacts.
 
-Both suites exist because of a Flutter port that was later abandoned (see the
-`archive/flutter-*` tags). Rewriting the qualifier in another language forced
-every implicit rule to become explicit, and the exercise showed the failure
-mode was never bad code — it was *two copies of the same sentences and numbers
-that no compiler checks*. Extracting the logic here found a real bug on the
-first run: at the minimum 50 m casing, rounding `0.9 × 50 = 45` to the nearest
-10 m put the landing threshold **on the shoe itself**, so the question offered
-an impossible "deeper" option and an unflagged "shallower" option that included
-landing at the shoe — the exact case the rule exists to catch.
+The qualifier suite exists because of a Flutter port that was later abandoned (see the
+`archive/flutter-*` tags): rewriting the logic forced every implicit rule to become explicit and found a
+real bug on the first run — at the minimum 50 m casing, rounding `0.9 × 50 = 45` to the nearest 10 m put
+the landing threshold **on the shoe itself**.
 
 ## SEO
 
@@ -329,31 +308,39 @@ Ranked by likely return for a single-page Canadian oilfield services site:
 
 ## Local preview
 
-```powershell
-Set-Location "C:\Users\kyle\MPS\Yotin-web"
-py -3 -m http.server 5050
+```bash
+npm install
 ```
 
-Open `http://localhost:5050/`. ChatFi's development CORS policy allows `localhost`; it intentionally rejects `127.0.0.1`.
+```bash
+npm run dev
+```
 
-The hero's live R3F scene points at `127.0.0.1:3001` on localhost, so the hero
-shows the poster locally unless the WellFi dev server is also running
-(`cd wellfi-marketing/site && next dev -p 3001`). This is expected; production
-uses `mpsgroup.energy`.
+Vite serves `http://localhost:5173/`. ChatFi's development CORS policy allows `localhost`; it rejects
+`127.0.0.1`. Under a software renderer (headless Chromium / SwiftShader) the gate chooses the stills
+path; append `?world=1` to force the world. `npm run preview` serves the production build on 4173.
+
+Frames for review: `node scripts/frames.mjs --url "http://localhost:5173/?world=1" --out scratch/frames`
+captures every chapter anchor; `node scripts/capture-all.mjs` does it for three viewports plus the
+reduced-motion page.
 
 ## Verification
 
-```powershell
-node --check .\main.js
-rg -n -i "sand control|flow control|slotted|multilateral" .\index.html .\main.js .\styles.css
+```bash
+npm run check
 ```
 
-Visual QA is recorded in `design-qa.md`.
+```bash
+npm run check:rm
+```
+
+Then look: `scratch/frames/ch*-1440x900.png` (and 1366×768, 390×844, `rm-*.png`). Visual QA of the
+pre-world site is recorded in `design-qa.md`; the world's design reviews live in the spec (§13–14).
 
 ## Production status
 
 - GitHub repository: `Bushels/YotinWeb`, branch `master`.
-- Vercel project: `yotin-energy`; a push to `master` automatically creates the production deployment. The final Option 3 implementation is commit `a3f4330bdc8c7ccfbcaebc89937192594da24f96`, released Ready as Git-sourced production deployment `dpl_2YoH5wH16hLfPocjVpNdE4YUgjjN`.
+- Vercel project: `yotin-energy`; a push to `master` automatically creates the production deployment (build command `npm run build`, output `dist/`). The three.js world build is on `master` from 2026-08-19; the last static-site production deployment was commit `a3f4330b` (`dpl_2YoH5wH16hLfPocjVpNdE4YUgjjN`).
 - Public Vercel alias: `https://yotin-energy.vercel.app`.
 - Canonical production domain: `https://yotinenergy.com`; both the apex and `www` domains are claimed by the Vercel project.
 - Porkbun DNS is still parked. The remaining registrar change is `A @ -> 76.76.21.21` and `A www -> 76.76.21.21`. Preserve the existing Porkbun MX records and SPF TXT record.
@@ -370,4 +357,6 @@ Before broad promotion:
 
 ## Deploy
 
-The normal release path is a reviewed commit followed by `git push origin master`. Vercel serves this directory directly and deploys that Git commit automatically. Framework preset: **Other**; no build command; output directory `.`. A manual `vercel --prod` deployment is not part of the release path.
+Reviewed commit, then `git push origin master`. Vercel builds with `npm run build` (Node 22, `.nvmrc`)
+and serves `dist/`; `/assets/` and `/_app/` are immutable, `index.html` revalidates. Framework preset
+**Other**. A manual `vercel --prod` deployment is not part of the release path.
