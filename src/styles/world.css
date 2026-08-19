@@ -70,6 +70,7 @@ html.world-on .qualifier { background: rgba(3, 7, 11, 0.9); }
 /* Chapter 0: hero H1 word-mask reveal (the only word-mask on the page; accessible name lives on aria-label). */
 .hero-message h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1.02; }
 .hero-message h1 .w > span { display: inline-block; transform: translateY(0); }
+.hero-message h1 .w, .hero-message h1 .w > span { color: var(--white, #f8f7f3); }
 .hero-message h1 .dot { color: var(--ember); }
 html.world-on .hero-message h1 .w > span { animation: word-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 html.world-on .hero-message h1 .w:nth-child(1) > span { animation-delay: 120ms; }
@@ -86,6 +87,12 @@ html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: 28p
 html.world-on .rise-caption span:last-child { color: var(--ember); }
 html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(48px, 6vw, 88px); padding-bottom: clamp(48px, 6vw, 88px); position: relative; z-index: 1; }
 @media (max-height: 560px) { html.world-on .rise-band { height: 36vh; } }
+
+/* Phones: the scroll cue yields to the fixed-layer motion toggle; the scrim lightens so the island reads below the copy. */
+@media (max-width: 820px) {
+  html.world-on .scroll-cue { display: none; }
+  html.world-on .hero-scrim { background: linear-gradient(to bottom, rgba(3, 7, 11, 0.82) 0%, rgba(3, 7, 11, 0.55) 45%, rgba(3, 7, 11, 0.12) 70%, rgba(3, 7, 11, 0.4) 100%); }
+}
 
 /* Reduced-motion / stills path: sections keep their own backgrounds; the world never loads. */
 html.stills-on #world { display: none; }
