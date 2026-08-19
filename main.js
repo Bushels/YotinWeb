@@ -879,6 +879,41 @@
         step_key: step.key,
         answer: reportedValue
       });
+      emitQualifierState(step.key, null);
+    }
+
+    /* Normalized schematic state for the world (spec §0, §4 row 6). The world
+       and its caption only ever see this object: fixed ids chosen by option
+       POSITION in QUALIFIER_STEPS (static steps) or by the option's flag (the
+       derived landing step), plus a boolean for whether a casing length was
+       given. The typed casing length, the derived threshold and every answer
+       string stay inside this closure — nothing here reads them. */
+    function qualifierWorldState(phase, verdict) {
+      function pick(key, ids) {
+        var step = null;
+        QUALIFIER_STEPS.forEach(function (s) { if (s.key === key) step = s; });
+        var a = answers[key];
+        if (!step || !a || !step.options) return null;
+        var i = step.options.indexOf(a);
+        return i >= 0 && ids[i] ? ids[i] : null;
+      }
+      var landing = answers.landing;
+      return {
+        step: phase,
+        lift: pick("lift", ["pcp", "esp", "rod", "flow"]),
+        fluid: pick("type", ["heavy", "light", "gas", "thermal"]),
+        temp: pick("temp", ["cool", "warm", "over", "unsure"]),
+        hasLength: Boolean(answers.intermediate),
+        landing: !landing ? null : landing.flag === "external" ? "deeper" : landing.flag === "landing" ? null : "shallower",
+        verdict: verdict || null
+      };
+    }
+    function emitQualifierState(phase, verdict) {
+      try {
+        document.dispatchEvent(new CustomEvent("qualifier:state", { detail: qualifierWorldState(phase, verdict) }));
+      } catch (err) {
+        /* The world is decoration; the qualifier never depends on it. */
+      }
     }
 
     function clear(node) {
@@ -970,6 +1005,7 @@
           });
           index -= 1;
           renderStep();
+          emitQualifierState("back", null);
         });
         wrap.appendChild(back);
       }
@@ -1190,10 +1226,12 @@
         index = 0;
         started = false;
         renderStep();
+        emitQualifierState("restart", null);
       });
       wrap.appendChild(restart);
 
       stage.appendChild(wrap);
+      emitQualifierState("verdict", result.fit);
     }
 
     renderStep();

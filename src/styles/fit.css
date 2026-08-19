@@ -1,0 +1,81 @@
+/* Chapter 6 — fit (spec §4 row 6). Two-column stage ≥ 1100 px: questions left, the live well showing through on
+   the right (the canvas is behind everything, so the "stage" is a reserved transparent column). ≤ 1100 px: a
+   40 vh sticky transparent band above the questions; dropped below 560 px viewport height (landscape phones,
+   short laptops give the questions the viewport). Scoped to html.world-on — the stills / no-JS page keeps the
+   qualifier exactly as today. */
+
+.fit-stage { display: none; }
+.fit-caption {
+  margin: 14px 0 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--sand, #e8dcc8);
+}
+.fit-caption[hidden], .fit-caption:empty { display: none; }
+.fit-download { min-height: 54px; }
+
+html.world-on .fit-stage { display: block; pointer-events: none; }
+html.world-on .fit-caption {
+  display: inline-block;
+  max-width: 40rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(3, 7, 11, 0.72);
+  border: 1px solid rgba(232, 220, 200, 0.16);
+}
+
+/* ≤ 1100 px — sticky band above the questions (the world shows through it; the caption rides its lower edge).
+   Native scroll means the questions pass over the band rather than under it, so the card is made near-opaque
+   here: the world reads in the band while the section top is on screen, never as ghosting behind the copy. */
+@media (max-width: 1099.98px) {
+  html.world-on .contact-section .fit-stage {
+    position: sticky;
+    top: var(--header-h, 64px);
+    height: 40vh;
+    z-index: 0;
+  }
+  html.world-on .contact-section .fit-caption {
+    position: sticky;
+    top: calc(var(--header-h, 64px) + 40vh - 64px);
+    z-index: 0;
+    margin: -56px 0 0 8px;
+    max-width: calc(100% - 16px);
+  }
+  html.world-on .contact-section .qualifier { position: relative; z-index: 1; margin-top: 18px; background: rgb(3, 7, 11); }
+}
+@media (max-height: 560px) {
+  html.world-on .contact-section .fit-stage { display: none; }
+  html.world-on .contact-section .fit-caption { position: static; margin: 0 0 12px; }
+}
+
+/* ≥ 1100 px — two columns: the qualifier left, the reserve (world) right, the caption rides the reserve. */
+@media (min-width: 1100px) {
+  html.world-on .contact-section .fit-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 560px) 1fr;
+    column-gap: clamp(32px, 4vw, 72px);
+    align-items: start;
+  }
+  html.world-on .contact-section .fit-shell .qualifier { grid-column: 1; grid-row: 1; margin-left: 0; margin-right: 0; max-width: none; }
+  html.world-on .contact-section .fit-shell .fit-stage {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: var(--header-h, 64px);
+    height: calc(100vh - var(--header-h, 64px));
+    align-self: start;
+  }
+  html.world-on .contact-section .fit-shell .fit-caption {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: calc(100vh - 150px);
+    align-self: start;
+    justify-self: start;
+    max-width: min(38rem, calc(100% - 160px)); /* clear of the ChatFi launcher (bottom-right fixed layer) */
+    margin: 0;
+    z-index: 1;
+  }
+}
