@@ -34,32 +34,16 @@ describe('Yotin website structure & feature presence', () => {
     assert.match(html, /\/assets\/stills\/ch0\.webp/); // the chapter-0 still is the poster (one URL, spec §6)
   });
 
-  test('live R3F hero has visible motion and pointer parallax without trapping touch scroll', () => {
-    assert.match(html, /data-wellfi-live/);
-    assert.match(css, /touch-action:\s*pan-y pinch-zoom;/);
-    assert.match(
-      css,
-      /\.hero-scene > \.hero-poster,\s*\.hero-scene > \.hero-live-frame\s*\{[\s\S]*?pointer-events:\s*none;/,
-    );
-    assert.doesNotMatch(css, /--hero-pointer-x|--hero-pointer-y/);
-    assert.match(script, /heroSection\.addEventListener\("pointermove", updateHeroPointer/);
-    assert.match(script, /heroSection\.addEventListener\("pointercancel", resetHeroPointer/);
-    assert.match(script, /var sceneBounds = heroScene\.getBoundingClientRect\(\);/);
-    assert.match(script, /var interactionLeft = window\.innerWidth <= 820/);
-    assert.match(script, /if \(!heroPointerX && !heroPointerY && !heroPointerFrame\) return;/);
-    assert.match(script, /function sendLivePointer\(x, y\)/);
-    assert.match(script, /type: "wellfi:set-pointer"/);
-    assert.match(script, /livePointerBridge = event\.data\.version >= 2/);
-    assert.match(script, /classList\.toggle\("has-pointer-bridge", Boolean\(livePointerBridge\)\)/);
-    assert.match(script, /function revealSameOriginLiveFrame\(\)/);
-    assert.match(script, /childDocument\.querySelector\("section\[data-yotin-embed\] canvas"\)/);
-    assert.match(script, /sameOriginReadyPoll = window\.setInterval\(revealSameOriginLiveFrame, 100\)/);
-    assert.match(script, /heroScene\.classList\.add\("is-pointer-active"\)/);
-    assert.match(script, /heroScene\.classList\.remove\("is-pointer-active"\)/);
-    assert.match(script, /var legacyX = livePointerBridge \? 0 : normalizedX \* 12/);
-    assert.match(script, /heroScene\.style\.setProperty\("--hero-legacy-x"/);
-    assert.match(script, /new URLSearchParams\(window\.location\.search\)\.get\("wellfiLocal"\) === "1"/);
-    assert.match(css, /\.hero-scene\.is-live:not\(\.has-pointer-bridge\):not\(\.is-pointer-active\)[\s\S]*?animation:\s*hero-legacy-idle/);
+  test('hero is poster + world: no cross-origin iframe, no pointer bridge, no legacy parallax', () => {
+    // The chapter-0 still is the poster; the world canvas (src/boot.js) renders over it. The legacy
+    // mpsgroup.energy iframe, its postMessage pointer bridge and the CSS idle-drift are gone (spec §0/§6).
+    assert.match(html, /class="hero-scene"\s+data-hero-poster/);
+    assert.doesNotMatch(html, /data-wellfi-live|data-live-src|mpsgroup\.energy/);
+    assert.match(css, /touch-action:\s*pan-y pinch-zoom;/); // the hero never traps a phone's vertical swipe
+    assert.match(css, /\.hero-scene > \.hero-poster\s*\{[\s\S]*?pointer-events:\s*none;/);
+    assert.doesNotMatch(css, /hero-live-frame|has-pointer-bridge|is-pointer-active|hero-legacy|--hero-pointer-x|--hero-pointer-y/);
+    assert.doesNotMatch(script, /wellfi:set-pointer|wellfi:set-active|revealSameOriginLiveFrame|sendLivePointer|updateHeroPointer|wellfiLocal|hero-legacy/);
+    assert.doesNotMatch(script, /data-wellfi-live/);
   });
 
   test('wellfi benefits section contains drill cutaway & fallback grid', () => {
