@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { assetManifestPlugin } from './scripts/manifest.mjs';
 const here = import.meta.dirname;
 
 // Multi-page static build. Everything in public/ is copied verbatim (assets, robots,
@@ -8,6 +9,7 @@ const here = import.meta.dirname;
 // second immutable rule covers the hashed bundles.
 export default defineConfig({
   publicDir: 'public',
+  plugins: [assetManifestPlugin()],
   build: {
     outDir: 'dist',
     assetsDir: '_app',

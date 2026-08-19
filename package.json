@@ -9,7 +9,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "build:manifest": "node scripts/manifest.mjs dist",
+    "check:budget": "node scripts/budget.mjs",
+    "check:scroll": "node scripts/scroll-length.mjs",
+    "check:rm": "node scripts/rm-smoke.mjs",
+    "check": "npm run build && node scripts/budget.mjs && node --test test/*.test.js"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
