@@ -14,13 +14,15 @@ export function mulberry32(seed) {
   };
 }
 
+// Four silhouette families (spec §14.2): three spruce shapes plus a tall narrow jack-pine spire.
 const VARIANTS = [
   { trunk: [0.035, 0.22], cones: [[0.42, 0.55, 0.45], [0.3, 0.45, 0.85], [0.17, 0.4, 1.2]] },
   { trunk: [0.03, 0.18], cones: [[0.34, 0.5, 0.38], [0.22, 0.42, 0.72], [0.12, 0.34, 1.02]] },
   { trunk: [0.04, 0.26], cones: [[0.5, 0.62, 0.5], [0.34, 0.5, 0.95], [0.18, 0.46, 1.35]] },
+  { trunk: [0.03, 0.55], cones: [[0.2, 0.5, 0.75], [0.13, 0.55, 1.15], [0.07, 0.4, 1.6]] },
 ];
 
-const COUNTS = { high: [240, 200, 160], low: [130, 110, 80] };
+const COUNTS = { high: [190, 170, 130, 90], low: [100, 90, 70, 40] };
 
 function spruceGeometry(v) {
   const parts = [];
@@ -62,7 +64,7 @@ export function buildForest(tier = 'high') {
       shader.uniforms.uWindTime = windTime;
       shader.uniforms.uPointer = pointer;
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', '#include <common>\nuniform float uWind;\nuniform float uWindTime;\nuniform vec3 uPointer;')
+        .replace('#include <common>', '#include <common>\nuniform float uWind;\nuniform float uWindTime;\nuniform vec3 uPointer;\nvarying float vTreeH;')
         .replace('#include <begin_vertex>', `#include <begin_vertex>
         {
           vec4 wp = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
@@ -77,7 +79,11 @@ export function buildForest(tier = 'high') {
           vec2 dir = dist > 1e-4 ? d / dist : vec2(0.0);
           transformed.x += sway + dir.x * part * h * h * 0.35;
           transformed.z += sway * 0.35 + dir.y * part * h * h * 0.35;
+          vTreeH = h;
         }`);
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying float vTreeH;')
+        .replace('#include <color_fragment>', '#include <color_fragment>\n  diffuseColor.rgb *= 0.55 + 0.45 * smoothstep(0.0, 0.7, vTreeH);');
     };
     const mesh = new THREE.InstancedMesh(geom, mat, count);
     let placed = 0, guard = 0;
@@ -85,13 +91,15 @@ export function buildForest(tier = 'high') {
       const x = SLAB.minX + rand() * (SLAB.maxX - SLAB.minX);
       const z = SLAB.minZ + rand() * (SLAB.maxZ - SLAB.minZ);
       if (!onCap(x, z) || inRect(x, z, PAD_RECT) || inRect(x, z, ROAD_RECT)) continue;
+      // clearing: no trees within ~1.1 units of the pad edge (negative space around the lease)
+      if (x > PAD_RECT.minX - 1.1 && x < PAD_RECT.maxX + 1.1 && z > PAD_RECT.minZ - 1.1 && rand() < 0.85) continue;
       const s = 0.8 + rand() * 0.7;
       dummy.position.set(x, 0, z);
       dummy.scale.setScalar(s * (rand() < 0.25 ? 1.35 : 1));
       dummy.rotation.y = rand() * Math.PI * 2;
       dummy.updateMatrix();
       mesh.setMatrixAt(placed, dummy.matrix);
-      mesh.setColorAt(placed, color.setHSL(0.33 + (rand() - 0.5) * 0.06, 0.34, 0.16 + rand() * 0.1)); // ~1/3 darker + desaturated (spec §3)
+      mesh.setColorAt(placed, color.setHSL(0.31 + (rand() - 0.5) * 0.07, 0.3, 0.11 + rand() * 0.09)); // luminance ceiling below the pad (spec §14.2)
       placed++;
     }
     mesh.count = placed;

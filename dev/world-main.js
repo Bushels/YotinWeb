@@ -15,6 +15,8 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = tier === 'high'; renderer.shadowMap.type = THREE.PCFShadowMap;
+import('three/addons/environments/RoomEnvironment.js').then(({ RoomEnvironment }) => { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.1; });
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(COLORS.void);
 const c = CHAPTERS[Math.min(CHAPTERS.length - 1, ch)];

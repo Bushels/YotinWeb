@@ -42,13 +42,28 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
 
   parallax.add(terrain.group, forest.group, well.group, tool.group, relay.mesh, pad.group, field.mesh);
 
-  // Lights: golden hour at the surface, driven per frame by the chapter light channel × the ambient cycle.
+  // Lights: golden hour at the surface — low, raking key from the west so long shadows cross the strata and
+  // the pad owns the brightest non-sky pixel (spec §14.2). Driven per frame by the chapter light channel ×
+  // the ambient cycle. Desktop tier casts one 2048 shadow map from the sun over the slab.
   const hemi = new THREE.HemisphereLight(COLORS.skyFill, COLORS.ground, 0.7);
   const sun = new THREE.DirectionalLight(COLORS.goldenHour, 2.0);
-  sun.position.set(-8, 6.5, 6);
+  sun.position.set(-11, 4.2, 7);
   const rim = new THREE.DirectionalLight('#5e86c4', 0.22);
   rim.position.set(8, 4, -7);
   root.add(hemi, sun, rim);
+  if (tier === 'high') {
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.near = 1; sun.shadow.camera.far = 40;
+    sun.shadow.camera.left = -11; sun.shadow.camera.right = 11; sun.shadow.camera.top = 9; sun.shadow.camera.bottom = -9;
+    sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
+    terrain.strataMeshes.forEach((m) => { m.receiveShadow = true; m.castShadow = true; });
+    terrain.bench.receiveShadow = true;
+    forest.meshes.forEach((m) => { m.castShadow = true; m.receiveShadow = false; });
+    pad.group.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    well.cased.castShadow = true;
+    // the surface plane (topsoil top face) receives; strata already do
+  }
 
   const state = { cycle: cycleState(1.5), elapsed: 0, view };
   const pointer = { x: 0, y: 0 };

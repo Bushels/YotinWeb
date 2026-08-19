@@ -1,6 +1,7 @@
 // World boot (spec §2): renderer, scene, the world, the scroll conductor and camera rig, world channels,
 // on-demand rendering with visibility pausing. Loaded only after the capability gate passes.
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildIsland } from './world/island.js';
 import { COLORS } from './world/layout.js';
 import { CHAPTERS, POSES, chapterElements, worldAt, poseProgress } from './chapters.js';
@@ -21,9 +22,18 @@ export function bootWorld() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
+  if (gate.tier >= 3) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; }
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(COLORS.void);
+  // Zero-download environment for the steel/PBR response (RoomEnvironment → PMREM), kept dim so it never
+  // competes with the authored key.
+  try {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 0.1;
+    pmrem.dispose();
+  } catch (e) { /* environment is a nicety */ }
   scene.fog = new THREE.FogExp2(COLORS.void, 0);
   const camera = new THREE.PerspectiveCamera(20, 1, 0.3, 120);
   const rig = createCameraRig(camera, POSES, { mobile: isMobile() });
@@ -87,11 +97,16 @@ export function bootWorld() {
   const timer = new THREE.Timer();
   timer.connect(document);
   let idleFrames = 0;
+  // Motion control (spec §5, §7): paused = no ambient tick and frozen world time (timescale 0); the world still
+  // re-renders on demand (scroll, resize) so the pose always matches the copy. html.motion-paused may already be
+  // set by ui/motionToggle.js (persisted choice / reduced-motion opt-in) before we boot.
+  let paused = html.classList.contains('motion-paused');
+  if (paused) timer.setTimescale(0);
   function frame() {
     if (!running) return;
     // On-demand: after 90 quiet frames (no scroll/pointer/resize), drop to a low ambient tick (every 4th frame).
     idleFrames = dirty ? 0 : idleFrames + 1;
-    if (idleFrames > 90 && (idleFrames % 4) !== 0) return;
+    if (paused ? !dirty : (idleFrames > 90 && (idleFrames % 4) !== 0)) return;
     timer.update();
     const dt = Math.min(timer.getDelta(), 1 / 30);
     const elapsed = timer.getElapsed();
@@ -117,7 +132,14 @@ export function bootWorld() {
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); running = false; renderer.setAnimationLoop(null); html.classList.remove('world-live'); html.classList.add('world-lost'); });
   conductor.start();
 
-  const api = { renderer, scene, camera, rig, island, conductor, get state() { return lastState || conductor.getState(); }, requestRender() { dirty = true; } };
+  const api = {
+    renderer, scene, camera, rig, island, conductor,
+    get state() { return lastState || conductor.getState(); },
+    requestRender() { dirty = true; },
+    get paused() { return paused; },
+    pause() { if (paused) return; paused = true; timer.setTimescale(0); dirty = true; },
+    resume() { if (!paused) return; paused = false; timer.reset?.(); timer.setTimescale(1); dirty = true; },
+  };
   window.__yotinWorld = api;
   return api;
 }
