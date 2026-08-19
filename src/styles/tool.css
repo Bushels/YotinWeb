@@ -34,8 +34,11 @@ html.motion-paused .channel-card[data-icon-anim].is-visible .channel-icon i { an
 .tool-hotspots-wrap { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(3, 7, 11, 0.72); max-width: 440px; }
 @media (max-width: 820px) { .tool-controls { align-items: stretch; } .tool-hotspots-wrap { max-width: none; } }
 /* While the orbit is open the cards and chips step back so the enlarged tool reads (Close/Esc restores). */
-html.tool-orbit .channel-card, html.tool-orbit .tool-hotspots-wrap, html.tool-orbit .spec-grid > div { opacity: 0.22; transition: opacity 240ms ease; }
-html.tool-orbit .tool-hotspots-wrap { pointer-events: none; }
+html.tool-orbit .channel-card, html.tool-orbit .spec-grid > div { opacity: 0.22; transition: opacity 240ms ease; }
+/* The four chips are the tool's visible twins, not decoration: they stay legible and usable while the orbit is
+   live. Only the surrounding cards step back (round 5). */
+html.tool-orbit .tool-hotspots-wrap { opacity: 1; }
+html.tool-orbit .tool-primary { display: none; } /* one control at a time: Inspect becomes Close */
 .tool-inspect { padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(3, 7, 11, 0.72); }
 .tool-hotspots { display: flex; flex-wrap: wrap; gap: 8px; }
 .tool-hotspot { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 6px; background: rgba(3, 7, 11, 0.5); color: var(--sand); font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; transition: border-color 200ms ease, background 200ms ease; }

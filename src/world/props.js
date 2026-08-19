@@ -24,7 +24,9 @@ export function buildSignalRelay(wellhead) {
 export function buildLeasePad() {
   const group = new THREE.Group();
   group.name = 'lease-pad';
-  const steel = new THREE.MeshStandardMaterial({ color: '#aab4ba', roughness: 0.45, metalness: 0.7 });
+  // Surface steel is weathered, not showroom: at ch3 the rim light is at its strongest exactly as the scene goes
+  // dark, and bright metal on the pad was out-shining the candle (round 5).
+  const steel = new THREE.MeshStandardMaterial({ color: '#7d868c', roughness: 0.62, metalness: 0.5 });
   const padCx = (PAD_RECT.minX + PAD_RECT.maxX) / 2, padCz = (PAD_RECT.minZ + PAD_RECT.maxZ) / 2;
   const roadCx = (ROAD_RECT.minX + ROAD_RECT.maxX) / 2, roadLen = ROAD_RECT.maxZ - ROAD_RECT.minZ;
 
@@ -39,14 +41,14 @@ export function buildLeasePad() {
   drive.position.set(-5.2, 0, 4.6);
   const driveBox = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.34, 0.2), steel);
   driveBox.position.y = 0.5;
-  const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.18, 10), new THREE.MeshStandardMaterial({ color: '#7a2c20', roughness: 0.5, metalness: 0.4 }));
+  const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.18, 10), new THREE.MeshStandardMaterial({ color: '#6d281d', roughness: 0.6, metalness: 0.3 }));
   motor.position.set(0.16, 0.62, 0); motor.rotation.z = Math.PI / 2;
   drive.add(driveBox, motor);
   group.add(drive);
 
   const tanks = new THREE.Group();
   tanks.name = 'tank-battery';
-  [[-6.0, 3.4, '#7a2c20'], [-5.3, 3.2, '#7a2c20'], [-5.65, 4.1, '#cfd6da']].forEach(([x, z, color], i) => {
+  [[-6.0, 3.4, '#6d281d'], [-5.3, 3.2, '#6d281d'], [-5.65, 4.1, '#96a0a5']].forEach(([x, z, color], i) => {
     const t = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.5, 16), new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.35 }));
     t.position.set(x, 0.31, z); t.name = `tank-${i}`;
     tanks.add(t);

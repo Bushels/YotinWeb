@@ -67,6 +67,9 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
   html.world-on .rail, html.stills-on .rail { display: flex; flex-direction: column; top: var(--header-h, 72px); left: 0; right: 0; width: auto; max-height: none; overflow: visible; gap: 0; z-index: 3; pointer-events: none; }
   .rail-chapters, .rail-tally, .rail-caption { display: none; }
   html.world-on, html.stills-on { scroll-padding-top: calc(var(--header-h, 72px) + 36px); } /* anchor arrivals clear header + bar */
+  /* The header shrinks on scroll while the bar stays anchored at --header-h, which left a 12 px strip of live body
+     copy showing between them (round 5). Pin the scrolled header to the height the bar is anchored to. */
+  html.world-on .site-header[data-scrolled], html.stills-on .site-header[data-scrolled] { height: var(--header-h, 72px); }
   .rail-bar { all: unset; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: #03070b; /* opaque: never text over text (round 4 P0) */ border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
   .rail-bar-current { color: var(--ember); }
   .rail-bar-tally { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sand); }

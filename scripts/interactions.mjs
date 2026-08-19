@@ -32,7 +32,7 @@ async function gotoChapter(i) {
   await page.waitForTimeout(700);
 }
 async function shot(name, note) {
-  await page.waitForTimeout(args.settle ? Number(args.settle) : 1100);
+  await page.waitForTimeout(args.settle ? Number(args.settle) : 2500); // match frames.mjs: SwiftShader needs the damped conductor to converge
   const file = path.join(out, `${name}-${W}x${H}.png`);
   await page.screenshot({ path: file });
   const state = await page.evaluate(() => ({ chapter: document.documentElement.dataset.chapter, classes: document.documentElement.className }));
@@ -90,6 +90,9 @@ async function runQualifier(answers, name, note) {
     }
     await page.waitForTimeout(350);
   }
+  // The verdict card is much taller than the question card, so answering moves the chapter anchor out from under
+  // the camera. Re-seat the chapter so every verdict frame is captured at the same authored pose.
+  await gotoChapter(6);
   await shot(name, note);
 }
 await runQualifier(['Progressing cavity pump', 'Heavy oil', '100 – 150', 1000, 'Shallower', 'Within 3 months'], 'fit-strong', 'Verdict strong: candle lights at the proposed placement, schematic state applied');

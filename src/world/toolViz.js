@@ -157,6 +157,11 @@ export function createToolViz(world) {
   if (benchMat && benchMat.emissive) { benchMat.emissive = new THREE.Color(SAND); }
   let benchLift = 0;
   const cutEdges = island.terrain.group.getObjectByName('cut-edges');
+  // The buried-casing ghost hairline is drawn with depthTest off so it reads through rock at chapter distance —
+  // which means it also draws straight through the chapter-2 tool close-up and its DOM panel. Fade it out as the
+  // camera closes on the tool, and kill it in orbit (round 5).
+  const casedGhost = island.well.group.getObjectByName('cased-ghost');
+  const _ghostA = new THREE.Vector3(), _ghostB = new THREE.Vector3();
   const cutBase = cutEdges ? cutEdges.material.opacity : 0.35;
   let cutBoost = 0;
 
@@ -330,6 +335,11 @@ export function createToolViz(world) {
     pumpMat.emissiveIntensity = 0.12 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9; // a readable body before pump-off
     // drive head keeps turning at one constant rate (chapter 4)
     if (chapterActive.deployment && !world.paused && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
+    if (casedGhost) {
+      const d = camera.getWorldPosition(_ghostA).distanceTo(tool.group.getWorldPosition(_ghostB));
+      casedGhost.material.opacity = orbit.active ? 0 : 0.38 * THREE.MathUtils.smoothstep(d, 4.5, 9);
+      casedGhost.visible = casedGhost.material.opacity > 0.01;
+    }
     // halo / bench / cut edges
     haloMat.opacity += (haloTarget - haloMat.opacity) * k; if (haloMat.opacity < 0.01 && haloTarget === 0) halo.visible = false;
     benchLift += (benchTarget - benchLift) * k; if (benchMat && benchMat.emissive) benchMat.emissiveIntensity = benchLift * 0.14;

@@ -113,7 +113,10 @@ export function buildForest(tier = 'high') {
     while (placed < count && guard++ < count * 60) {
       const x = SLAB.minX + rand() * (SLAB.maxX - SLAB.minX);
       const z = SLAB.minZ + rand() * (SLAB.maxZ - SLAB.minZ);
-      if (!onCap(x, z) || inRect(x, z, PAD_RECT) || inRect(x, z, ROAD_RECT)) continue;
+      // The lease road has cleared shoulders — a real one does, and without them the spruce close over the road so
+      // the ground stake and the measurement loop vanish into the canopy (round 5).
+      const ROAD_CLEAR = { minX: ROAD_RECT.minX - 1.15, maxX: ROAD_RECT.maxX + 1.15, minZ: ROAD_RECT.minZ, maxZ: ROAD_RECT.maxZ + 0.8 };
+      if (!onCap(x, z) || inRect(x, z, PAD_RECT) || inRect(x, z, ROAD_CLEAR)) continue;
       // clearing: no trees within ~1.1 units of the pad edge (negative space around the lease)
       if (x > PAD_RECT.minX - 1.1 && x < PAD_RECT.maxX + 1.1 && z > PAD_RECT.minZ - 1.1 && rand() < 0.85) continue;
       const s = 0.8 + rand() * 0.7;

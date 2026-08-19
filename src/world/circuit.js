@@ -15,20 +15,31 @@ export function createCircuit(island, THREE) {
   // Stake: a slim steel rod with a small cyan-capable cap; slides along the road (z from 2.4 down to -4.4).
   const stake = new THREE.Group();
   stake.name = 'ground-stake';
-  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.36, 8), new THREE.MeshStandardMaterial({ color: '#8f9aa3', roughness: 0.5, metalness: 0.7 }));
-  rod.position.y = 0.16;
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.52, 8), new THREE.MeshStandardMaterial({ color: '#b9c2c9', roughness: 0.45, metalness: 0.6 }));
+  rod.position.y = 0.24;
   const capMat = new THREE.MeshBasicMaterial({ color: '#e8dcc8', toneMapped: false });
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), capMat);
-  cap.position.y = 0.36;
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 12), capMat);
+  cap.position.y = 0.52;
   stake.add(rod, cap);
   // proxy for raycast: a fatter invisible cylinder
   const stakeProxy = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.6, 8), new THREE.MeshBasicMaterial({ visible: false }));
   stakeProxy.position.y = 0.3;
   stake.add(stakeProxy);
+  // Separation 0 means the two references are IN THE SAME PLACE — the stake stands on the wellhead itself, which
+  // is what the "no difference, no reading" beat claims (spec §12). The first 15 % of the travel walks the stake
+  // off the wellhead onto the head of the road; the rest runs it down the road away from the pad. (Round 5: sep 0
+  // used to leave the stake 2.5 units away on the pad edge while the copy said "same place".)
   const roadX = (ROAD_RECT.minX + ROAD_RECT.maxX) / 2;
-  let sep = 0.6; // 0..1 along the road away from the pad
-  function placeStake(t) { sep = THREE.MathUtils.clamp(t, 0, 1); stake.position.set(roadX, 0.05, ROAD_RECT.maxZ - sep * (ROAD_RECT.maxZ - ROAD_RECT.minZ)); }
-  placeStake(sep);
+  const ROAD_HEAD = new THREE.Vector3(roadX, 0.05, ROAD_RECT.maxZ);
+  const ROAD_TOE = new THREE.Vector3(roadX, 0.05, ROAD_RECT.minZ);
+  const AT_WELLHEAD = new THREE.Vector3(wellhead.x, 0.05, wellhead.z);
+  let sep = 0.6; // 0..1 from "on the wellhead" to the far end of the road
+  function placeStake(t) {
+    sep = THREE.MathUtils.clamp(t, 0, 1);
+    if (sep < 0.15) stake.position.lerpVectors(AT_WELLHEAD, ROAD_HEAD, sep / 0.15);
+    else stake.position.lerpVectors(ROAD_HEAD, ROAD_TOE, (sep - 0.15) / 0.85);
+    updateLoop();
+  }
   stake.visible = false;
   group.add(stake);
 
@@ -60,25 +71,30 @@ export function createCircuit(island, THREE) {
       p.y += Math.sin(t * Math.PI) * 0.12; // slight arc so it reads as a hairline in air, not a road stripe
       pts.push(p);
     }
-    const next = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5), LOOP_SEGS, 0.012, 5, false);
+    if (a.distanceTo(b) < 0.05) { loop.visible = false; return; } // the two references coincide: there is no loop to draw
+    const next = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5), LOOP_SEGS, 0.018, 5, false);
     loop.geometry = next; loopGeom.dispose(); loopGeom = next;
     loopGeom.setDrawRange(0, Math.round(loopDraw * loopGeom.index.count));
   }
   let loopDraw = 0; // 0..1 draw progress
-  updateLoop();
+  placeStake(sep); // now that updateLoop exists: seats the stake and builds the loop geometry
 
   const state = { wellhead: false, ground: false, closed: false, dashes: false };
   function set(next) {
+    const wasClosed = state.closed;
     Object.assign(state, next);
     state.closed = state.wellhead && state.ground && sep > 0.06;
     stake.visible = state.ground;
     whRing.material.opacity = state.wellhead ? 0.9 : 0;
     whRing.visible = state.wellhead;
     capMat.color.set(state.closed ? '#22D3EE' : '#e8dcc8');
+    // Opening the loop is instant — the world must never show a drawn loop while the caption says there is no
+    // reading (round 5). Closing it still eases in (update()).
+    if (wasClosed && !state.closed) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); }
   }
   function update(dt) {
-    const target = state.closed ? 1 : 0;
-    loopDraw += (target - loopDraw) * (1 - Math.exp(-4 * dt));
+    if (!state.closed) { if (loop.visible) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); } return; }
+    loopDraw += (1 - loopDraw) * (1 - Math.exp(-4 * dt));
     loopGeom.setDrawRange(0, Math.max(0, Math.round(loopDraw * loopGeom.index.count)));
     loopMat.opacity = 0.75 * Math.min(1, loopDraw * 1.4);
     loop.visible = loopDraw > 0.02;

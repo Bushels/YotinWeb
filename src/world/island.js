@@ -81,7 +81,7 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     const L = channels.light;
     sun.intensity = 0.1 + 2.7 * L * (0.55 + 0.45 * s.sun);
     hemi.intensity = 0.16 + 0.75 * L * (0.6 + 0.4 * s.sky) + 0.05;
-    rim.intensity = 0.2 + 0.5 * (1 - L);
+    rim.intensity = 0.12 + 0.26 * (1 - L); // the rim separates silhouettes; it must not become the key light as L → 0 (round 5)
     const flow = channels.flow ?? L;
     const flowTime = elapsed % 20;
     casedFlow.setFlow(0.9 * flow, flowTime);

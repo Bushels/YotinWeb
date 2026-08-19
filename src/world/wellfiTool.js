@@ -18,6 +18,7 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   group.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), placement.tangent);
   const base = new THREE.Color(glowColor);
   const SAND = new THREE.Color(COLORS.sand || '#e8dcc8');
+  const REST = new THREE.Color('#9aa3a8'); // the collar at rest is a steel band, not the brightest thing on the tool
   const glow = new THREE.Color(SAND);
   const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -84,8 +85,9 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   function update(boost, focus) {
     const k = Math.max(EMBER, boost);
     const sig = smooth(0.28, 0.55, k);              // 0 = sand (rest/ember), 1 = cyan (transmission)
-    glow.copy(SAND).lerp(base, sig);
-    sleeveMat.color.copy(glow).multiplyScalar(0.3 + 1.7 * k); // > 1 at full signal: the brightest non-sky pixel of ch. 3
+    const warm = smooth(0.16, 0.34, k);             // steel → sand as the collar wakes
+    glow.copy(REST).lerp(SAND, warm).lerp(base, sig);
+    sleeveMat.color.copy(glow).multiplyScalar(0.28 + 1.75 * k); // > 1 at full signal: the brightest non-sky pixel of ch. 3
     haloMat.color.copy(glow);
     haloMat.opacity = Math.min(0.72, 0.02 + 0.7 * k * k);
     witnessMat.opacity = Math.min(0.3, 0.04 + 0.26 * k);

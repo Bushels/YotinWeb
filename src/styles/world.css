@@ -50,15 +50,24 @@ html.world-on .section-intro::before,
 html.world-on .insight-head::before,
 html.world-on .drill-fallback-head::before,
 html.world-on .contact-grid > div::before {
+  /* A WASH, not a pane: a flat rectangle put a one-pixel luminance step straight down the render (the world's
+     brightness doubled across x = 800 in ch4 — round 5). The fill feathers out over ~140 px, so there is no edge
+     to see, with a generous bleed on the side the copy runs toward. */
   content: "";
   position: absolute;
-  inset: -24px -28px;
+  inset: -40px -180px -56px -48px;
   z-index: -1;
-  border-radius: 6px;
-  background: rgba(3, 7, 11, 0.55);
+  border-radius: 0;
+  background:
+    linear-gradient(to right, rgba(3, 7, 11, 0.62) 0, rgba(3, 7, 11, 0.6) 55%, rgba(3, 7, 11, 0) 100%),
+    linear-gradient(to bottom, rgba(3, 7, 11, 0) 0, rgba(3, 7, 11, 0.32) 12%, rgba(3, 7, 11, 0.32) 84%, rgba(3, 7, 11, 0) 100%);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+/* The washes bleed sideways to feather; the sections clip that bleed so it can never widen the document.
+   (overflow-x: clip does not create a scroll container, so the sticky rise band and fit stage still work.) */
+html.world-on .wellfi-section, html.world-on .insight-section, html.world-on .drill-section,
+html.world-on .contact-section, html.world-on .company-section { overflow-x: clip; overflow-y: visible; }
 html.world-on .faq-section .shell { background: rgba(3, 7, 11, 0.92); border-radius: 8px; padding-top: 32px; padding-bottom: 32px; }
 html.world-on .channel-card, html.world-on .spec-grid > div { background: rgba(3, 7, 11, 0.82); }
 html.world-on .journey-list > li { background: rgba(3, 7, 11, 0.6); border-radius: 6px; padding: 18px 20px; }
@@ -85,7 +94,7 @@ html.world-on .company-section { background: transparent; padding-top: 0; }
 html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; } /* spec §4 row 5: 60 vh rise (round 2) */
 html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: clamp(72px, 12vh, 120px); margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
 html.world-on .rise-caption span:last-child { color: var(--ember); }
-html.world-on .rise-caption span { background: rgba(3, 7, 11, 0.55); padding: 2px 10px; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; } /* ≥ 4.5:1 where lit laminae cross the glyphs (round 4) */
+html.world-on .rise-caption span { background: rgba(3, 7, 11, 0.78); padding: 3px 10px; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; } /* ≥ 4.5:1 for the ember half over the lit slab face (round 5) */
 html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(40px, 5vw, 64px); padding-bottom: clamp(40px, 5vw, 64px); position: relative; z-index: 1; }
 @media (max-height: 560px) { html.world-on .rise-band { height: 40vh; } }
 
@@ -132,6 +141,8 @@ html.world-on .journey-list h3 { text-wrap: balance; }
 html.world-on .journey-list > li, html.world-on .journey-list > li:nth-child(even) { padding: 10px 12px; }
 html.world-on .signal-stage { margin-top: 16px; padding: 20px 22px; }
 @media (min-width: 901px) { html.world-on .signal-stage { max-width: min(720px, 60%); margin-right: auto; grid-template-columns: 1fr; } html.world-on .signal-stage .readout { max-width: 420px; } } /* the collar's side of the frame stays uncovered while the instrument is in use (round 2) */
+/* Short laptops: the card row takes less of the viewport so the candle keeps its clearance below it (round 5). */
+@media (max-height: 820px) { html.world-on .journey-list { min-height: calc(100svh - var(--header-h, 72px) - 44px); } }
 @media (max-width: 1100px) {
   html.world-on .journey-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -292,7 +303,7 @@ html.world-on .contact-grid > div, html.world-on .contact-section .fit-shell { w
 html.world-on .contact-grid > div:first-child { order: 1; }
 html.world-on .contact-section .fit-shell { order: 2; margin-top: 18px; }
 html.world-on .contact-grid > .contact-actions { order: 3; margin-top: 28px; }
-html.world-on .contact-grid > div::before { inset: -16px -20px; }
+html.world-on .contact-grid > div::before { inset: -20px -180px -28px -40px; }
 @media (min-width: 1101px) {
   html.world-on .contact-section { padding-top: 40px; }
   html.world-on .contact-grid > div:first-child, html.world-on .contact-grid > .contact-actions { max-width: 50%; margin-left: 0; }
@@ -311,7 +322,7 @@ html.world-on .journey-icon span { background: rgba(232, 220, 200, 0.14); color:
 /* Phones: the local scrims' negative insets stay inside the viewport (a -28 px bleed on a flush block widened the
    document by 28 px — round 3). */
 @media (max-width: 820px) {
-  html.world-on .section-intro::before, html.world-on .insight-head::before, html.world-on .drill-fallback-head::before, html.world-on .contact-grid > div::before { inset: -14px 0; }
+  html.world-on .section-intro::before, html.world-on .insight-head::before, html.world-on .drill-fallback-head::before, html.world-on .contact-grid > div::before { inset: -14px 0 -20px 0; background: linear-gradient(to bottom, rgba(3, 7, 11, 0) 0, rgba(3, 7, 11, 0.62) 9%, rgba(3, 7, 11, 0.62) 88%, rgba(3, 7, 11, 0) 100%); }
 }
 @media (max-width: 820px) {
   html.world-on .drill-fallback ul { grid-template-columns: minmax(0, 1fr); } /* one column: a 3-up grid widened the document at 390 (round 3; placed after the desktop rule it overrides) */

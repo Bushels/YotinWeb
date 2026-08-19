@@ -71,10 +71,12 @@ export function makeBeddingMaterial(color, roughness, freq, depth, phase, bump, 
         // Bedding that reads as rock, not corrugated siding (round 4): the bed phase drifts along strike with a cheap
         // 2-octave value noise, amplitude varies bed to bed, and the lamination fades with screen-space density so it
         // never aliases into a uniform stripe field at distance.
+        // Long, low-amplitude drift along strike (beds thin and thicken over metres, not centimetres) plus a fine
+        // second octave as jitter only — the first pass warped so hard it read as wood grain (round 5).
         vec2 wp = vBedWorld.xz + vBedWorld.y * 0.37;
-        float n1 = vnoise(wp * 0.8), n2 = vnoise(wp * 3.1);
-        float warp = (n1 - 0.5) * 0.35 + (n2 - 0.5) * 0.12;
-        float amp = 0.55 + 0.45 * n1;
+        float n1 = vnoise(wp * 0.26), n2 = vnoise(wp * 3.1);
+        float warp = (n1 - 0.5) * 0.17 + (n2 - 0.5) * 0.05;
+        float amp = 0.68 + 0.32 * n1;
         float y = vBedWorld.y + warp;
         float bed = abs(sin(y * BED_FREQ + BED_PHASE));
         float fw = fwidth(y * BED_FREQ);                    // how many radians one pixel spans

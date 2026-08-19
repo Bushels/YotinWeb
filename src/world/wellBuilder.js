@@ -104,13 +104,20 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
   const cur = { boost: 0, scale: 1 };
   const target = { boost: 0, scale: 1 };
   let dimHalo = false;
+  // Time-based easing, not per-frame: a fixed 0.06 step takes ~1 s at 60 fps and ~20 s on a software renderer or a
+  // slow phone, so the verdict's candle appeared not to light at all on slow devices (round 5).
+  let lastEase = 0;
   tool.update = function wrappedUpdate(candle, focus) {
-    cur.boost += (target.boost - cur.boost) * 0.06;
-    cur.scale += (target.scale - cur.scale) * 0.06;
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
+    const dt = lastEase ? Math.min(0.25, Math.max(0, now - lastEase)) : 1 / 60;
+    lastEase = now;
+    const ease = 1 - Math.exp(-3.6 * dt);
+    cur.boost += (target.boost - cur.boost) * ease;
+    cur.scale += (target.scale - cur.scale) * ease;
     origUpdate.call(tool, Math.min(1, candle * cur.scale + cur.boost), focus);
     if (dimHalo && halo && halo.material) halo.material.opacity = Math.min(halo.material.opacity, 0.05);
     if (glide.active) {
-      glide.t = Math.min(1, glide.t + 1 / 40);
+      glide.t = Math.min(1, glide.t + Math.max(1 / 90, dt * 1.6)); // time-based: ~0.6 s regardless of frame rate
       const e = glide.t < 0.5 ? 2 * glide.t * glide.t : 1 - Math.pow(-2 * glide.t + 2, 2) / 2;
       tool.group.position.lerpVectors(glide.from, glide.to, e);
       tool.group.quaternion.slerpQuaternions(glide.q0, glide.q1, e);
@@ -155,7 +162,9 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
   }
   function applyTemp(temp, verdict) {
     const over = temp === 'over' || verdict === 'future';
-    target.scale = over ? 0.25 : 1;
+    // Above the rating there is no product to light: the collar goes dark rather than dim, so an unavailable
+    // configuration never appears to transmit (round 5).
+    target.scale = over ? 0 : 1;
     dimHalo = over;
     if (witness && witness.material) witness.material.color.set(over ? WITNESS_WARM : WITNESS_COOL);
   }
