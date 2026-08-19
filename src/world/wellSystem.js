@@ -40,21 +40,23 @@ export function buildWellSystem(paths, mats) {
   const rimMeshes = [];
   const bores = [{ curve: paths.openHole, r: RADII.openHole, name: 'open-hole', mat: mats.openHole }, ...paths.laterals.map((c, i) => ({ curve: c, r: RADII.lateral, name: `lateral-${i}`, mat: mats.lateral, meta: c.userData }))];
   const meanY = (curve) => { let m = 0; const N = 9; for (let k = 0; k < N; k++) m += curve.getPointAt(k / (N - 1)).y; return m / N; };
-  const squash = (geom, my, sink) => { geom.translate(0, -my, 0); geom.scale(1, 0.34, 1); geom.translate(0, my - sink, 0); return geom; };
+  // Flatten each trough tube to a slot (y-scale 0.18) about its own mean height and sink it so the crown sits a
+  // hairline proud of the bench: the lip 8 mm, the darker trough inside it 4 mm, the bore a sliver. Read: a dark
+  // slot cut into lit rock, not a tube lying on a shelf (round-1 P0).
+  const SQ = 0.18;
+  const squash = (geom, my, sink) => { geom.translate(0, -my, 0); geom.scale(1, SQ, 1); geom.translate(0, my - sink, 0); return geom; };
   bores.forEach((b) => {
     const my = meanY(b.curve);
-    // rock lip: a wider ring of rock colour, squashed about the bore's own height, sunk to the bench
-    const lipMesh = new THREE.Mesh(squash(new THREE.TubeGeometry(b.curve, 64, b.r * 2.6, 8, false), my, 0.06), rimMat);
+    const lipMesh = new THREE.Mesh(squash(new THREE.TubeGeometry(b.curve, 64, b.r * 2.6, 8, false), my, b.r * 2.6 * SQ - 0.008), rimMat);
     lipMesh.name = b.name + '-lip';
     group.add(lipMesh);
     rimMeshes.push(lipMesh);
-    // dark trough inside the lip
-    const troughMesh = new THREE.Mesh(squash(new THREE.TubeGeometry(b.curve, 64, b.r * 2.0, 8, false), my, 0.05), troughMat);
+    const troughMesh = new THREE.Mesh(squash(new THREE.TubeGeometry(b.curve, 64, b.r * 2.0, 8, false), my, b.r * 2.0 * SQ - 0.004), troughMat);
     troughMesh.name = b.name + '-trough';
     group.add(troughMesh);
-    // the bore itself, buried past half (only its upper part shows above the trough floor)
+    // the bore itself, buried past half: only a sliver of the flow material shows in the slot floor
     const bore = new THREE.Mesh(new THREE.TubeGeometry(b.curve, 64, b.r, 12, false), b.mat);
-    bore.position.y = -b.r * 0.55;
+    bore.position.y = -b.r * 0.7;
     bore.name = b.name;
     bore.userData = { ...(b.meta || {}), bore: true };
     group.add(bore);

@@ -8,13 +8,13 @@
 // candle 0..1 (collar glow) · field 0..1 (section-plane field reveal) · wind 0..1 · flow 0..1 (chevrons) ·
 // fog 0..1
 export const CHAPTERS = [
-  { id: 'surface',    section: '.hero',              dwell: 1.0, world: { light: 0.85, cutaway: 0.0, candle: 0.15, field: 0.0, wind: 0.6, flow: 0.7, fog: 0.0 } },
-  { id: 'descent',    section: '[data-chapter="descent"]',    dwell: 1.5, world: { light: 0.38, cutaway: 0.6, candle: 0.2,  field: 0.0, wind: 0.2, flow: 0.4, fog: 0.02 } },
-  { id: 'tool',       section: '[data-chapter="tool"]',       dwell: 1.4, world: { light: 0.24, cutaway: 0.85, candle: 0.35, field: 0.0, wind: 0.05, flow: 0.25, fog: 0.03 } },
+  { id: 'surface',    section: '.hero',              dwell: 1.0, world: { light: 0.85, cutaway: 0.0, candle: 0.1,  field: 0.0, wind: 0.6, flow: 0.25, fog: 0.0 } },
+  { id: 'descent',    section: '[data-chapter="descent"]',    dwell: 1.5, world: { light: 0.38, cutaway: 0.6, candle: 0.12, field: 0.0, wind: 0.2, flow: 0.3, fog: 0.02 } },
+  { id: 'tool',       section: '[data-chapter="tool"]',       dwell: 1.4, world: { light: 0.24, cutaway: 0.85, candle: 0.12, field: 0.0, wind: 0.05, flow: 0.2, fog: 0.03 } },
   { id: 'signal',     section: '[data-chapter="signal"]',     dwell: 1.6, world: { light: 0.03, cutaway: 0.9, candle: 1.0,  field: 1.0, wind: 0.0, flow: 0.0, fog: 0.05 } },
-  { id: 'deployment', section: '#insight',           dwell: 1.5, world: { light: 0.32, cutaway: 0.95, candle: 0.4, field: 0.05, wind: 0.05, flow: 0.3, fog: 0.03 } },
+  { id: 'deployment', section: '#insight',           dwell: 1.5, world: { light: 0.32, cutaway: 0.95, candle: 0.15, field: 0.05, wind: 0.05, flow: 0.25, fog: 0.03 } },
   { id: 'yotin',      section: '#company',           dwell: 1.0, world: { light: 0.75, cutaway: 0.2, candle: 0.1,  field: 0.0, wind: 1.0, flow: 0.5, fog: 0.0 } },
-  { id: 'fit',        section: '#contact',           dwell: 1.3, world: { light: 0.42, cutaway: 0.8, candle: 0.5,  field: 0.3, wind: 0.15, flow: 0.3, fog: 0.02 } },
+  { id: 'fit',        section: '#contact',           dwell: 1.3, world: { light: 0.42, cutaway: 0.8, candle: 0.12, field: 0.2, wind: 0.15, flow: 0.25, fog: 0.02 } },
 ];
 
 // Camera poses (8): one per chapter, two for deployment. Targets: the candle at the heel ≈ (-0.67,-2.43,3.32)

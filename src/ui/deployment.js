@@ -42,6 +42,7 @@ export function mountDeployment() {
       viz.setXray(xrayOn);
       xrayBtn.setAttribute('aria-pressed', String(xrayOn));
       if (xrayCaption) xrayCaption.hidden = !xrayOn;
+      document.documentElement.classList.toggle('xray-on', xrayOn); // the approved ghost figure shows its x-ray colour only while X-ray is on (one-candle rule)
     }
     I.register('xray', {
       proxy: null, twin: xrayBtn, chapters: DEPLOY_GATE,

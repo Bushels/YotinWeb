@@ -153,7 +153,7 @@ export function buildTerrain({ noiseTex = makeNoiseTexture() } = {}) {
   // Bench: the exposed pay surface inside the notch — wet bitumen, slightly glossy.
   const bench = new THREE.Mesh(
     new THREE.PlaneGeometry(NOTCH.maxX - NOTCH.minX, NOTCH.maxZ - NOTCH.minZ),
-    makeBeddingMaterial('#2e2018', 0.38, 12, 0.08, 0.3, noiseTex, { cornerRadius: 2.2 }),
+    makeBeddingMaterial('#3a2a1e', 0.5, 12, 0.08, 0.3, noiseTex, { cornerRadius: 2.2 }), // visibly rock (round 1): the slots need a lit bench to be cut into
   );
   bench.material.bumpScale = 0.025;
   bench.rotation.x = -Math.PI / 2;

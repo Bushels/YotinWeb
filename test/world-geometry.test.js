@@ -41,12 +41,15 @@ describe('well geometry', () => {
     const heel = paths.cased.getPointAt(1);
     assert.ok(Math.abs(heel.y - (layout.BENCH_Y + 0.12)) < 0.02, `heel y ${heel.y}`);
     const bores = [paths.openHole, ...paths.laterals];
-    for (const c of bores) {
-      for (let i = 0; i <= 20; i++) {
+    bores.forEach((c, ci) => {
+      // the open hole leaves the shoe 0.12 above the bench and settles onto it within its first ~15 %; the
+      // first junction (t = 0.10) sits on that descent, so a lateral's first sample may inherit it
+      for (let i = ci === 0 ? 3 : 1; i <= 20; i++) {
         const y = c.getPointAt(i / 20).y;
         assert.ok(Math.abs(y - (layout.BENCH_Y + wellPath.BORE_LIFT)) < 0.06, `bore point off the bench: ${y}`);
       }
-    }
+    });
+    assert.equal(wellPath.BORE_LIFT, 0, 'bore centrelines lie ON the bench plane (spec §3) — troughs are slots, not mounds');
   });
   test('six legs from four staggered junctions (1/1/2/2), never a fan from one node', () => {
     assert.equal(paths.laterals.length, 6);

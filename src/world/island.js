@@ -67,7 +67,7 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     // the surface plane (topsoil top face) receives; strata already do
   }
 
-  const state = { cycle: cycleState(1.5), elapsed: 0, view, candleBoost: 0 };
+  const state = { cycle: cycleState(1.5), elapsed: 0, view, candleBoost: 0, toolFocus: 0 }; // toolFocus: inspection sleeve + rings (orbit open), not the cutaway
   const pointer = { x: 0, y: 0 };
   let compact = false;
 
@@ -87,14 +87,14 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     legFlow.setFlow(0.9 * flow, flowTime);
     const cut = Math.max(channels.cutaway, 0);
     casedFlow.setCutaway(1 - 0.72 * cut, cut < 0.05);
-    tool.update(channels.candle, cut);
+    tool.update(channels.candle, state.toolFocus);
     field.setReveal(channels.field);
     field.update(1 / 60, elapsed);
     forest.uniforms.wind.value = channels.wind;
     forest.uniforms.windTime.value = elapsed;
     wind.update(elapsed, channels.wind);
     // candle boost from the qualifier verdict (world:candle) decays on its own
-    if (state.candleBoost > 0) { state.candleBoost = Math.max(0, state.candleBoost - 0.004); tool.update(Math.min(1, channels.candle + state.candleBoost), cut); }
+    if (state.candleBoost > 0) { state.candleBoost = Math.max(0, state.candleBoost - 0.004); tool.update(Math.min(1, channels.candle + state.candleBoost), state.toolFocus); }
     if (!reducedMotion) {
       const idleY = Math.sin(elapsed * 0.18) * (compact ? 0.018 : 0.026);
       const idleX = Math.sin(elapsed * 0.13 + 0.8) * (compact ? 0.006 : 0.01);
@@ -118,5 +118,6 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     state, pointer, update, setView,
     setCompact(v) { compact = v; },
     setForestPointer(x, z, strength) { forest.uniforms.pointer.value.set(x, strength, z); wind.setPointer(x, z, strength); },
+    setToolFocus(v) { state.toolFocus = Math.max(0, Math.min(1, v || 0)); },
   };
 }

@@ -134,26 +134,19 @@
     return out + (node.getAttribute("data-count-suffix") || "");
   }
 
-  /* Counters run on plain rAF + IntersectionObserver, so the spec numbers
-     animate on every browser regardless of whether GSAP is ever fetched. */
+  /* Spec tiles never tween their numbers. A count-up from 0 prints "0+ installed" / "8,651 psia" /
+     "40 mm" at the instant a visitor stops, screenshots or deep-links — a false specification and a false
+     install count in the largest type on the page (round-1 P0). The final literal is in the HTML; the
+     reveal is a settle of opacity/position only (styles.css .is-settled). */
   function runCounter(node) {
     var target = parseFloat(node.getAttribute("data-count"));
     if (!isFinite(target)) return;
-    if (reduceMotion) {
-      node.textContent = formatCount(target, node);
-      return;
-    }
-    var duration = 1300;
-    var started = 0;
-    function frame(now) {
-      if (!started) started = now;
-      var p = Math.min(1, (now - started) / duration);
-      var eased = 1 - Math.pow(1 - p, 3);
-      node.textContent = formatCount(target * eased, node);
-      if (p < 1) window.requestAnimationFrame(frame);
-      else node.textContent = formatCount(target, node);
-    }
-    window.requestAnimationFrame(frame);
+    node.textContent = formatCount(target, node);
+    if (reduceMotion) return;
+    node.classList.add("is-settling");
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () { node.classList.add("is-settled"); });
+    });
   }
 
   function buildCounters() {

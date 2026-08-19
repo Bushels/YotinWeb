@@ -10,7 +10,7 @@ import { BENCH_Y, NOTCH } from './layout.js';
 
 export const RADII = { surfaceCollar: 0.175, casedShell: 0.127, cased: 0.100, openHole: 0.086, lateral: 0.070 };
 export const Z_FACE = 5; // front cut face — the cased bore rides ON it (half-proud)
-export const BORE_LIFT = 0.07; // bore centreline sits this far above the bench so the trough reads
+export const BORE_LIFT = 0.0; // bore centreline ON the bench plane (spec §3) — the trough is drawn as a flattened dark slot, not a raised mound
 
 export const WELLFI_VIEW_IDS = ['outside-intermediate', 'below-pump'];
 export const DEFAULT_WELLFI_VIEW = 'outside-intermediate';

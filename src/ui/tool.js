@@ -138,6 +138,7 @@ export function mountTool() {
       if (orbitOn) return;
       orbitOn = true;
       viz.startOrbit();
+      if (w.island.setToolFocus) w.island.setToolFocus(1); // inspection sleeve + rings only while inspecting
       html.classList.add('tool-orbit');
       inspectBtn.setAttribute('aria-pressed', 'true');
       if (closeBtn) closeBtn.hidden = false;
@@ -148,6 +149,7 @@ export function mountTool() {
       if (!orbitOn) return;
       orbitOn = false; dragging = false;
       viz.stopOrbit();
+      if (w.island.setToolFocus) w.island.setToolFocus(0);
       html.classList.remove('tool-orbit', 'tool-orbit-drag');
       inspectBtn.setAttribute('aria-pressed', 'false');
       if (closeBtn) closeBtn.hidden = true;

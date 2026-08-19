@@ -166,7 +166,7 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
   }
   function applyVerdict(verdict) {
     if (verdict === 'strong' || verdict === 'review') {
-      target.boost = verdict === 'strong' ? 0.5 : 0.3;
+      target.boost = verdict === 'strong' ? 0.8 : 0.3; // base 0.12 → strong 0.92 (cyan), review 0.42 (sand warming)
       island.field.swell();
       document.dispatchEvent(new CustomEvent('world:candle', { detail: { boost: target.boost } }));
     } else {

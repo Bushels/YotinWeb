@@ -30,6 +30,15 @@ describe('install figure is "160+" everywhere', () => {
     assert.match(html, /<span data-count="160" data-count-suffix="\+">160\+<\/span>/);
   });
 
+  test('spec numbers never tween through false values (no count-up from 0)', () => {
+    const script = fs.readFileSync(path.join(root, 'main.js'), 'utf8');
+    // runCounter writes the final literal immediately; the reveal is a CSS settle, never "target * eased".
+    assert.doesNotMatch(script, /formatCount\(target \* /);
+    assert.match(script, /node\.textContent = formatCount\(target, node\);\s*if \(reduceMotion\) return;/);
+    // the final literals are in the HTML for no-JS and first paint
+    for (const lit of ['>10,000<', '>150<', '>46<', '>5+<', '>160+<']) assert.ok(html.includes(lit), `spec literal ${lit} present in HTML`);
+  });
+
   test('Product JSON-LD Deployments property says "160+ installed internationally"', () => {
     const product = jsonLdBlocks().find((b) => b['@type'] === 'Product');
     assert.ok(product, 'Product JSON-LD block present');
