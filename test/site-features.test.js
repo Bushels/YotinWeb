@@ -29,7 +29,7 @@ describe('Yotin website structure & feature presence', () => {
 
   test('hero section contains headline, key metrics, and WellFi poster', () => {
     assert.match(html, /<h1 id="hero-title"[^>]*>Know the<br>Unknown/i);
-    assert.match(html, /160 Installed/i); // metric
+    assert.match(html, /160\+ Installed/i); // metric (spec §0: "160+")
     assert.match(html, /assets\/wellfi-island-r3f-poster\.webp/);
   });
 
