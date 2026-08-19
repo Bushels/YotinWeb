@@ -26,6 +26,7 @@ export function mountRail() {
   // Chapters
   const nav = document.createElement('div');
   nav.className = 'rail-chapters';
+  nav.id = 'rail-chapters';
   const links = CHAPTERS.map((c) => {
     const a = document.createElement('a');
     a.href = c.section.startsWith('#') ? c.section : ANCHORS[c.id];
@@ -117,10 +118,10 @@ export function mountRail() {
   bar.type = 'button';
   bar.className = 'rail-bar';
   bar.setAttribute('aria-expanded', 'false');
-  bar.setAttribute('aria-controls', 'rail-legend');
+  bar.setAttribute('aria-controls', 'rail-chapters rail-legend'); // the sheet is contents: seven chapters, then the strata
   const current = document.createElement('span'); current.className = 'rail-bar-current'; current.textContent = LABELS.surface;
   const barTally = document.createElement('span'); barTally.className = 'rail-bar-tally'; barTally.setAttribute('aria-hidden', 'true');
-  const barHint = document.createElement('span'); barHint.className = 'rail-bar-hint'; barHint.textContent = 'Formations';
+  const barHint = document.createElement('span'); barHint.className = 'rail-bar-hint'; barHint.textContent = 'Contents';
   bar.append(current, barTally, barHint);
   legend.id = 'rail-legend';
   rail.insertBefore(bar, rail.firstChild);
@@ -128,11 +129,20 @@ export function mountRail() {
   bar.addEventListener('click', () => setOpen(!rail.classList.contains('is-open')));
   window.addEventListener('scroll', () => { if (rail.classList.contains('is-open')) setOpen(false); }, { passive: true });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && rail.classList.contains('is-open')) setOpen(false); });
-  document.addEventListener('world:progress', () => {
+  // Position on the phone: a 2 px rule on the bar's bottom edge, driven by the same exact progress the desktop
+  // tally track uses, and cyan on its leading edge while the return marker is on (round 9). The stills path
+  // never emits world:progress, so it falls back to the chapter index — chapter-granular, but still position.
+  let hasProgress = false;
+  const setBarProgress = (p) => bar.style.setProperty('--rail-p', p.toFixed(3));
+  document.addEventListener('world:progress', (e) => {
+    hasProgress = true;
+    setBarProgress(e.detail.exact);
+    bar.classList.toggle('is-signal', up.classList.contains('is-on'));
     const lit = tallyItems.filter((li) => li.classList.contains('is-lit')).pop();
     const text = lit ? lit.textContent : '';
     if (barTally.textContent !== text) barTally.textContent = text;
   });
+  document.addEventListener('world:chapter', (e) => { if (!hasProgress) setBarProgress(e.detail.index); });
   setActive('surface');
   return { rail, links, setActive, focusStratum };
 }

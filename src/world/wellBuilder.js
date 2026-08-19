@@ -14,8 +14,12 @@ const SAND_FLOW = '#d9c39a';     // island.SAND_FLOW
 const R_CASED = 0.100;           // wellPath.RADII.cased
 export const FLUID_TINT = { heavy: SAND_FLOW, light: '#e9dcc0', gas: '#c9d4da', thermal: SAND_FLOW };
 export const FOG_WARM = '#140c07';
-const PUMP_U = { shallower: 0.35, deeper: 0.9 }; // cased-string parameter of the answered pump band
-const STANDOFF_U = 0.9;                            // relative — "10 % of intermediate" above the shoe
+// Cased-string parameter of the answered pump band. These must BRACKET the standoff line: "deeper" means the
+// pump is landed below it (the whole reason WellFi is proposed outside the intermediate) and "shallower" above.
+// Round 9: deeper was 0.9 — exactly ON the standoff line, so the one spatial relation chapter 6 exists to show
+// was unreadable, and the 3D disagreed with the PNG schematic (src/ui/fit.js:108 uses 0.96 / 0.42).
+export const PUMP_U = { shallower: 0.42, deeper: 0.96 };
+export const STANDOFF_U = 0.9;                     // relative — "10 % of intermediate" above the shoe
 const WITNESS_COOL = '#d9e5ef', WITNESS_WARM = '#e6c9a6';
 
 // Derive the handful of three.js classes from objects the island already holds (no 'three' import here).

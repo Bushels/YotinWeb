@@ -64,7 +64,14 @@ html.tool-orbit .tool-primary { display: none; } /* one control at a time: Inspe
 .tool-secondary:hover { border-color: var(--sand); }
 .tool-secondary:focus-visible { outline: 1px solid var(--ember); outline-offset: 3px; }
 .tool-secondary[hidden] { display: none; }
-.tool-secondary[aria-pressed="true"] { background: rgba(232, 220, 200, 0.12); border-color: var(--sand); }
+/* Pressed ≠ focused (round 9): measured at 1.2:1 against its own panel, the pressed X-ray pill changed only in
+   fill lightness while the white ring a reader saw was the FOCUS ring — so a visitor who clicked X-ray and then
+   clicked away could not tell from the control whether the toggle was on. The pressed state now takes the sand
+   secondary treatment from the button system (1 px sand border + a sand fill) AND a filled sand dot before the
+   label, which is what actually reads at 1×. No cyan: the one candle stays in chapter 3. The focus ring
+   (:focus-visible, ember, outside the border) is a separate, outer channel. */
+.tool-secondary[aria-pressed="true"] { background: rgba(232, 220, 200, 0.12); border-color: var(--sand); color: var(--sand); }
+.tool-secondary[aria-pressed="true"]::before { content: ""; flex: none; width: 7px; height: 7px; margin-right: 9px; border-radius: 50%; background: var(--sand); }
 .tool-hint { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); }
 .tool-hint[hidden] { display: none; }
 .tool-primary[data-unavailable], .tool-secondary[data-unavailable] { opacity: 0.6; }

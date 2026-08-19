@@ -70,15 +70,35 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
   /* The header shrinks on scroll while the bar stays anchored at --header-h, which left a 12 px strip of live body
      copy showing between them (round 5). Pin the scrolled header to the height the bar is anchored to. */
   html.world-on .site-header[data-scrolled], html.stills-on .site-header[data-scrolled] { height: var(--header-h, 72px); }
-  .rail-bar { all: unset; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: #03070b; /* opaque: never text over text (round 4 P0) */ border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
-  .rail-bar-current { color: var(--ember); }
+  .rail-bar { all: unset; position: relative; pointer-events: auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; background: #03070b; /* opaque: never text over text (round 4 P0) */ border-bottom: 1px solid rgba(232, 220, 200, 0.12); font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); cursor: pointer; touch-action: pan-y; }
+  /* The chapter slot and the casing tally are two independent pieces of state, and colour was the only thing
+     separating them — so "TOOL WELLFI · OPEN HOLE" parsed as one string, and as one string in greyscale
+     (round 9). A hairline rule between them, the way the desktop rail separates its blocks. */
+  .rail-bar-current { color: var(--ember); padding: 6px 10px 6px 0; border-right: 1px solid rgba(232, 220, 200, 0.22); }
   .rail-bar-tally { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sand); }
   .rail-bar-hint { color: var(--sand-mute, #b3aa9a); }
   .rail-bar-hint::after { content: " ▾"; }
   .rail.is-open .rail-bar-hint::after { content: " ▴"; }
-  .rail-legend { display: none; pointer-events: auto; background: rgba(3, 7, 11, 0.94); padding: 8px 16px 12px; border-bottom: 1px solid rgba(232, 220, 200, 0.12); opacity: 1; transform: none; }
+  /* Position, not just identity: a 2 px rule on the bar's bottom edge carries the same progress the desktop
+     tally track carries, so "TOOL" becomes "TOOL, a third of the way" (round 9). Sand at 40 %. While the cyan
+     return marker is on — the reading coming back up the string — the rule's leading 3 px takes that cyan and
+     the phone keeps descent ≠ return. It is the one licensed cyan on a phone, and it lives in chapter 3 only,
+     so the one-candle rule holds. */
+  .rail-bar::after {
+    content: ""; position: absolute; left: 0; bottom: -1px; height: 2px;
+    width: calc(var(--rail-p, 0) / 7 * 100%);
+    background: rgba(232, 220, 200, 0.4);
+    transition: width 200ms linear;
+  }
+  .rail-bar.is-signal::after { background: linear-gradient(to right, rgba(232, 220, 200, 0.4) calc(100% - 3px), #22D3EE calc(100% - 3px)); }
+  .rail-legend { display: none; pointer-events: auto; background: #03070b; /* opaque like the bar: the sheet is navigation now, never text over text (round 4 P0) */ padding: 8px 16px 12px; border-bottom: 1px solid rgba(232, 220, 200, 0.12); opacity: 1; transform: none; }
   .rail.is-open .rail-legend { display: flex; }
   .rail-legend-item { min-height: 44px; display: flex; align-items: center; }
+  /* The expand sheet is CONTENTS, not just formations: below 1100 px the chapter nav was display:none, so a
+     phone had no chapter navigation outside the burger and lost the descent/return story entirely (round 9).
+     The seven anchors sit above the strata legend in the same sheet; 44 px rows. */
+  .rail.is-open .rail-chapters { display: flex; pointer-events: auto; gap: 0; padding: 6px 16px; background: #03070b; border-bottom: 1px solid rgba(232, 220, 200, 0.12); }
+  .rail.is-open .rail-chapters a { min-height: 44px; display: flex; align-items: center; padding: 0 8px; border-left-width: 2px; }
 }
 @media (prefers-reduced-motion: reduce) { .rail *, .rail-tally, .rail-legend { transition: none !important; } }
 

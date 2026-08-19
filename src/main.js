@@ -29,6 +29,26 @@ mountMotionToggle(); // always: applies the persisted motion choice before the w
 if (!gate.world) mountStills();
 mountFit(); // always: the Download schematic button needs no world; the world response attaches on world:first-frame
 
+// ChatFi launcher on the world path (§6 colour budget, Mobbin #2): sand until it has earned ember, and out of
+// the picture while chapters 2 and 3 are the chapter — the two darkest frames, where the cyan collar is meant to
+// own the brightest non-sky pixel and a persistent ember orb 200 px away undercuts it. Gated on the chapter
+// INDEX (floor(p + 0.002), §13b), never raw progress. The stills path never hears world:progress, so the
+// launcher there is untouched and available at every scroll position.
+if (gate.world) {
+  const launcher = document.querySelector('.chatfi-launcher');
+  if (launcher) {
+    let hushed = null, warm = false;
+    document.addEventListener('world:progress', (e) => {
+      const index = Math.floor(e.detail.exact + 0.002);
+      const hush = index === 2 || index === 3;
+      if (hush !== hushed) { hushed = hush; launcher.classList.toggle('is-hushed', hush); }
+      if (!warm && (index >= 4 || document.documentElement.classList.contains('signal-received'))) {
+        warm = true; launcher.classList.add('is-warm');
+      }
+    });
+  }
+}
+
 if (gate.world) {
   import('./boot.js').then(({ bootWorld }) => bootWorld()).catch((err) => {
     document.documentElement.classList.remove('world-on');

@@ -36,6 +36,10 @@ async function pass(label, { launchArgs, contextOptions }) {
     railShown: (() => { const r = document.getElementById('rail'); return Boolean(r) && getComputedStyle(r).display !== 'none'; })(),
     railAnchors: document.querySelectorAll('#rail .rail-chapters a').length,
     railCurrent: Array.from(document.querySelectorAll('#rail .rail-chapters a[aria-current="true"]')).map((a) => a.dataset.railChapter),
+    // typographic truth (round 9): mA is milliamps, MA is megaamps. The unit-casing correction used to be
+    // scoped to html.world-on, so this path printed "4-20 MA" and "KPA" — case-sensitive here on purpose.
+    chipOut: (document.querySelector('.readout .chip-out') || {}).textContent || '',
+    readoutUnits: Array.from(document.querySelectorAll('.readout-list b')).map((b) => b.textContent).join(' | '),
   }));
   // scroll to the second chapter and confirm aria-current follows on the stills path
   await page.evaluate(() => { const el = document.querySelector('[data-chapter="descent"]'); if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.3); });
@@ -53,6 +57,10 @@ async function pass(label, { launchArgs, contextOptions }) {
     if (dom.railAnchors !== 7) problems.push(`rail has ${dom.railAnchors} chapter anchors, expected 7`);
     if (dom.railCurrent.join() !== 'surface') problems.push(`rail aria-current at top = [${dom.railCurrent}] (expected surface)`);
     if (after.join() !== 'descent') problems.push(`rail aria-current after scrolling to descent = [${after}] (expected descent)`);
+  }
+  { // units keep their casing on this path too (spec §0: the instrumentation strings are the truth surface)
+    if (!dom.chipOut.includes('4-20 mA')) problems.push(`output chip reads "${dom.chipOut.trim()}" (expected "4-20 mA")`);
+    for (const u of ['kPa', 'mm/s RMS']) if (!dom.readoutUnits.includes(u)) problems.push(`readout units "${dom.readoutUnits}" missing "${u}"`);
   }
   console.log(`\n[${label}] ${problems.length ? 'FAIL' : 'PASS'} — ${requests.length} requests, ${dom.preloads.length} modulepreload link(s), stills-on=${dom.stillsOn}, world-on=${dom.worldOn}, tier=${dom.reason}, canvases=${dom.canvases}`);
   for (const p of problems) console.log('  - ' + p);

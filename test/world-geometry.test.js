@@ -80,3 +80,24 @@ describe('well geometry', () => {
     assert.ok(p.position.y > layout.BENCH_Y);
   });
 });
+
+// Chapter 6 truth (round 9): the qualifier's "deeper"/"shallower" answers are a spatial relation to the standoff
+// line, so the 3D marker must bracket it — and must agree with the client-side PNG schematic (src/ui/fit.js:108,
+// deeper ? 0.96 : 0.42), or the download and the world tell an operator two different stories about one answer.
+describe('chapter 6 pump marker vs the standoff line', () => {
+  let builder;
+  before(async () => { builder = await import('../src/world/wellBuilder.js'); });
+  test('PUMP_U.deeper > STANDOFF_U > PUMP_U.shallower', () => {
+    assert.ok(builder.PUMP_U.deeper > builder.STANDOFF_U, `deeper ${builder.PUMP_U.deeper} must be below the standoff line ${builder.STANDOFF_U}`);
+    assert.ok(builder.STANDOFF_U > builder.PUMP_U.shallower, `shallower ${builder.PUMP_U.shallower} must be above the standoff line ${builder.STANDOFF_U}`);
+  });
+  test('the 3D marker uses the same parameters as the downloaded schematic', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'ui', 'fit.js'), 'utf8');
+    const m = src.match(/deeper\s*\?\s*([\d.]+)\s*:\s*([\d.]+)/);
+    assert.ok(m, 'fit.js pump-marker parameters not found');
+    assert.equal(Number(m[1]), builder.PUMP_U.deeper);
+    assert.equal(Number(m[2]), builder.PUMP_U.shallower);
+  });
+});

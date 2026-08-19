@@ -8,16 +8,21 @@
 import * as THREE from 'three';
 import { TOOL_LENGTH } from './wellfiTool.js';
 import { RADII } from './wellPath.js';
+import { mergeIndexed } from './forest.js';
 
 export const SAND = '#e8dcc8';
 export const EMBER = '#f27622';
 export const FLOW_TINTS = { light: '#e9dcc0', heavy: '#d9c39a', gas: '#c9d4da', thermal: '#d9c39a' };
 export const FLOW_STEP = '#f0e6d2'; // "one step" lighter than the sand default
 
-// Instrument on the part of the cased string that rides the FRONT FACE (z ≥ 5, u ≤ ~0.42): below that the string
-// is buried in rock and the level marker left the casing (round 4). Pump-off is AT the pump.
-const FLUID_U = { above: 0.18, pumpOff: 0.41 };
-const PUMP_U = 0.42;
+// Instrument on the part of the cased string that rides the FRONT FACE (z ≥ 5): below that the string is buried
+// in rock and the level marker leaves the casing (round 4). Pump-off is AT the pump.
+// Round 9 (engineering truth): the pump sat at u = 0.42, which on the authored cased curve is 74° from vertical —
+// three quarters of the way through the build. WCSB heavy-oil PCP and rod installs land the pump in the vertical
+// or a low-angle tangent above the KOP, so it moves up to u = 0.27 (≈ 27°, still on the front face at z = 5.0).
+// The instrument's travel shortens with it; the level captions gain by sitting closer together.
+const FLUID_U = { above: 0.14, pumpOff: 0.26 };
+const PUMP_U = 0.27;
 
 export function createToolViz(world) {
   const { island, camera, rig, scene } = world;
@@ -107,8 +112,21 @@ export function createToolViz(world) {
 
   // ---- fluid-level instrument ---------------------------------------------------------------------------------
   const cased = island.paths.cased;
-  const pumpMat = new THREE.MeshStandardMaterial({ color: '#5e5650', roughness: 0.6, metalness: 0.5, emissive: new THREE.Color(EMBER), emissiveIntensity: 0.12 });
-  const pump = new THREE.Mesh(new THREE.CylinderGeometry(RADII.cased * 0.7, RADII.cased * 0.7, 0.18, 14), pumpMat);
+  // The pump body: at 1× on a laptop the old ≈ 18 × 10 px plain cylinder was not identifiable as anything, so the
+  // micro-beat's payload ("pump body warms" / "surface looks the same") had no visible subject (round 9). It is
+  // ~1.6× in radius now and it has a silhouette — tapered shoulders top and bottom, the drive head's own language
+  // at surface — merged into ONE mesh so the draw-call budget is untouched. Slightly warmer than the casing steel,
+  // which is on-message here: this is the one element in chapter 4 licensed to warm.
+  const pumpMat = new THREE.MeshStandardMaterial({ color: '#6b5c4c', roughness: 0.58, metalness: 0.5, emissive: new THREE.Color(EMBER), emissiveIntensity: 0.12 });
+  const R_PUMP = RADII.cased * 1.12; // 1.6 × the old 0.7 R_CASED
+  const pumpGeoms = [];
+  { // barrel + a shoulder collar at each end (the flange/bonnet taper the wellhead stack uses)
+    const barrel = new THREE.CylinderGeometry(R_PUMP, R_PUMP, 0.24, 14); pumpGeoms.push(barrel);
+    const top = new THREE.CylinderGeometry(R_PUMP * 0.66, R_PUMP * 1.18, 0.05, 14); top.translate(0, 0.145, 0); pumpGeoms.push(top);
+    const bot = new THREE.CylinderGeometry(R_PUMP * 1.18, R_PUMP * 0.66, 0.05, 14); bot.translate(0, -0.145, 0); pumpGeoms.push(bot);
+  }
+  const pump = new THREE.Mesh(mergeIndexed(pumpGeoms), pumpMat);
+  pumpGeoms.forEach((g) => g.dispose());
   pump.name = 'pump';
   placeOnCased(pump, PUMP_U);
   pump.visible = false;
@@ -332,7 +350,7 @@ export function createToolViz(world) {
     // fluid level + pump warm (+ visibility gated to chapter 4)
     pump.visible = chapterActive.deployment; levelRing.visible = false; earlierRing.visible = false; // the rules carry the level; the rings stay as proxies only
     levelTick.visible = chapterActive.deployment && levelShown; earlierTick.visible = chapterActive.deployment && levelShown && earlier != null;
-    pumpMat.emissiveIntensity = 0.12 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9; // a readable body before pump-off
+    pumpMat.emissiveIntensity = 0.10 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.55; // a readable body before pump-off; the warm lift is smaller now that the body is 1.6× (round 9)
     // drive head keeps turning at one constant rate (chapter 4)
     if (chapterActive.deployment && !world.paused && island.pad && island.pad.motor) island.pad.motor.rotateY(dt * 1.6);
     if (casedGhost) {
@@ -348,7 +366,11 @@ export function createToolViz(world) {
     for (const cap of [surfaceCaption, standoffCaption, levelCaption, earlierCaption]) {
       if (!cap) continue;
       rig.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
-      if (cap.obj) { cap.obj.getWorldPosition(_v); _v.y += 0.12; } else { island.well.wellhead.getWorldPosition(_v); _v.y += 0.4; }
+      // Side captions (the fluid level's "now" and its trend ghost's "earlier") sit ON the rule they name — no
+      // world-space lift. The 0.12 lift is depth-dependent once projected, so it pushed the two chips off their
+      // own lines by different amounts (24 px vs 35 px) and made the pair read as two anchoring behaviours
+      // rather than one (round 9). Same object, same offset, both chips.
+      if (cap.obj) { cap.obj.getWorldPosition(_v); if (!cap.side) _v.y += 0.12; } else { island.well.wellhead.getWorldPosition(_v); _v.y += 0.4; }
       _ndc.copy(_v).project(camera);
       // Clamp into the viewport (inside the rail gutter / header) — when the pad is out of frame the caption holds
       // the edge nearest the wellhead, which still says where "surface" is.
