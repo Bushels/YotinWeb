@@ -40,16 +40,12 @@ const CAPS = {
 };
 
 // Debts allowed to WARN instead of FAIL (cleared as the spec §10 debt list is worked off).
-const KNOWN_DEBT = [
-  { match: (a) => a.url === '/assets/yotin-icon.png', note: 'icon re-encode pending (spec §10)' },
-  { match: (a) => a.url === '/assets/yotin-wellfi-og-2026.png', note: 'OG PNG re-encode pending (spec §10)' },
-  { match: (a) => a.url === '/assets/wellfi-island-r3f-poster.webp', note: 'poster to be replaced by the <= 60 KB chapter-0 still (Gate 2)' },
-];
+const KNOWN_DEBT = []; // spec §10 debts cleared 2026-08-19: icon re-encoded (palette PNG), OG re-encoded (JPEG), legacy poster removed
 
 const sum = (list) => list.reduce((n, a) => n + a.gzipBytes, 0);
 const by = (pred) => assets.filter(pred);
 const isFont = (a) => a.kind === 'font';
-const isPosterOrCh0 = (a) => a.url === '/assets/wellfi-island-r3f-poster.webp' || /^\/assets\/stills\/ch0\./.test(a.url);
+const isPosterOrCh0 = (a) => /^\/assets\/stills\/ch0\./.test(a.url);
 const isWordmark = (a) => a.url === '/assets/wellfi-logo.webp';
 const isIcon = (a) => a.url === '/assets/yotin-icon.png';
 

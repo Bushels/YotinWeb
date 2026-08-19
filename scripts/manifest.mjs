@@ -18,7 +18,6 @@ export const BUCKETS = ['critical', 'ui', 'world', 'still', 'lazy'];
 const CRITICAL_URLS = new Set([
   '/index.html',
   '/privacy.html',
-  '/assets/wellfi-island-r3f-poster.webp',
   '/assets/wellfi-logo.webp',
   '/assets/yotin-icon.png',
 ]);
