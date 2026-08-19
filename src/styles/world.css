@@ -82,10 +82,10 @@ html.world-on .hero-message h1 .w:nth-child(4) > span { animation-delay: 264ms; 
 /* Chapter 5: the rise band — a transparent sticky viewport over the world; the paper panel takes the lower stack. */
 .rise-band { display: none; }
 html.world-on .company-section { background: transparent; padding-top: 0; }
-html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 60vh; pointer-events: none; }
+html.world-on .rise-band { display: block; position: sticky; top: var(--header-h, 64px); height: 44vh; pointer-events: none; }
 html.world-on .rise-caption { position: absolute; left: 0; right: 0; bottom: 28px; margin: 0; padding: 0 clamp(22px, 4vw, 60px); font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--font-display, "Archivo", sans-serif); color: var(--sand); letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(3, 7, 11, 0.7); }
 html.world-on .rise-caption span:last-child { color: var(--ember); }
-html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(48px, 6vw, 88px); padding-bottom: clamp(48px, 6vw, 88px); position: relative; z-index: 1; }
+html.world-on .company-section .company-grid { background: var(--paper); border-radius: 10px 10px 0 0; padding-top: clamp(40px, 5vw, 64px); padding-bottom: clamp(40px, 5vw, 64px); position: relative; z-index: 1; }
 @media (max-height: 560px) { html.world-on .rise-band { height: 36vh; } }
 
 /* Phones: the scroll cue yields to the fixed-layer motion toggle; the scrim lightens so the island reads below the copy. */
@@ -97,19 +97,38 @@ html.world-on .company-section .company-grid { background: var(--paper); border-
 /* Layout diet (spec §4, §6): the world carries the dwell, so the DOM gets tighter rhythm. Measured gate:
    scrollHeight/innerHeight ≤ 7.5 desktop, ≤ 8.5 phone. CSS-only; markup and tests untouched. */
 html.world-on .wellfi-section { padding: clamp(56px, 6vw, 96px) 0 clamp(40px, 5vw, 72px); }
-html.world-on .channel-head { margin-top: clamp(40px, 5vw, 72px); }
+html.world-on .channel-head { margin-top: clamp(32px, 4vw, 56px); }
+html.world-on .channel-card { min-height: 150px; }
 html.world-on .spec-grid { margin-top: clamp(36px, 4vw, 60px); }
 html.world-on .journey-list { margin-top: clamp(40px, 5vw, 72px); }
-html.world-on .signal-stage { margin-top: 28px; }
-html.world-on .insight-section { padding: clamp(56px, 6vw, 96px) 0; }
+html.world-on .signal-stage { margin-top: 24px; padding: 20px 22px; }
+html.world-on .journey-list > li { padding: 14px 18px; }
+html.world-on .insight-section { padding: clamp(48px, 5vw, 80px) 0; }
+html.world-on .device-banner { margin-top: clamp(28px, 3vw, 44px); padding: clamp(20px, 2.5vw, 34px) 0 18px; }
+html.world-on .device-banner img { max-height: 220px; object-fit: contain; }
+html.world-on .portal-note { margin-top: 20px; }
 html.world-on .drill-fallback { padding: clamp(48px, 6vw, 88px) 0; }
 html.world-on .drill-fallback ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-html.world-on .faq-section { padding: clamp(48px, 5vw, 80px) 0; }
+html.world-on .faq-section { padding: clamp(40px, 4vw, 64px) 0; }
+html.world-on .faq-section h2 { margin-bottom: 12px; }
 html.world-on .faq-item summary { min-height: 48px; padding: 12px 0; }
 html.world-on .faq-item p { padding-bottom: 18px; }
-html.world-on .contact-section { padding: clamp(56px, 6vw, 96px) 0; }
+html.world-on .contact-section { padding: clamp(48px, 5vw, 80px) 0; }
+html.world-on .contact-grid { margin-bottom: 0; }
+html.world-on .qualifier { margin-top: 28px; }
 html.world-on .site-footer { padding-top: 28px; padding-bottom: 28px; }
-@media (min-width: 821px) { html.world-on .hero { min-height: min(100svh, 860px); } }
+@media (min-width: 821px) { html.world-on .hero { min-height: min(100svh, 860px); } html.world-on .signal-strip { padding-top: 18px; padding-bottom: 22px; } html.world-on .signal-step { padding-top: 14px; padding-bottom: 14px; } }
+
+/* Header "Check your well fit": appears once the header has scrolled (desktop), hard-cut arrival at #contact. */
+.nav-fit { display: none; }
+@media (min-width: 1101px) {
+  html.world-on .site-header[data-scrolled] .nav-fit { display: inline-flex; align-items: center; gap: 8px; margin-right: 14px; padding: 9px 14px; border: 1px solid var(--ember); border-radius: 999px; color: var(--ember); font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background 200ms ease, color 200ms ease; }
+  html.world-on .site-header[data-scrolled] .nav-fit:hover, html.world-on .site-header[data-scrolled] .nav-fit:focus-visible { background: var(--ember); color: var(--void); outline: none; }
+}
+/* Anchor arrival = hard cut with a 240 ms cross-fade of the canvas (spec §5: never a forced fly-through). */
+html.world-on { scroll-behavior: auto; } /* anchors jump; the canvas fade covers the cut */
+#world canvas { transition: opacity 240ms ease; }
+html.world-cut #world canvas { opacity: 0; transition: none; }
 
 /* Reduced-motion / stills path: sections keep their own backgrounds; the world never loads. */
 html.stills-on #world { display: none; }

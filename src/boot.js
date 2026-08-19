@@ -131,6 +131,7 @@ export function bootWorld() {
     timer.update();
     const dt = Math.min(timer.getDelta(), 1 / 30);
     const elapsed = timer.getElapsed();
+    if (arriving > 0) { arriving--; conductor.jumpTo(); lastState = conductor.getState(); }
     const st = lastState || conductor.getState();
     const p = st.smooth;
     const w = worldAt(p);
@@ -155,6 +156,21 @@ export function bootWorld() {
     if (running) { timer.reset?.(); renderer.setAnimationLoop(frame); } else { renderer.setAnimationLoop(null); }
   });
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); running = false; renderer.setAnimationLoop(null); html.classList.remove('world-live'); html.classList.add('world-lost'); });
+  // Anchor / deep-link arrival (spec §5): hard cut — set exact & smooth together, fade the canvas 240 ms.
+  let arriving = 0;
+  function hardCut() {
+    html.classList.add('world-cut');
+    arriving = 40; // frames during which smooth is pinned to exact (the browser's scroll may take a few frames)
+    setTimeout(() => html.classList.remove('world-cut'), 60);
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target && e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href');
+    if (id && id.length > 1 && document.querySelector(id)) hardCut();
+  }, true);
+  window.addEventListener('hashchange', hardCut);
+  if (location.hash && location.hash.length > 1) hardCut();
   conductor.start();
 
   const api = {
