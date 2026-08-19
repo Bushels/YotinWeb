@@ -149,7 +149,7 @@ export function createToolViz(world) {
   const casedColor = island.materials.casedFlow.uniforms.uFlowColor.value;
   const legColor = island.materials.legFlow.uniforms.uFlowColor.value;
   const flowDefault = trunkColor.clone();
-  let flowTint = null, flowBlink = 0; // blink = remaining ms of a one-step blink
+  let flowTint = null, flowBlink = -1000; // blink = remaining ms of a one-step blink (negative = settled)
   let flowSpeedBoostUntil = 0, flowOffset = 0; // accumulated extra phase (speed ×1.4 while boosted, no snap back)
   function setFlowTint(hex) {
     flowTint = hex ? new THREE.Color(hex) : null;
@@ -195,14 +195,14 @@ export function createToolViz(world) {
   function busy() {
     const now = performance.now();
     if (tweens.length) return true;
-    if (now < vibUntil || now < desatUntil || now < flowSpeedBoostUntil || flowBlink > 0 || now < revealHold) return true;
+    // +160 ms so the frame that restores each timed beat (vibration base, colours, reveal) is guaranteed to run
+    if (now < vibUntil + 160 || now < desatUntil + 160 || now < flowSpeedBoostUntil + 160 || flowBlink > -160 || now < revealHold + 160) return true;
     for (const k in warm) if (Math.abs(warm[k] - warmTarget[k]) > 0.005) return true;
     if (Math.abs(haloMat.opacity - haloTarget) > 0.005) return true;
     if (Math.abs(benchLift - benchTarget) > 0.005) return true;
     if (Math.abs(cutBoost - cutTarget) > 0.005) return true;
     if (ringBoost !== ringTarget || witnessWarm !== witnessTarget) return true;
-    if (orbit.active || levelShown || surfaceCaption) return true;
-    return false;
+    return false; // orbit drags, scroll and pointer moves dirty the frame on their own
   }
   let benchTarget = 0, cutTarget = 0, ringBoost = 0, ringTarget = 0, witnessWarm = 0, witnessTarget = 0;
   let surfaceCaption = null; // { el, anchor } projected each frame
@@ -298,7 +298,7 @@ export function createToolViz(world) {
     // flow: tint / blink / speed
     const tint = flowTint || flowDefault;
     if (flowBlink > 0) { flowBlink -= dt * 1000; trunkColor.set(FLOW_STEP); casedColor.set(FLOW_STEP); legColor.set(FLOW_STEP); }
-    else { trunkColor.copy(tint); casedColor.copy(tint); legColor.copy(tint); }
+    else { if (flowBlink > -1000) flowBlink -= dt * 1000; trunkColor.copy(tint); casedColor.copy(tint); legColor.copy(tint); }
     if (now < flowSpeedBoostUntil) flowOffset += dt * 0.4;
     if (flowOffset > 0) { const u = island.materials.trunkFlow.uniforms.uTime; u.value = u.value + flowOffset; island.materials.casedFlow.uniforms.uTime.value += flowOffset; island.materials.legFlow.uniforms.uTime.value += flowOffset; }
     // x-ray: tubing to 28 %, shell nearly gone, ghost hairlines
@@ -309,7 +309,7 @@ export function createToolViz(world) {
     earlierRing.visible = chapterActive.deployment && earlier != null;
     pumpMat.emissiveIntensity = THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.9;
     // drive head keeps turning at one constant rate (chapter 4)
-    if (chapterActive.deployment && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
+    if (chapterActive.deployment && !world.paused && island.pad && island.pad.drive && island.pad.drive.children[1]) island.pad.drive.children[1].rotateY(dt * 1.6);
     // halo / bench / cut edges
     haloMat.opacity += (haloTarget - haloMat.opacity) * k; if (haloMat.opacity < 0.01 && haloTarget === 0) halo.visible = false;
     benchLift += (benchTarget - benchLift) * k; if (benchMat && benchMat.emissive) benchMat.emissiveIntensity = benchLift * 0.14;
