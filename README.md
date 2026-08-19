@@ -20,11 +20,11 @@ Future equipment is intentionally not included in the deployed site until it is 
 - Deep Chat 2.4.2 is integrity-pinned and lazy-loaded from unpkg only when ChatFi opens; model credentials stay server-side.
 - Analytics: GA4 + Microsoft Clarity, both guarded off on localhost; anything echoing a qualifier answer carries `data-clarity-mask`.
 
-Design spec (panel-converged, authoritative): `docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`. Plan: `docs/superpowers/plans/2026-08-19-yotin-threejs-world.md`.
+Design spec (panel-converged, authoritative): `docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`. Plan: `docs/superpowers/plans/2026-08-19-yotin-threejs-world.md`. After the build, a self-improvement loop (three critics — Opus 5, Codex, Fable — over captured frames with adversarial verification) ran round by round; every confirmed finding was fixed or recorded as a decision for Kyle in spec §14.
 
 ### Spec sheet — measured, CI-enforced
 
-`npm run check` builds, writes `dist/asset-manifest.json` (every shipped byte in a bucket) and fails the build when a cap is exceeded (`scripts/budget.mjs`). Figures are gzip, from the current build:
+`npm run check` builds, writes `dist/asset-manifest.json` (every shipped byte in a bucket), fails the build when a cap is exceeded (`scripts/budget.mjs`), runs the stills colour gate (`scripts/colour-gate.mjs`: saturated cyan only in the chapter-3 still, no stale stills) and the test suites. Figures are gzip, from the current build:
 
 | Bucket | Cap | Measured |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ Design spec (panel-converged, authoritative): `docs/superpowers/specs/2026-08-19
 | Reduced-motion first paint (excl. fonts/marks/ui) | 127 KB | 73 KB |
 | Reduced-motion full scroll, all-in | 470 KB | 223 KB — **zero world requests** (`scripts/rm-smoke.mjs`) |
 
-World at chapter anchors under headless SwiftShader: ~45–50 draw calls, ~65–75 k triangles. Scroll length (`npm run check:scroll`): 9.2 viewports desktop · 10.3 laptop · 13.8 phone — the page *is* the content; the conversion path (hero → header **Check your well fit** → qualifier Q1) is one click.
+Runtime (`npm run check:runtime`, `renderer.info` at every chapter anchor, asserted): desktop tier 3 peaks 76 calls / 121 k tris against ≤ 80 / 130 k (the sun shadow pass counted); phone tier 1 peaks 54 / 46 k against ≤ 56 / 62 k. The same job asserts no horizontal overflow at any anchor and the one-candle rule (saturated cyan present in chapter 3, absent elsewhere). Scroll length (`npm run check:scroll`): 10.4 viewports desktop · 11.6 laptop · 13.95 phone, asserted at +0.3 — the page *is* the content; the conversion path (hero → header **Check your well fit** → qualifier Q1) is one click. Interaction states (`npm run capture:interactions`): orbit, circuit closed / no-difference, x-ray, pump-off, three fit verdicts.
 
 ### Before / after
 
@@ -46,7 +46,7 @@ World at chapter anchors under headless SwiftShader: ~45–50 draw calls, ~65–
 | Interaction | hover reveals | hotspot registry: every 3D object has a ≥ 44 px DOM twin; hover/focus/tap/keyboard all reach the same state; Close-the-Circuit, tool channels, deployment, qualifier → schematic |
 | Accessibility | reduced-motion = fewer reveals | reduced-motion / Save-Data / no-WebGL2 → complete page with stills, no world bytes; print stylesheet |
 | Build | none (`python -m http.server`) | Vite multi-page build to `dist/`, hashed `/_app/` immutable, asset manifest + budgets in CI |
-| Tests | 2 suites | 14 suites / 120 tests: geometry ledger, ids resolve, claims ("160+", no metres), physics sources, stills path, tool twins, fit privacy, routes allow-list, cache keys, privacy notice |
+| Tests | 2 suites | 14 suites / 121 tests + 5 scripted gates (budget, colour, reduced-motion smoke, runtime, scroll): geometry ledger, ids resolve, claims ("160+", no count-up through false values, no metres), physics sources, stills path, tool twins, fit privacy, routes allow-list, cache keys, privacy notice |
 
 ## Structure
 
@@ -64,7 +64,7 @@ src/world/                 layout ledger, well paths, terrain bench, well system
 src/ui/                    rail, signal (circuit), descent, probe, tool, deployment, fit, motion toggle, stills
 src/styles/                world, rail, signal, probe, tool, fit, stills, print
 public/                    copied verbatim: assets (stills, marks, fonts), robots, sitemap, operator routes
-scripts/                   manifest, budget, scroll-length, rm-smoke, stills (Playwright + sharp), frames, capture-all
+scripts/                   manifest, budget, colour-gate, scroll-length, rm-smoke, stills (Playwright + sharp), frames, capture-all, interactions
 test/                      node:test suites (npm test)
 docs/superpowers/          design spec and plan
 vercel.json                build command, immutable /assets and /_app, security headers
@@ -246,9 +246,10 @@ npm test
 npm run check
 ```
 
-`npm test` runs fourteen `node:test` suites (120 tests). `npm run check` builds, runs the resource budgets
-and the suites. Two more checks run on demand: `npm run check:rm` (Playwright, reduced-motion smoke —
-zero world requests, all stills present) and `npm run check:scroll` (scroll-length ratios per viewport).
+`npm test` runs fourteen `node:test` suites (121 tests). `npm run check` builds, runs the resource budgets,
+the stills colour gate and the suites. Three more checks run on demand against the dev server: `npm run
+check:rm` (Playwright, reduced-motion smoke — zero world requests, rail present with aria-current),
+`npm run check:runtime` (draw calls / triangles per chapter, overflow, one-candle) and `npm run check:scroll`.
 
 Layout bugs are visible the moment you look at the page; **wrong numbers are not**. So the suites bias
 toward things a human would not notice: the qualifier's thresholds (`qualifier-logic.test.js`), FAQ ↔
