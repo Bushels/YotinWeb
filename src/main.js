@@ -11,12 +11,14 @@ import '../qualifier-logic.js';
 import '../main.js';
 import { mountRail } from './ui/rail.js';
 import { mountSignal } from './ui/signal.js';
+import { mountDescent } from './ui/descent.js';
 import { mountMotionToggle } from './ui/motionToggle.js';
 import { mountStills } from './ui/stills.js';
 import { mountFit } from './ui/fit.js';
 
 mountRail();
 mountSignal();
+mountDescent();
 mountMotionToggle(); // always: applies the persisted motion choice before the world (or the stills) paint
 if (!gate.world) mountStills();
 mountFit(); // always: the Download schematic button needs no world; the world response attaches on world:first-frame
