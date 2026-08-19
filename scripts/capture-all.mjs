@@ -1,0 +1,44 @@
+// Capture the full frame set for a review round: chapters at 1440x900, 1366x768, 390x844 (world), plus the
+// reduced-motion stills path at 1440x900, and write scratch/frames/report.json (renderer.info, console logs,
+// scroll ratios per viewport). Usage: node scripts/capture-all.mjs --url http://localhost:5174
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const args = Object.fromEntries(process.argv.slice(2).map((a, i, arr) => a.startsWith('--') ? [a.slice(2), arr[i + 1] && !arr[i + 1].startsWith('--') ? arr[i + 1] : true] : []).filter(Boolean));
+const base = (args.url || 'http://localhost:5174').replace(/\/$/, '');
+const out = args.out || 'scratch/frames';
+fs.mkdirSync(out, { recursive: true });
+for (const f of fs.readdirSync(out)) if (f.endsWith('.png') || f.endsWith('.json')) fs.unlinkSync(path.join(out, f));
+
+const report = { generatedAt: new Date().toISOString(), viewports: {} };
+function run(extra, key) {
+  const r = spawnSync(process.execPath, ['scripts/frames.mjs', '--url', `${base}/?world=1`, '--out', out, ...extra], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const text = r.stdout || '';
+  const start = text.indexOf('{');
+  try { report.viewports[key] = JSON.parse(text.slice(start)); } catch (e) { report.viewports[key] = { error: 'parse', stderr: (r.stderr || '').slice(0, 2000) }; }
+}
+run(['--w', '1440', '--h', '900'], '1440x900');
+run(['--w', '1366', '--h', '768'], '1366x768');
+run(['--w', '390', '--h', '844'], '390x844');
+// reduced-motion stills path (no ?world): capture top and three scroll positions
+{
+  const r = spawnSync(process.execPath, ['-e', `
+    import('playwright').then(async ({ chromium }) => {
+      const b = await chromium.launch({ args: ['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+      const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+      const p = await ctx.newPage();
+      const logs = []; p.on('console', m => { if (m.type()==='error') logs.push(m.text()); }); p.on('pageerror', e => logs.push('pageerror '+e.message));
+      await p.goto('${base}/', { waitUntil: 'load', timeout: 60000 });
+      await p.waitForTimeout(1200);
+      const h = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+      for (const [i, f] of [[0,0],[0.33,1],[0.66,2],[1,3]]) { await p.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), Math.round(h * i)); await p.waitForTimeout(700); await p.screenshot({ path: '${out.replace(/\\\\/g, '/')}/rm-' + f + '-1440x900.png' }); }
+      console.log(JSON.stringify({ stillsOn: await p.evaluate(() => document.documentElement.classList.contains('stills-on')), logs, ratio: await p.evaluate(() => document.documentElement.scrollHeight / innerHeight) }));
+      await b.close();
+    });
+  `], { encoding: 'utf8' });
+  try { report.viewports['reduced-motion-1440x900'] = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch (e) { report.viewports['reduced-motion-1440x900'] = { error: (r.stderr || '').slice(0, 1000) }; }
+}
+fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 1));
+const summary = Object.entries(report.viewports).map(([k, v]) => `${k}: ratio ${v.scrollRatio ? v.scrollRatio.toFixed(2) : v.ratio ? v.ratio.toFixed(2) : '?'} · logs ${(v.logs || []).length}${v.frames ? ' · frames ' + v.frames.length : ''}`);
+console.log(summary.join('\n'));
