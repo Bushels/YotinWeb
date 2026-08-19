@@ -153,6 +153,31 @@ Opus 1–8: candle at the open-hole anchor with the four field planes named (§3
 
 **Confirmation-round addendum (folded):** cyan gate restated as a luminance threshold with the collar ember permitted and ch. 5 ramp sand → ember (Opus 1); reduced-motion rows restated with the `ui` bucket, the shared poster/still (one URL in `critical`) and all-in caps that close (Opus 2, Codex P1); dwell floors lowered to 60 vh with the ≈ 9.2-viewport de-pinned baseline published (Opus 3); world sub-cap 25 KB against the measured 14 KB (Opus). Golden hour = low, raking sun; the pad owns the brightest non-sky pixel; the forest gets a luminance ceiling below the pad, distance falloff and a fourth silhouette family (Opus §14.2 answer). Adopted XS ideas: differential labels V₁/V₂ resolving to V₁ − V₂ before digits; wet-pay probe (roughness, not brightness); probe earns cyan only where it intersects a field stroke (Codex).
 
+## 13b. Self-improvement loop (rounds 1–6, 2026-08-19)
+
+Three critics (Opus 5 · Codex GPT-5.6-Sol · a craft critic) review the captured frame set each round; every finding
+is adversarially verified against the frames **and the source** before it is acted on, and refuted findings are
+recorded rather than fixed. Scores rose 4.0 / 4.5 / 5.5 → 6.4 / 6.0 / 8.2 across five rounds. What the loop
+changed that the spec did not anticipate, and which is now binding:
+
+- **The camera map must be continuous.** A one-pose step at a chapter boundary is invisible in a still and
+  unmissable in motion, and it made the frame job non-deterministic (the same anchor rendered two different poses
+  1e-4 apart in progress). `test/pose-continuity.test.js` asserts every boundary. The chapter-5 anchor is the one
+  deliberate exception: it is mid-rise.
+- **A control must be spatially true, not just captioned.** "No difference, no reading" now means the stake stands
+  on the wellhead and no loop is drawn; the loop opens instantly and only closing is eased.
+- **Legibility beats fidelity for a hairline.** A 1 px GL line, a 0.004 torus and a 0.02 stake were all correct and
+  all invisible; they are tubes, rules and a taller stake now.
+- **Frame-rate-dependent easing is a bug, not a detail.** A per-frame 0.06 step is ~1 s at 60 fps and ~20 s on a
+  software renderer or a slow phone — the verdict's candle appeared never to light. All state easing is time-based.
+- **Copy grounds are washes, never panes.** A flat scrim rectangle puts a one-pixel luminance step across the
+  render; grounds feather over ~140 px and their bleed is clipped so it cannot widen the document.
+- **Gate on the chapter index, not raw progress.** `floor(p + 0.002)` is the only correct chapter test; comparing
+  raw `exact` against integers left cyan on the rail at 3.9998.
+- **Two new CI gates** came out of the loop: `scripts/colour-gate.mjs` (saturated cyan only in the chapter-3 still,
+  and no still older than `src/chapters.js`) and the runtime/overflow/one-candle assertions in `scripts/frames.mjs
+  --strict`. Both caught real regressions the tests could not.
+
 ## 14. For Kyle
 
 1. **Launch blocker:** brand architecture paragraph (Yotin ↔ WellFi ↔ MPS) → ChatFi persona + JSON-LD wording.
