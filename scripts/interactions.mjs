@@ -94,6 +94,12 @@ async function runQualifier(answers, name, note) {
   // the camera. Re-seat the chapter so every verdict frame is captured at the same authored pose.
   await gotoChapter(6);
   await shot(name, note);
+  // Companion frame: the DOM verdict block itself (readback + label + reasoning + actions) centred,
+  // so critique rounds can verify the reasoning sentence and hierarchy — the block is taller than the
+  // fold at the authored anchor.
+  await page.evaluate(() => { const v = document.querySelector(".qualifier-verdict"); if (v) v.scrollIntoView({ block: "center", behavior: "instant" }); });
+  await page.waitForTimeout(600);
+  await shot(name + "-verdict", note + " — DOM verdict block centred");
 }
 await runQualifier(['Progressing cavity pump', 'Heavy oil', '100 – 150', 1000, 'Shallower', 'Within 3 months'], 'fit-strong', 'Verdict strong: candle lights at the proposed placement, schematic state applied');
 await runQualifier(['Rod pump', 'Light oil', 'Under 100', 1000, 'Deeper', '3 – 12 months'], 'fit-review', 'Verdict review: likely fit, collar outside the intermediate');
