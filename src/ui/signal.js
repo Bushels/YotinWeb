@@ -154,6 +154,21 @@ export function mountSignal() {
   function inChapter(w) { const p = w.state.exact; return p >= 2.6 && p < 4.2; }
   function overUI(e) { const t = e.target; return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .signal-stage, .qualifier')); }
 
+  // Detent (round 9, Mobbin #3): the track's one marked position is separation 0 — the stake back on the
+  // wellhead, no difference to read (spec §12). Arrowing down from just above it lands ON it instead of skating
+  // past in ones, so the reversible state is reachable from the DOM twin and not only by dragging in 3D. The
+  // input event is re-dispatched, so both the world path and the reduced-motion DOM twin see the same change.
+  if (stakeRange) {
+    stakeRange.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowDown') return;
+      const v = Number(stakeRange.value);
+      if (!(v > 0 && v <= 7)) return;
+      e.preventDefault();
+      stakeRange.value = '0';
+      stakeRange.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
+
   wireDom(); // the lesson works from first paint, world or not
   if (window.__yotinWorld) attach(window.__yotinWorld);
   else document.addEventListener('world:first-frame', () => attach(window.__yotinWorld), { once: true });

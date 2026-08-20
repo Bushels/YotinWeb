@@ -43,10 +43,16 @@ Recommended loop shape going forward: craft ×2 at **medium** · truth ×1 at **
 
 Batch 1 (nine contained fixes: two P1s, truth P2, four measured P2s, two Mobbin CSS wins) ran through the plain
 Agent tool, which has no effort knob — it inherits the session default. Batch 2 (three design-level interaction
-changes from the Mobbin research) runs through the Workflow runner at an explicit effort. Results are filled in
-below after the gates.
+changes from the Mobbin research) runs through the Workflow runner at an explicit effort. Results:
 
 | Batch | effort | wall | output tok | items done | gate failures fixed by the agent | orchestrator rework needed |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 — contained fixes | inherited | — | — | — | — | — |
-| 2 — interaction redesign | — | — | — | — | — | — |
+| 1 — contained fixes (9 items, A–I) | inherited (default) | 58 min | 324 k (subagent total) | 9/9 — two done better than briefed (E was a misdiagnosis it re-measured; A avoided the verifier's radial trap) | 2 (WebGL context-loss flake, re-ran serially) | none — committed as-is (749d1b1) |
+| 2 — interaction redesign (verdict block, circuit instrument, orbit merge) | **medium** (explicit) | 21 min | 190 k (subagent total) | 3/3, incl. a live-verified keyboard detent and a well-reasoned flagged deviation (kept ember on the main CTA per §0 rather than blindly following “secondary”) | 0 | none — one flagged deviation accepted |
+
+Reading of experiment 2: **medium was enough for implementation even at design level.** The riskier batch (three
+interaction redesigns) at explicit medium cost ~59 % of the contained batch and needed zero rework — because the
+brief carried the verifier fixes / research recommendations with file-level pointers. The lesson is that implementer
+effort matters less than brief quality: put the measurements, the file:line pointers, and the binding rules (§13b)
+in the brief, and medium executes them faithfully while still exercising judgment (batch 1’s E re-measure, batch 2’s
+CTA deviation). Reserve high-effort implementation for briefs that say “diagnose and fix” rather than “apply this”.

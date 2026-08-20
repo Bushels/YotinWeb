@@ -437,11 +437,16 @@
             </div>
             <p class="tool-caption" data-tool-caption aria-live="polite">electrical separation creates the transmitting geometry</p>
             <span class="tool-chip">schematic — see the tool figure below</span>
+            <!-- Round 9 (Mobbin #2): the orbit no longer opens a SECOND floating box over the model. Close and its
+                 hint are a footer row of this same panel, under a hairline rule, and the Inspect pill hides while
+                 the orbit is live — one cluster, one control swapping state (spec §4 fixed-layer arbitration). -->
+            <div class="tool-orbit-foot" data-tool-foot hidden>
+              <span class="tool-hint" data-tool-hint hidden>drag to rotate · Esc closes</span>
+              <button type="button" class="tool-secondary" data-tool-close hidden>Close</button>
+            </div>
           </div>
           <div class="tool-inspect">
             <button type="button" class="tool-primary" data-hotspot="inspect" aria-pressed="false">Inspect tool</button>
-            <button type="button" class="tool-secondary" data-tool-close hidden>Close</button>
-            <span class="tool-hint" data-tool-hint hidden>drag to rotate · Esc closes</span>
           </div>
         </div>
 
@@ -513,14 +518,18 @@
               <button type="button" class="circuit-ref" data-hotspot="ref-wellhead" aria-pressed="false"><span class="circuit-ref-tag">V₁</span> Wellhead reference</button>
               <button type="button" class="circuit-ref" data-hotspot="ref-ground" aria-pressed="false"><span class="circuit-ref-tag">V₂</span> Remote ground reference</button>
             </div>
+            <!-- Round 9 (Mobbin #3): the reading the track drives lives in the SAME card as the track, directly
+                 above it, so dragging changes something inside the visitor's fixation. The pressure / temperature
+                 rows stay in the readout card below. -->
+            <p class="readout-head circuit-head"><span class="readout-diff" data-readout-diff>V₁ − V₂</span><span class="chip">representative values</span><span class="chip">visual timing not representative</span></p>
             <label class="circuit-stake" data-hotspot="stake">
               <span>Reference separation <small>(qualitative — no distance is shown)</small></span>
               <input type="range" min="0" max="100" value="60" step="1" aria-label="Reference separation along the lease road">
+              <span class="circuit-stake-ends" aria-hidden="true"><span>on the wellhead — no difference</span><span>down the lease road</span></span>
             </label>
             <p class="circuit-caption" data-circuit-caption aria-live="polite">One point is not a measurement — voltage is a difference.</p>
           </div>
           <div class="readout" data-readout aria-label="Surface readout — representative values, visual timing not representative">
-            <p class="readout-head"><span class="readout-diff" data-readout-diff>V₁ − V₂</span><span class="chip">representative values</span><span class="chip">visual timing not representative</span></p>
             <ul class="readout-list">
               <li><span>Pressure</span><b data-readout-value data-final="158" data-unit="kPa" data-decimals="0">— kPa</b></li>
               <li><span>Temperature</span><b data-readout-value data-final="26" data-unit="°C" data-decimals="0">— °C</b></li>

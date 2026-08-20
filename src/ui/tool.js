@@ -36,6 +36,8 @@ export function mountTool() {
   const inspectBtn = stage.querySelector('[data-hotspot="inspect"]');
   const closeBtn = stage.querySelector('[data-tool-close]');
   const hint = stage.querySelector('[data-tool-hint]');
+  // The orbit's footer row lives INSIDE the chip panel (round 9, Mobbin #2): one cluster over the model, not two.
+  const foot = stage.querySelector('[data-tool-foot]');
 
   // Non-native twins (role=button) activate on Enter/Space.
   [...cards, ...tiles].forEach((el) => {
@@ -141,6 +143,7 @@ export function mountTool() {
       if (w.island.setToolFocus) w.island.setToolFocus(1); // inspection sleeve + rings only while inspecting
       html.classList.add('tool-orbit');
       inspectBtn.setAttribute('aria-pressed', 'true');
+      if (foot) foot.hidden = false;
       if (closeBtn) closeBtn.hidden = false;
       if (hint) hint.hidden = false;
       if (source === 'key') closeBtn && closeBtn.focus({ preventScroll: true });
@@ -152,6 +155,7 @@ export function mountTool() {
       if (w.island.setToolFocus) w.island.setToolFocus(0);
       html.classList.remove('tool-orbit', 'tool-orbit-drag');
       inspectBtn.setAttribute('aria-pressed', 'false');
+      if (foot) foot.hidden = true;
       if (closeBtn) closeBtn.hidden = true;
       if (hint) hint.hidden = true;
       inspectBtn.focus({ preventScroll: true });

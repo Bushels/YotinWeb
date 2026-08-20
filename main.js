@@ -717,12 +717,15 @@
       return i;
     }
 
-    function renderProgress() {
+    /* Same markup at every width, on the question screens AND on the verdict (round 9, Mobbin #1): the phone
+       had the segmented rule and the step counter, the desktop verdict had neither, so the visitor arrived at
+       the answer with no sense of having finished six questions. `complete` lights every segment. */
+    function renderProgress(complete) {
       var bar = el("div", "qualifier-progress");
       bar.setAttribute("aria-hidden", "true");
       QUALIFIER_STEPS.forEach(function (step, i) {
         var seg = el("span");
-        if (i < index) seg.className = "is-done";
+        if (complete || i < index) seg.className = "is-done";
         else if (i === index) seg.className = "is-current";
         bar.appendChild(seg);
       });
@@ -875,6 +878,40 @@
       });
     }
 
+    /* One sentence of reasoning, built ONLY from the normalized ids the qualifier already derived for the world
+       (qualifierWorldState) — the visitor's own answers in their own words, no new facts, no figures the page
+       does not already publish. The decision itself is untouched: this only says out loud which answers drove
+       it, which is what an engineer needs to trust the verdict (round 9, Mobbin #1). */
+    var LIFT_WORD = { pcp: "PCP lift", esp: "ESP lift", rod: "rod pump", flow: "natural flow or other lift" };
+    var FLUID_WORD = { heavy: "heavy oil", light: "light oil", gas: "gas", thermal: "thermal / SAGD" };
+    var TEMP_WORD = {
+      cool: "under 100 °C",
+      warm: "100 – 150 °C",
+      over: "above 150 °C",
+      unsure: "a bottomhole temperature you could not confirm"
+    };
+    var LANDING_WORD = {
+      shallower: "the pump landed shallower than the standoff line, so WellFi runs inside the tubing",
+      deeper: "the pump landed deeper than the standoff line, so WellFi runs outside the intermediate"
+    };
+    var REASON_TAIL = {
+      strong: "nothing you entered sits outside the operating envelope.",
+      review: "that is what the points below would confirm before a deployment date.",
+      future: "temperature is the one hard limit, so this well waits on the high-temperature build."
+    };
+    function reasonSentence(result) {
+      var s = qualifierWorldState("verdict", result.fit);
+      var parts = [];
+      if (LIFT_WORD[s.lift]) parts.push(LIFT_WORD[s.lift]);
+      if (FLUID_WORD[s.fluid]) parts.push(FLUID_WORD[s.fluid]);
+      if (TEMP_WORD[s.temp]) parts.push(TEMP_WORD[s.temp]);
+      var clause = LANDING_WORD[s.landing] || (answers.landing ? "the pump landing still to pin down" : "");
+      var lead = parts.join(", ");
+      if (clause) lead = lead ? lead + " and " + clause : clause;
+      if (!lead) return "";
+      return lead.charAt(0).toUpperCase() + lead.slice(1) + " — " + (REASON_TAIL[result.fit] || "");
+    }
+
     function plainSummary(result) {
       var lines = ["Candidate well review — WellFi", ""];
       summaryLines().forEach(function (row) { lines.push(row.label + ": " + row.value); });
@@ -896,37 +933,57 @@
         flags: result.flags.length ? result.flags.join(",") : "none"
       });
       clear(stage);
+      stage.appendChild(renderProgress(true));
 
       var wrap = el("div", "qualifier-verdict");
       wrap.setAttribute("data-fit", result.fit);
       wrap.setAttribute("role", "status");
+      wrap.appendChild(el("p", "qualifier-count", "All " + (WORDS[QUALIFIER_STEPS.length] || QUALIFIER_STEPS.length).toString().toLowerCase() + " questions answered"));
 
-      var badge = el("p", "qualifier-badge");
-      var headline;
+      /* Round 9 (Mobbin #1). The verdict used to be a single bordered pill — a ring makes a result look like a
+         button, and the only reasoning on the page was a mono caption 900 px away on the canvas. It is a stacked
+         block now: what you answered, then VERDICT, then the label as plain text, then one sentence saying which
+         of your answers drove it, and only then the quiet actions row. The decision logic is untouched. */
+      var label;
       var detail;
-
       var ctaLabel = "Send this to Yotin";
 
       if (result.fit === "strong") {
-        badge.appendChild(icon("ph-check-circle"));
-        badge.appendChild(el("span", null, "Strong fit"));
-        headline = "This well looks like a straightforward deployment.";
-        detail = "Everything you entered sits inside WellFi's operating envelope. The next step is confirming tubing configuration and what data you want out of it.";
+        label = "Strong fit";
+        // the reasoning sentence above now says the envelope part, in the visitor's own answers — no need to say it twice
+        detail = "The next step is confirming tubing configuration and what data you want out of it.";
       } else if (result.fit === "review") {
-        badge.appendChild(icon("ph-magnifying-glass"));
-        badge.appendChild(el("span", null, "Likely fit — worth a review"));
-        headline = "Probably workable, with a couple of things to confirm.";
+        label = "Likely fit — worth a review";
         detail = "Nothing you entered rules it out. These are the points our team would want to walk through before committing to a deployment date.";
       } else {
-        badge.appendChild(icon("ph-wrench"));
-        badge.appendChild(el("span", null, "High-temp version in development"));
-        headline = "Above 150 °C — that build is in progress.";
+        label = "High-temp version in development";
         detail = "WellFi is rated to 150 °C today, and a higher-temperature version is in development. Send this well through and we will come back to you when it is ready, rather than you starting from scratch later.";
         ctaLabel = "Have Yotin follow up";
       }
 
-      wrap.appendChild(badge);
-      wrap.appendChild(el("p", "qualifier-headline", headline));
+      /* (a) readback first: the six questions with the visitor's own answers, verbatim, in the mono face. §0
+         licenses echoing their own data — it is the only way an engineer can check what the answer was given.
+         data-clarity-mask, like everything else that repeats an answer. */
+      var readback = el("dl", "qualifier-summary qualifier-readback");
+      readback.setAttribute("data-clarity-mask", "true");
+      summaryLines().forEach(function (row) {
+        var line = el("div");
+        line.appendChild(el("dt", null, row.label));
+        line.appendChild(el("dd", null, row.value));
+        readback.appendChild(line);
+      });
+      wrap.appendChild(readback);
+
+      wrap.appendChild(el("p", "qualifier-eyebrow", "Verdict"));
+      wrap.appendChild(el("p", "qualifier-label", label));
+
+      var reason = reasonSentence(result);
+      if (reason) {
+        var reasonEl = el("p", "qualifier-reason", reason);
+        reasonEl.setAttribute("data-clarity-mask", "true");
+        wrap.appendChild(reasonEl);
+      }
+
       wrap.appendChild(el("p", "qualifier-detail", detail));
 
       if (result.flags.length) {
@@ -941,19 +998,12 @@
         if (notes.childNodes.length) wrap.appendChild(notes);
       }
 
-      var summary = el("dl", "qualifier-summary");
-      summaryLines().forEach(function (row) {
-        var line = el("div");
-        line.appendChild(el("dt", null, row.label));
-        line.appendChild(el("dd", null, row.value));
-        summary.appendChild(line);
-      });
-      wrap.appendChild(summary);
-
       var body = plainSummary(result);
       var actions = el("div", "qualifier-actions");
 
-      var send = el("a", "button button-primary");
+      // (e) the row is an exit from the block, not its headline: quieter scale, ember kept as an outline so the
+      // CTA hue rule (§0: ember carries CTAs) survives the demotion from a filled pill.
+      var send = el("a", "button button-primary qualifier-cta");
       // Distinct subject so the team can triage the waitlist separately.
       var subject = result.fit === "future"
         ? "Candidate well — awaiting 150 °C+ WellFi"

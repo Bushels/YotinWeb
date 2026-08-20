@@ -38,8 +38,11 @@ html.tool-orbit .channel-card, html.tool-orbit .spec-grid > div { opacity: 0.22;
 /* The four chips are the tool's visible twins, not decoration: they stay legible and usable while the orbit is
    live. Only the surrounding cards step back (round 5). */
 html.tool-orbit .tool-hotspots-wrap { opacity: 1; }
-html.tool-orbit .tool-primary { display: none; } /* one control at a time: Inspect becomes Close */
-.tool-inspect { padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(3, 7, 11, 0.72); }
+/* One control at a time: Inspect hides and the panel grows its Close footer in roughly the same slot, so the
+   open/close reads as one control swapping state rather than two boxes appearing (round 9, Mobbin #2). */
+html.tool-orbit .tool-inspect { display: none; }
+/* The pill sits clear of the chip panel's lower corner (round 9 P3). */
+.tool-inspect { margin-top: 24px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(3, 7, 11, 0.72); }
 .tool-hotspots { display: flex; flex-wrap: wrap; gap: 8px; }
 .tool-hotspot { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 6px; background: rgba(3, 7, 11, 0.5); color: var(--sand); font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; transition: border-color 200ms ease, background 200ms ease; }
 .tool-hotspot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sand-mute); transition: background 200ms ease, box-shadow 200ms ease; }
@@ -52,6 +55,10 @@ html.tool-orbit .tool-primary { display: none; } /* one control at a time: Inspe
 .tool-hotspots-wrap { display: flex; flex-direction: column; gap: 0; }
 .tool-hotspots-wrap .tool-caption { margin-top: 10px; min-height: 1.6em; }
 .tool-hotspots-wrap .tool-chip { margin-top: 8px; align-self: flex-start; }
+/* Merged orbit footer: hairline rule, hint left, Close right — inside the chip panel, not beside it. */
+.tool-orbit-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.tool-orbit-foot[hidden] { display: none; }
+.tool-orbit-foot .tool-hint { margin: 0; }
 
 .tool-inspect { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .tool-primary { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--ember); border-radius: 999px; background: var(--ember); color: #1a0c04; font: 600 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; transition: background 200ms ease, color 200ms ease, border-color 200ms ease; }
@@ -62,6 +69,10 @@ html.tool-orbit .tool-primary { display: none; } /* one control at a time: Inspe
 .tool-primary[aria-pressed="true"] { background: transparent; color: var(--ember); }
 .tool-secondary { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--sand); font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; transition: border-color 200ms ease; }
 .tool-secondary:hover { border-color: var(--sand); }
+/* Close is an exit, not an invitation: sand-on-transparent with a 1 px sand border (the .rail-legend-item
+   treatment), never the brightest thing over the model. Hit target stays ≥ 44 px through padding. */
+.tool-orbit-foot .tool-secondary { padding: 12px 16px; border-color: rgba(232, 220, 200, 0.28); background: transparent; color: var(--sand-mute, #b3aa9a); }
+.tool-orbit-foot .tool-secondary:hover, .tool-orbit-foot .tool-secondary:focus-visible { border-color: var(--sand); color: var(--sand); }
 .tool-secondary:focus-visible { outline: 1px solid var(--ember); outline-offset: 3px; }
 .tool-secondary[hidden] { display: none; }
 /* Pressed ≠ focused (round 9): measured at 1.2:1 against its own panel, the pressed X-ray pill changed only in

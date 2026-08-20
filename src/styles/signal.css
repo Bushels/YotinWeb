@@ -27,14 +27,56 @@
 .circuit-ref[aria-pressed="true"] .circuit-ref-tag { border-color: var(--ember); color: var(--ember); }
 .circuit-stake { display: block; margin-top: 16px; font: 500 11px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .circuit-stake small { text-transform: none; letter-spacing: 0; opacity: 0.8; }
-.circuit-stake input[type="range"] { display: block; width: 100%; margin-top: 8px; accent-color: var(--ember); min-height: 44px; }
+/* Round 9 (Mobbin #3): a measurement track, not a settings control. The full-width ember fill was the loudest
+   ember run in the chapter §6 wants darkest, and it read as a form widget. Now: a 1 px sand rule at 28 % alpha,
+   ticks every 10 %, a 2 × 14 px sand bar for a thumb, and a taller detent tick at 0 — the position where the
+   stake stands back on the wellhead and there is no difference to read. Ember appears only on focus / press. */
+.circuit-stake input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  display: block; width: 100%; margin-top: 10px; min-height: 44px; padding: 0;
+  background: transparent; cursor: pointer;
+}
+.circuit-stake input[type="range"]:focus { outline: none; }
+.circuit-stake input[type="range"]:focus-visible { outline: 1px solid var(--ember); outline-offset: 4px; }
+/* one shared track paint: hairline rule · 10 % ticks · the taller "no difference" detent at 0 */
+.circuit-stake input[type="range"]::-webkit-slider-runnable-track {
+  height: 18px; border: 0; border-radius: 0;
+  background:
+    linear-gradient(rgba(232, 220, 200, 0.28), rgba(232, 220, 200, 0.28)) 0 6px / 100% 1px no-repeat,
+    linear-gradient(rgba(232, 220, 200, 0.5), rgba(232, 220, 200, 0.5)) 0 6px / 2px 11px no-repeat,
+    repeating-linear-gradient(90deg, rgba(232, 220, 200, 0.28) 0 1px, transparent 1px 10%) 0 7px / calc(100% + 1px) 6px no-repeat;
+}
+.circuit-stake input[type="range"]::-moz-range-track {
+  height: 14px; border: 0; border-radius: 0;
+  background:
+    linear-gradient(rgba(232, 220, 200, 0.28), rgba(232, 220, 200, 0.28)) 0 6px / 100% 1px no-repeat,
+    linear-gradient(rgba(232, 220, 200, 0.5), rgba(232, 220, 200, 0.5)) 0 2px / 2px 11px no-repeat,
+    repeating-linear-gradient(90deg, rgba(232, 220, 200, 0.28) 0 1px, transparent 1px 10%) 0 7px / calc(100% + 1px) 6px no-repeat;
+}
+.circuit-stake input[type="range"]::-moz-range-progress { height: 1px; background: transparent; }
+.circuit-stake input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 2px; height: 14px; margin-top: -0.5px; border: 0; border-radius: 0;
+  background: var(--sand); transition: background 160ms ease, box-shadow 160ms ease;
+}
+.circuit-stake input[type="range"]::-moz-range-thumb {
+  width: 2px; height: 14px; border: 0; border-radius: 0;
+  background: var(--sand); transition: background 160ms ease, box-shadow 160ms ease;
+}
+.circuit-stake input[type="range"]:focus-visible::-webkit-slider-thumb,
+.circuit-stake input[type="range"]:active::-webkit-slider-thumb { background: var(--ember); box-shadow: 0 0 0 1px rgba(242, 118, 34, 0.45); }
+.circuit-stake input[type="range"]:focus-visible::-moz-range-thumb,
+.circuit-stake input[type="range"]:active::-moz-range-thumb { background: var(--ember); box-shadow: 0 0 0 1px rgba(242, 118, 34, 0.45); }
+.circuit-stake-ends { display: flex; justify-content: space-between; gap: 12px; margin-top: 2px; font-size: 10px; letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); }
 .circuit-caption { margin: 14px 0 0; color: var(--sand); font-size: 15px; line-height: 1.5; min-height: 1.5em; }
 .circuit-caption:empty { margin: 0; min-height: 0; }
 
 .readout { padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: rgba(3, 7, 11, 0.7); align-self: start; }
 .readout-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font: 600 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; }
 .readout-diff { color: var(--sand); }
-.readout .chip, .readout .chip-out { display: inline-block; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 10px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
+.readout .chip, .readout .chip-out, .circuit-head .chip { display: inline-block; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 10px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
+/* the reading rides above its own track, inside the circuit card (Mobbin #3) */
+.readout-head.circuit-head { margin: 18px 0 0; }
 .readout-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .readout-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font: 500 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .readout-list b { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--sand); transition: color 400ms ease; }
