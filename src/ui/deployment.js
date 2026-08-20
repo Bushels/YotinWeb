@@ -28,6 +28,56 @@ export function mountDeployment() {
 
   function levelText(d) { return d >= 0.97 ? 'pump-off' : d <= 0.08 ? 'above pump' : 'between above-pump and pump-off'; }
 
+  /* ---- the readout the slider settles into (Kyle, 2026-08-20) ---------------------------------------
+     Move the fluid level, stop, and 400 ms later the card says what a tool down there would be reading —
+     plus what changed since the last time it settled. The value model is a straight line between the two
+     ends of the instrument the visitor is already holding: more fluid over the pump = more head on the
+     gauge and a marginally warmer tool; at pump-off it lands exactly on the chapter-3 readout (158 kPa,
+     26 °C) so the two never contradict each other. Representative throughout: no live data, no WellFi
+     figure, and the readout says so on every line.
+
+     Deliberately mounted OUT here rather than inside attach(): on the reduced-motion / no-WebGL path the
+     world never arrives, but the slider still moves and must still answer. */
+  const valuesEl = insight.querySelector('[data-fluid-values]');
+  const deltaEl = insight.querySelector('[data-fluid-delta]');
+  const P_ABOVE = 420, P_PUMPOFF = 158;   // kPa, representative
+  const T_ABOVE = 26.9, T_PUMPOFF = 26.0; // °C, representative
+  const readingFor = (d) => ({ p: P_ABOVE + (P_PUMPOFF - P_ABOVE) * d, t: T_ABOVE + (T_PUMPOFF - T_ABOVE) * d });
+  const signed = (n, dec) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(dec);
+
+  if (range && valuesEl && deltaEl) {
+    let previous = null, settleTimer = 0;
+    const printReading = () => {
+      const r = readingFor(Number(range.value) / 100);
+      const p = Math.round(r.p), t = Number(r.t.toFixed(1));
+      valuesEl.hidden = false;
+      valuesEl.textContent = '';
+      const line = document.createElement('span');
+      line.className = 'fluid-readout-figures';
+      line.textContent = `${p} kPa · ${t.toFixed(1)} °C`;
+      const chip = document.createElement('span');
+      chip.className = 'tool-chip';
+      chip.textContent = 'representative values';
+      valuesEl.append(line, document.createTextNode(' at the tool '), chip);
+      // Only the figures that actually moved are named: "±0.0 °C" is noise, not a delta.
+      if (previous) {
+        const parts = [];
+        if (p !== previous.p) parts.push(`${signed(p - previous.p, 0)} kPa`);
+        if (t !== previous.t) parts.push(`${signed(t - previous.t, 1)} °C`);
+        if (parts.length) {
+          deltaEl.hidden = false;
+          deltaEl.textContent = `Δ ${parts.join(' · ')} since the last reading`;
+        }
+      }
+      previous = { p, t };
+    };
+    // One schedule for both events: a range fires `change` per key press in some browsers, and a reading
+    // per arrow key would be a stream of one-unit deltas rather than "you moved it, here is what changed".
+    const schedule = () => { window.clearTimeout(settleTimer); settleTimer = window.setTimeout(printReading, 400); };
+    range.addEventListener('input', schedule);
+    range.addEventListener('change', schedule);
+  }
+
   async function attach(w) {
     const viz = await getToolViz(w);
     const I = w.interactions;

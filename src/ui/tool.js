@@ -1,14 +1,14 @@
 // Chapter 2 UI (spec §4 row 2, §5, §12): the five channel cards and six spec tiles as hotspot twins (sensor
 // warms + a HUD value that settles in the card — tabular, "representative values"; dimension lines that draw on
-// the tool for the public specs), the four chip-buttons that twin the tool's named volumes ("the gap makes the
-// antenna"), and the chapter's one invited action — "Inspect tool": a contained orbit around the tool whose pose
+// the tool for the public specs), the four chip-buttons that twin the tool's named volumes (what each one
+// does, never how it is built), and the chapter's one invited action — "Inspect tool": a contained orbit around the tool whose pose
 // persists until Close or Esc (no hold-to-orbit, no spring-back; two-stage tap on touch only here).
 import '../styles/tool.css';
 
 export const TOOL_GATE = [[1.6, 3.4]];
 const CAPTIONS = {
   collar: 'the collar is the candle — the emissive band that transmits',
-  gap: 'electrical separation creates the transmitting geometry',
+  gap: 'this is where the reading leaves the string',
   sensors: 'pressure · temperature · vibration live in this package',
   battery: 'the battery volume — rated 5+ years, no cable to surface',
 };
@@ -117,7 +117,7 @@ export function mountTool() {
       });
     });
 
-    // Tool volume chips → the named volume warms; the gap beat (spec §12: the gap makes the antenna).
+    // Tool volume chips → the named volume warms; the transmitter beat (spec §12).
     const volumeFor = { collar: 'gap', gap: 'gap', sensors: 'sensors', battery: 'battery' };
     chips.forEach((chip) => {
       const id = chip.dataset.hotspot;

@@ -100,8 +100,8 @@ describe('fit modules stay local', () => {
     assert.doesNotMatch(digits, /\d/, 'caption vocabulary must carry no numbers beyond the public rule/spec line');
     assert.ok(fitJs.includes('Proposed outside-intermediate WellFi configuration — review required'));
     assert.ok(fitJs.includes('standoff — 10 % of intermediate'));
-    assert.ok(fitJs.includes('inside casing — attenuated coupling'));
-    assert.ok(fitJs.includes('open hole — direct coupling to the formation'));
+    assert.ok(fitJs.includes('inside casing — reduced signal'));
+    assert.ok(fitJs.includes('open hole — strongest signal'));
     assert.ok(fitJs.includes('representative · not to scale · generated locally'));
   });
 

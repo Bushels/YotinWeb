@@ -16,7 +16,6 @@ export function mountSignal() {
   const readout = stage.querySelector('[data-readout]');
   const diff = stage.querySelector('[data-readout-diff]');
   const values = Array.from(stage.querySelectorAll('[data-readout-value]'));
-  const sealChip = stage.querySelector('[data-seal-chip]');
   const steps = Array.from(document.querySelectorAll('.journey-list > li'));
 
   let world = null, circuit = null, closedOnce = false, digitsShown = false;
@@ -114,20 +113,15 @@ export function mountSignal() {
     }
     // Journey steps: replay their beat on hover/focus/tap (twins only; the beats are visual, not claims).
     const beats = [
-      () => { w.island.field.swell(); },                                              // 01 gap
-      () => { w.island.field.swell(); },                                              // 02 transmit
-      () => { refWell.focus({ preventScroll: true }); },                              // 03 decode → look at the references
-      () => { if (circuit.state.closed) settleDigits(); else say('Close the circuit first — then the reading lands on RS-485 / 4-20 mA.'); }, // 04 connect
+      () => { w.island.field.swell(); },                                              // 01 the tool speaks
+      () => { w.island.field.swell(); },                                              // 02 the formation carries it
+      () => { refWell.focus({ preventScroll: true }); },                              // 03 surface hears it → look at the references
+      () => { if (circuit.state.closed) settleDigits(); else say('Close the circuit first — then the reading lands on RS-485 / 4-20 mA.'); }, // 04 it lands in your RTU
     ];
     steps.forEach((li, i) => {
       li.setAttribute('tabindex', '0');
       li.dataset.hotspot = `journey-0${i + 1}`;
       I.register(`journey-0${i + 1}`, { proxy: null, twin: li, chapters: gate, apply3D() {}, onActivate: () => beats[i] && beats[i]() });
-    });
-    // Seal chip: the rail legend's Colorado Shale twin fires world:focus-stratum; also expose on the chip.
-    document.addEventListener('world:focus-stratum', (e) => {
-      const name = e.detail && e.detail.name;
-      if (sealChip) sealChip.hidden = !(name === 'colorado' && (w.state.exact >= 2.6 && w.state.exact < 4.4));
     });
     // Probe on rock: click/tap, or a 200 ms dwell — never a merely travelling pointer.
     let dwellTimer = 0, lastX = 0, lastY = 0, moved = true;

@@ -123,10 +123,9 @@
     {
       /* Where the pump lands decides the deployment method. Landed closer to
          the shoe than the standoff rule allows, WellFi runs outside the
-         intermediate instead of inside the tubing. This matches the EM physics
-         — the formation is the antenna, and an emitter sitting at the cemented
-         shoe couples at roughly 0.1%. Either comfortably above the shoe or
-         below it in open hole is fine; at the shoe is the bad case. */
+         intermediate instead of inside the tubing. Either comfortably above
+         the shoe or below it in open hole works; right at the shoe is the
+         awkward case. */
       key: "landing",
       type: "derived",
       label: "Pump landing",
@@ -147,7 +146,7 @@
         var threshold = landingThreshold(len);
         return {
           question: "Is the pump landed shallower or deeper than " + fmtNum(threshold) + " m?",
-          hint: "That is 10% of your intermediate above the shoe — the standoff WellFi needs to run inside the tubing.",
+          hint: "That is 10% of your intermediate above the shoe — the standoff we design to for a run inside the tubing.",
           options: [
             { value: "Shallower than " + fmtNum(threshold) + " m", tag: "< " + fmtNum(threshold) },
             { value: "Deeper than " + fmtNum(threshold) + " m", tag: "> " + fmtNum(threshold), flag: "external" },
@@ -173,7 +172,7 @@
   var NOTES = {
     temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
     // source: Yotin deployment practice — internal rule of thumb, not a published figure.
-    external: "Landed that deep, WellFi would be set below the intermediate shoe, in open hole, rather than on the tubing inside casing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. It is a supported configuration, but it changes the install and is worth confirming early.",
+    external: "Landed that deep, WellFi would be set below the intermediate shoe, in open hole, rather than on the tubing inside casing. It is a supported configuration and it reports just as well — but it changes the install, so it is worth confirming early.",
     landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs on the tubing inside casing or is set below the shoe, in open hole. Worth pinning down before the changeout gets scoped.",
     timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
     lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",

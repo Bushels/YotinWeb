@@ -105,6 +105,12 @@ html.tool-orbit.tool-orbit-drag main { cursor: grabbing; }
 .fluid-level-trend { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; }
 .fluid-level-trend .tool-caption { margin: 0; }
 .fluid-level-trend[hidden] { display: none; }
+/* The settled readout (Kyle, 2026-08-20): figures in sand, the delta a quieter line under them. */
+.fluid-readout { margin-top: 10px; }
+.fluid-readout-values { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 0; font: 500 11px/1.6 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
+.fluid-readout-figures { font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--sand); text-transform: none; }
+.fluid-readout-delta { margin: 4px 0 0; font: 500 11px/1.6 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); }
+.fluid-readout-values[hidden], .fluid-readout-delta[hidden] { display: none; }
 
 /* "surface looks the same" — a DOM caption projected to the wellhead while the level sits at pump-off. */
 .surface-caption { position: fixed; left: 0; top: 0; z-index: 2; margin: 0; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(3, 7, 11, 0.72); font: 500 11px/1.5 var(--font-mono); letter-spacing: 0.06em; color: var(--sand); pointer-events: none; white-space: nowrap; transition: opacity 240ms ease; }

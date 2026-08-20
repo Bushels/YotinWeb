@@ -87,14 +87,12 @@
 .readout-list b, .readout .chip-out, .tool-chip .unit, [data-unit] { text-transform: none; }
 .readout.is-closed .readout-list b { color: #22D3EE; }
 .readout-foot { margin: 12px 0 0; }
-.seal-chip { grid-column: 1 / -1; margin: 0; padding: 12px 14px; border-left: 2px solid var(--sand); font: 500 12px/1.6 "IBM Plex Mono", ui-monospace, monospace; color: var(--sand); background: rgba(232, 220, 200, 0.06); }
-.seal-chip[hidden] { display: none; }
 
 /* Journey steps as twins */
 .journey-list > li[data-hotspot] { cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
 .journey-list > li.is-hover, .journey-list > li:focus-visible { outline: none; border-color: var(--sand); background: rgba(232, 220, 200, 0.06); }
 
-/* The logomark receives the signal (spec §12/§13b): the mark's WARM stroke carries its own brand ember from
+/* The lockup receives the signal (spec §12/§13b): the mark's WARM stroke carries its own brand ember from
    first paint (Kyle, round 11: "the Yotin logo on the header isn't in color") while its COOL stroke waits in
    sand — the one-candle rule reserves teal/cyan for after the circuit closes. #yotin-presignal (index.html)
    is the linear colour map that does exactly that; dropping it lets the teal arrive. */

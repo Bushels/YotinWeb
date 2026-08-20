@@ -158,20 +158,73 @@
   /* Spec tiles never tween their numbers. A count-up from 0 prints "0+ installed" / "8,651 psia" /
      "40 mm" at the instant a visitor stops, screenshots or deep-links — a false specification and a false
      install count in the largest type on the page (round-1 P0). The final literal is in the HTML; the
-     reveal is a settle of opacity/position only (styles.css .is-settled). */
+     reveal is a settle of opacity/position only (styles.css .is-settled).
+
+     Kyle asked (2026-08-20) for the numerals to "count up". The answer to the ask, without reopening the
+     P0, is a GLYPH settle: every digit of the real figure is in the DOM from first paint and arrives one
+     after another over ~650 ms, so the number appears to assemble itself and no frame of the animation
+     ever shows a figure that is not the published one. */
+  function splitGlyphs(node) {
+    var text = node.textContent;
+    if (!text || node.querySelector(".ct-d")) return;
+    node.textContent = "";
+    for (var i = 0; i < text.length; i++) {
+      var span = document.createElement("span");
+      span.className = "ct-d";
+      span.style.setProperty("--g", String(i));
+      span.textContent = text.charAt(i);
+      node.appendChild(span);
+    }
+  }
+
   function runCounter(node) {
     var target = parseFloat(node.getAttribute("data-count"));
     if (!isFinite(target)) return;
     node.textContent = formatCount(target, node);
     if (reduceMotion) return;
+    splitGlyphs(node);
     node.classList.add("is-settling");
     window.requestAnimationFrame(function () {
       window.requestAnimationFrame(function () { node.classList.add("is-settled"); });
     });
   }
 
+  /* Spec grid entrance (Kyle, 2026-08-20: "I would like the icons bigger and this section also lacks some
+     kind of additional animation"). One observer on the whole <dl>: the tiles arrive 60 ms apart, each one
+     drawing its ember rule, settling its icon and then assembling its numeral. Once only, never idle
+     (spec §5). The hidden start state is armed from here, so with no JS the tiles simply render. */
+  function buildSpecGrid() {
+    var grid = document.querySelector(".spec-grid");
+    if (!grid) return null;
+    var tiles = Array.prototype.slice.call(grid.children);
+    function enter() {
+      tiles.forEach(function (tile, i) {
+        window.setTimeout(function () {
+          tile.classList.add("is-in");
+          var n = tile.querySelector("[data-count]");
+          if (n) runCounter(n);
+        }, reduceMotion ? 0 : i * 60);
+      });
+    }
+    if (!("IntersectionObserver" in window)) { enter(); return grid; }
+    if (!reduceMotion) grid.classList.add("is-armed");
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (!entries[i].isIntersecting) continue;
+        io.disconnect();
+        enter();
+        return;
+      }
+    }, { rootMargin: "0px 0px -10% 0px" });
+    io.observe(grid);
+    return grid;
+  }
+
   function buildCounters() {
-    var nodes = document.querySelectorAll("[data-count]");
+    var grid = buildSpecGrid();
+    var nodes = Array.prototype.filter.call(document.querySelectorAll("[data-count]"), function (n) {
+      return !(grid && grid.contains(n)); // the spec grid runs its own, staggered
+    });
     if (!nodes.length) return;
     if (!("IntersectionObserver" in window)) {
       nodes.forEach(function (node) {
