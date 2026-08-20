@@ -94,7 +94,10 @@
 .journey-list > li[data-hotspot] { cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
 .journey-list > li.is-hover, .journey-list > li:focus-visible { outline: none; border-color: var(--sand); background: rgba(232, 220, 200, 0.06); }
 
-/* The logomark receives the signal (spec §12): sand/mono until the circuit first closes, then its own colours. */
-html.world-on .brand-mini img, html.world-on .footer-brand img { filter: grayscale(1) sepia(0.35) brightness(1.05); transition: filter 400ms ease; }
+/* The logomark receives the signal (spec §12/§13b): the mark's WARM stroke carries its own brand ember from
+   first paint (Kyle, round 11: "the Yotin logo on the header isn't in color") while its COOL stroke waits in
+   sand — the one-candle rule reserves teal/cyan for after the circuit closes. #yotin-presignal (index.html)
+   is the linear colour map that does exactly that; dropping it lets the teal arrive. */
+html.world-on .brand-mini img, html.world-on .footer-brand img { filter: url(#yotin-presignal); transition: filter 400ms ease; }
 html.signal-received .brand-mini img, html.signal-received .footer-brand img { filter: none; }
 html.stills-on .brand-mini img, html.stills-on .footer-brand img { filter: none; }

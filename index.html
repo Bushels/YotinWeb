@@ -232,6 +232,21 @@
 
 <body id="top" data-chatfi-api="https://chatfi-server-851855129205.us-central1.run.app">
   <a class="skip-link" href="#main">Skip to content</a>
+  <!-- Pre-signal Yotin logomark filter (spec §13b, one-candle rule). The brand mark is two wind strokes: a
+       warm one (#EC6B24 — the brand's own ember) and a cool one (#3FB4C3 teal). Cyan/teal in the logomark is
+       reserved for AFTER the circuit closes, so before the signal arrives the mark renders its WARM half in
+       full brand colour and its COOL half in sand. This is a single linear colour map (no offsets, sRGB), fitted
+       so brand-orange maps to itself, brand-teal maps to sand #d5c9b3, and white maps to white — which makes
+       every antialiased pixel between them land correctly, and leaves the dark keyline dark. When
+       html.signal-received is set the filter is dropped and the teal arrives. -->
+  <svg class="brand-filter" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
+    <filter id="yotin-presignal" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="-0.67137  4.70810 -3.03672 0 0
+                                           -0.23399  1.65913 -0.42514 0 0
+                                            0.17828 -0.50220  1.32392 0 0
+                                            0        0        0       1 0"/>
+    </filter>
+  </svg>
   <div class="scroll-rail" aria-hidden="true"></div>
   <!-- The persistent world: one fixed canvas behind the semantic DOM (spec §2). Decorative — every word,
        control and claim lives in the DOM below. Hidden unless the capability gate stamps html.world-on. -->
@@ -316,12 +331,9 @@
               <li><i class="ph ph-plugs" aria-hidden="true"></i> MODBUS Ready</li>
               <li><i class="ph ph-lightning" aria-hidden="true"></i> Rapid Deployment</li>
             </ul>
-            <!-- Primary CTA points at the qualifier, not at a scroll anchor:
-                 a hero button that only scrolls 400px converts nothing. -->
-            <div class="hero-actions" data-hero-step>
-              <a class="button button-primary" href="#contact">Check your well fit <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-              <a class="button button-secondary" href="#wellfi">Explore WellFi <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-            </div>
+            <!-- No hero CTA row (round 11, Kyle): the header's CHECK YOUR WELL FIT and ASK CHATFI are the
+                 one-click paths from any scroll position, and the qualifier owns the bottom of the page. A
+                 duplicated pair here only pushed the chips down and stole the eye from the world. -->
           </div>
         </div>
 

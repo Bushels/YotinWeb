@@ -169,6 +169,30 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   letter-spacing: 0.04em;
 }
+/* First paint only (Kyle, round 11): the wind strokes wipe in left-to-right — the direction the mark reads —
+   and the wordmark and tagline follow. Time-based, one shot, no idle loop, done in 900 ms. It is a pure CSS
+   entrance so it costs nothing on the world path and nothing to the stills path's byte budget; both the
+   reduced-motion query and html.stills-on switch it off entirely. */
+@media (prefers-reduced-motion: no-preference) {
+  /* fill: backwards, never forwards — .site-header[data-scrolled] .brand-mini-copy small { opacity: 0 }
+     must keep winning once the entrance has finished. */
+  .brand-mini img { animation: yotin-mark-in 760ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+  .brand-mini-copy strong { animation: yotin-brand-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) 240ms backwards; }
+  .brand-mini-copy small { animation: yotin-brand-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) 360ms backwards; }
+}
+html.stills-on .brand-mini img,
+html.stills-on .brand-mini-copy strong,
+html.stills-on .brand-mini-copy small { animation: none; }
+@keyframes yotin-mark-in {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  40%  { opacity: 1; }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+@keyframes yotin-brand-rise {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .site-header[data-scrolled] .brand-mini { transform: scale(0.86); transform-origin: left center; }
 .site-header[data-scrolled] .brand-mini-copy small { opacity: 0; }
 
@@ -289,7 +313,10 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
   gap: 8px;
   max-width: 560px;
-  margin: 26px 0 0;
+  /* Last row of the hero block since the duplicated CTA pair came out (round 11):
+     it carries the breathing the buttons used to provide, so the copy column still
+     lands as a composed stack rather than stopping short. */
+  margin: 30px 0 6px;
   padding: 0;
   list-style: none;
 }
@@ -311,7 +338,6 @@ a { color: inherit; text-decoration: none; }
 }
 .proof-chips i { color: var(--ember); font-size: 15px; }
 
-.hero-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 32px; }
 
 .button {
   min-height: 58px;
@@ -333,17 +359,6 @@ a { color: inherit; text-decoration: none; }
 .button-primary:hover { background: var(--ember-lit); box-shadow: 0 12px 34px -14px rgba(242, 118, 34, 0.9); }
 .button-secondary { border-color: var(--line-strong); background: rgba(3, 7, 11, 0.55); color: var(--sand); }
 .button-secondary:hover { border-color: var(--sand); color: var(--white); }
-
-.hero-actions .button {
-  min-width: 236px;
-  min-height: 62px;
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
 /* Scene ------------------------------------------------------------------ */
 
@@ -1784,8 +1799,6 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 560px) {
-  .hero-actions { flex-direction: column; align-items: stretch; }
-  .hero-actions .button { width: 100%; min-width: 0; }
   .hero-message h1 { font-size: clamp(42px, 12.5vw, 56px); }
   .proof-chips { max-width: 100%; }
   .hero-scene { width: 880px; right: -330px; }

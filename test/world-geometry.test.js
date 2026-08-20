@@ -67,11 +67,23 @@ describe('well geometry', () => {
     assert.ok(casedMouth && casedMouth.plane === 'left', 'cased bore mouth on the notch wall');
     assert.ok(Math.abs(casedMouth.point.x - layout.NOTCH.minX) < 0.03);
   });
-  test('the candle (default view) is at the open-hole anchor, on the bench near the x = -1.6 wall', () => {
+  // Round 11 (Kyle): the landing page shows WellFi INSIDE the intermediate. The collar stayed put in world
+  // space (chapter 2 is an fov-18 close-up on it); the intermediate was landed deeper so the shoe is now below
+  // it, with the standoff the qualifier states.
+  test('the candle (default view) is inside the intermediate, on the bench near the x = -1.6 wall', () => {
     const p = wellPath.getWellFiPlacement(paths, wellPath.DEFAULT_WELLFI_VIEW);
-    assert.equal(p.id, 'outside-intermediate');
+    assert.equal(p.id, 'inside-intermediate');
     assert.ok(p.position.x > layout.NOTCH.minX && p.position.x < layout.NOTCH.minX + 1.2, `x ${p.position.x}`);
     assert.ok(Math.abs(p.position.y - (layout.BENCH_Y + 0.12)) < 0.1);
+  });
+  test('the default collar sits above the shoe with ~10 % of the intermediate as standoff', () => {
+    const p = wellPath.getWellFiPlacement(paths, wellPath.DEFAULT_WELLFI_VIEW);
+    const standoff = paths.cased.getLength() * (1 - wellPath.WELLFI_INSIDE_INTERMEDIATE_PARAM);
+    assert.ok(Math.abs(standoff / paths.cased.getLength() - 0.10) < 0.02, `standoff share ${standoff / paths.cased.getLength()}`);
+    assert.ok(p.position.distanceTo(paths.shoe) > 0.5, 'the collar is clear of the shoe');
+    // and the "deeper" answer still puts the collar BELOW the shoe, in open hole
+    const outside = wellPath.getWellFiPlacement(paths, 'outside-intermediate');
+    assert.ok(outside.position.x > paths.shoe.x, 'outside-intermediate is past the shoe, down the open-hole trunk');
   });
   test('the below-pump placement is inside the intermediate string on the front face', () => {
     const p = wellPath.getWellFiPlacement(paths, 'below-pump');
@@ -90,6 +102,16 @@ describe('chapter 6 pump marker vs the standoff line', () => {
   test('PUMP_U.deeper > STANDOFF_U > PUMP_U.shallower', () => {
     assert.ok(builder.PUMP_U.deeper > builder.STANDOFF_U, `deeper ${builder.PUMP_U.deeper} must be below the standoff line ${builder.STANDOFF_U}`);
     assert.ok(builder.STANDOFF_U > builder.PUMP_U.shallower, `shallower ${builder.PUMP_U.shallower} must be above the standoff line ${builder.STANDOFF_U}`);
+  });
+  // wellBuilder.js may not import the world modules (one-chunk budget), so it RESTATES the authored default
+  // placement. If the two drift, an unanswered qualifier silently re-proposes the open-hole configuration.
+  test('wellBuilder restates the authored default placement', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'world', 'wellBuilder.js'), 'utf8');
+    const m = src.match(/const DEFAULT_VIEW = '([a-z-]+)'/);
+    assert.ok(m, 'wellBuilder DEFAULT_VIEW not found');
+    assert.equal(m[1], wellPath.DEFAULT_WELLFI_VIEW);
   });
   test('the 3D marker uses the same parameters as the downloaded schematic', () => {
     const fs = require('node:fs');

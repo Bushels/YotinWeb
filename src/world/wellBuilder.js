@@ -21,6 +21,7 @@ export const FOG_WARM = '#140c07';
 export const PUMP_U = { shallower: 0.42, deeper: 0.96 };
 export const STANDOFF_U = 0.9;                     // relative — "10 % of intermediate" above the shoe
 const WITNESS_COOL = '#d9e5ef', WITNESS_WARM = '#e6c9a6';
+const DEFAULT_VIEW = 'inside-intermediate';        // wellPath.DEFAULT_WELLFI_VIEW (restated: no world imports here)
 
 // Derive the handful of three.js classes from objects the island already holds (no 'three' import here).
 export function threeFromWorld(island) {
@@ -131,7 +132,11 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
   };
 
   // Collar glides separately into the proposed configuration (island.setView snaps; we ease from the old pose).
-  function anchorFor(view) { return view === 'below-pump' ? paths.wellfiTools.belowPump : paths.wellfiTools.outsideIntermediate; }
+  function anchorFor(view) {
+    if (view === 'below-pump') return paths.wellfiTools.belowPump;
+    if (view === 'outside-intermediate') return paths.wellfiTools.outsideIntermediate;
+    return paths.wellfiTools.insideIntermediate;
+  }
   function moveTool(view) {
     if (island.state.view === view) return;
     glide.from.copy(tool.group.position); glide.q0.copy(tool.group.quaternion);
@@ -175,12 +180,17 @@ export function createWellBuilder(island, THREE, { scene = null } = {}) {
   // Coupling: the caption for a shallower landing says "inside casing — attenuated coupling", so the world has to
   // show it. Steel around the emitter shorts a large part of the dipole; open hole couples straight into the
   // formation. This is the ratio the candle and the field are scaled by (round 7, engineering-truth review).
-  const COUPLING = { 'below-pump': 0.45, 'outside-intermediate': 1 };
+  // 'inside-intermediate' is the authored landing-page placement (round 11) and is steel-shorted like
+  // 'below-pump': both sit on the tubing inside the intermediate.
+  const COUPLING = { 'inside-intermediate': 0.45, 'below-pump': 0.45, 'outside-intermediate': 1 };
   let coupling = 1;
   function applyLanding(landing, hasLength) {
     standoff.visible = Boolean(hasLength) || Boolean(landing);
     placeMarker(landing);
-    const view = landing === 'shallower' ? 'below-pump' : 'outside-intermediate';
+    // Unanswered means unanswered: with no landing the collar stays at the AUTHORED landing-page placement —
+    // inside the intermediate (round 11). Before this it fell through to 'outside-intermediate' on every reset,
+    // so the world quietly proposed the open-hole configuration to a visitor who had answered nothing.
+    const view = landing == null ? DEFAULT_VIEW : (landing === 'shallower' ? 'below-pump' : 'outside-intermediate');
     coupling = COUPLING[view];
     moveTool(view);
   }

@@ -12,10 +12,17 @@ export const RADII = { surfaceCollar: 0.175, casedShell: 0.127, cased: 0.100, op
 export const Z_FACE = 5; // front cut face — the cased bore rides ON it (half-proud)
 export const BORE_LIFT = 0.0; // bore centreline ON the bench plane (spec §3) — the trough is drawn as a flattened dark slot, not a raised mound
 
-export const WELLFI_VIEW_IDS = ['outside-intermediate', 'below-pump'];
-export const DEFAULT_WELLFI_VIEW = 'outside-intermediate';
-export const WELLFI_BELOW_PUMP_CASING_PARAM = 0.5;   // inside the 7-in string
-export const WELLFI_OUTSIDE_INTERMEDIATE_PARAM = 0.03; // on the open-hole trunk at the heel
+export const WELLFI_VIEW_IDS = ['inside-intermediate', 'below-pump', 'outside-intermediate'];
+// Round 11 (Kyle, lead design decision): the landing page shows WellFi INSIDE the intermediate — on the
+// tubing above the shoe — not in open hole below it. The collar did not move in world space (chapters 2–4 are
+// authored around it, chapter 2 is an fov-18 close-up on it); the intermediate was landed deeper instead, so
+// the heel/shoe now sits ~10 % of the intermediate's length BELOW the collar. That is the same standoff rule
+// the qualifier states ("roughly 10 % of the intermediate's length of standoff above the shoe"), read from the
+// other end.
+export const DEFAULT_WELLFI_VIEW = 'inside-intermediate';
+export const WELLFI_INSIDE_INTERMEDIATE_PARAM = 0.90; // on the cased string, the standoff line above the shoe
+export const WELLFI_BELOW_PUMP_CASING_PARAM = 0.5;   // inside the 7-in string, below a shallow pump landing
+export const WELLFI_OUTSIDE_INTERMEDIATE_PARAM = 0.03; // on the open-hole trunk, just below the shoe (the "deeper" answer)
 
 const v = (x, y, z) => new Vector3(x, y, z);
 
@@ -57,7 +64,9 @@ function crossing(curve, plane, samples = 200, axis = 'z') {
 
 export function buildWellPaths() {
   const wellhead = v(-5.2, 0.05, Z_FACE);
-  const heel = v(-0.9, BENCH_Y + 0.12, 3.4);
+  // The heel is where the intermediate lands. It sits down the trunk far enough that the authored collar
+  // (cased u = 0.90) has ~10 % of the intermediate's length of standoff above the shoe (round 11).
+  const heel = v(0.03, BENCH_Y + 0.12, 3.04);
   const cased = new CatmullRomCurve3([
     wellhead.clone(), v(-5.2, -0.9, Z_FACE), v(-5.08, -1.7, Z_FACE), v(-4.45, -2.25, Z_FACE), v(-3.1, heel.y, 4.6), heel.clone(),
   ], false, 'catmullrom', 0.5);
@@ -81,6 +90,7 @@ export function buildWellPaths() {
 
   const shoe = cased.getPointAt(1);
   const wellfiTools = {
+    insideIntermediate: toolAnchor(cased, WELLFI_INSIDE_INTERMEDIATE_PARAM),
     outsideIntermediate: toolAnchor(openHole, WELLFI_OUTSIDE_INTERMEDIATE_PARAM),
     belowPump: toolAnchor(cased, WELLFI_BELOW_PUMP_CASING_PARAM),
   };
@@ -113,5 +123,6 @@ export function buildWellPaths() {
 
 export function getWellFiPlacement(paths, view) {
   if (view === 'below-pump') return { ...paths.wellfiTools.belowPump, id: 'below-pump', label: 'WellFi', tone: 'primary' };
-  return { ...paths.wellfiTools.outsideIntermediate, id: 'outside-intermediate', label: 'WellFi', tone: 'primary' };
+  if (view === 'outside-intermediate') return { ...paths.wellfiTools.outsideIntermediate, id: 'outside-intermediate', label: 'WellFi', tone: 'primary' };
+  return { ...paths.wellfiTools.insideIntermediate, id: 'inside-intermediate', label: 'WellFi', tone: 'primary' };
 }

@@ -19,12 +19,12 @@ export const BENCH_Y = PAY_TOP - 0.15; // -2.55
 // Colours follow the Bluesky-derived material discipline (near-black wet bitumen pay, sharp cut, no bevels).
 export const STRATA = [
   { name: 'topsoil',        label: 'Boreal topsoil',        topY: 0.0,   bottomY: -0.35, color: '#3f5a2e', roughness: 0.95 },
-  { name: 'colorado',       label: 'Colorado Shale (seal)', topY: -0.35, bottomY: -1.5,  color: '#6f787e', roughness: 0.9,  bed: { freq: 38, depth: 0.34, phase: 0.0 } },
+  { name: 'colorado',       label: 'Colorado Gp — Joli Fou Shale (seal)', topY: -0.35, bottomY: -1.5,  color: '#6f787e', roughness: 0.9,  bed: { freq: 38, depth: 0.34, phase: 0.0 } },
   { name: 'upperSand',      label: 'Clearwater Upper Sand', topY: -1.5,  bottomY: -2.1,  color: '#a8874f', roughness: 0.92, bed: { freq: 22, depth: 0.24, phase: 1.1 } },
-  { name: 'middleMudstone', label: 'Middle Mudstone',       topY: -2.1,  bottomY: PAY_TOP, color: '#4a4540', roughness: 0.88, bed: { freq: 44, depth: 0.3, phase: 0.6 } },
+  { name: 'middleMudstone', label: 'Clearwater Mudstone',       topY: -2.1,  bottomY: PAY_TOP, color: '#4a4540', roughness: 0.88, bed: { freq: 44, depth: 0.3, phase: 0.6 } },
   { name: 'lowerSand',      label: 'Clearwater Lower Sand', topY: PAY_TOP, bottomY: -3.6, color: '#2b1e14', roughness: 0.45, bed: { freq: 26, depth: 0.22, phase: 2.3 } },
 ];
-export const LOWER = { name: 'ellerslie', label: 'Ellerslie', topY: -3.6, bottomY: SLAB.baseY, color: '#241a10', roughness: 0.6, bed: { freq: 20, depth: 0.28, phase: 0.6 } };
+export const LOWER = { name: 'ellerslie', label: 'McMurray (Lower Mannville)', topY: -3.6, bottomY: SLAB.baseY, color: '#241a10', roughness: 0.6, bed: { freq: 20, depth: 0.28, phase: 0.6 } };
 
 // The Colorado seal band — the conductive bed that flattens and dims the field above it (spec §3, field).
 export const SEAL = { topY: STRATA[1].topY, bottomY: STRATA[1].bottomY };
@@ -59,7 +59,11 @@ export const COLORS = {
   casing: '#6b7d8a',
   casingShell: '#7dd3e8',
   trough: '#0f0a07',      // dark rock-walled open-hole bore (negative), not a pipe — darker than the bench (#3a2a1e)
-  boreRim: '#241911',     // rock lip along an exposed bore — ≈ 0.6× the bench albedo so the slot reads as shadow, not a sand strip
+  // Rock lip along an exposed bore. Round 11 (Kyle: "it is hard to see the OHML fishbone, it is quite dark"):
+  // at 0.6× the bench albedo the six laterals disappeared in the chapter-0 pose — the raking golden-hour key
+  // had nothing to catch. Raised to ≈ bench albedo, so the lip's curved crown is what draws the fishbone while
+  // the trough inside it stays the dark slot. Albedo only — no emissive — so the darkest chapters are unchanged.
+  boreRim: '#3c2c1e',
   void: '#03070b',
   sunWarm: '#ffd9a8',
   goldenHour: '#ffc98a',

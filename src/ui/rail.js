@@ -11,11 +11,13 @@ const LABELS = { surface: 'Surface', descent: 'Descent', tool: 'Tool', signal: '
 const ANCHORS = { surface: '#top', descent: '#wellfi', tool: '#wellfi', signal: '#wellfi', deployment: '#insight', yotin: '#company', fit: '#contact' };
 
 // Casing tally by name — lit as the descent passes each mark (exact progress thresholds within chapter 1).
+// Round 11: WellFi is set INSIDE the intermediate, on the tubing above the shoe (wellPath.js —
+// DEFAULT_WELLFI_VIEW). The tally is a depth tally, so the tool now lights BEFORE the shoe, not after it.
 const TALLY = [
   { id: 'surface-casing', label: 'Surface casing', at: 0.12 },
-  { id: 'intermediate-shoe', label: 'Intermediate shoe', at: 0.62 },
-  { id: 'pay-top', label: 'Pay top', at: 0.8 },
-  { id: 'wellfi', label: 'WellFi · open hole', at: 0.98 },
+  { id: 'wellfi', label: 'WellFi · in casing', at: 0.58 }, // same 18 chars as the old 'WellFi · open hole': it fits the rail gutter without truncating, and it is what the qualifier's readback already says ("inside casing, on the tubing")
+  { id: 'intermediate-shoe', label: 'Intermediate shoe', at: 0.72 },
+  { id: 'pay-top', label: 'Pay top', at: 0.88 },
 ];
 
 export function mountRail() {
@@ -100,7 +102,7 @@ export function mountRail() {
     const index = Math.floor(p + 0.002);
     const inSignal = index === 3;
     tally.classList.toggle('is-signal', inSignal);
-    // marker positions along the track: 0 = top (surface), 1 = bottom (tool)
+    // marker positions along the track: 0 = top (surface), 1 = bottom (total depth — the pay)
     const downPos = p < 1 ? 0 : Math.min(1, descent);
     const upPos = p < 3 ? 1 : 1 - returned;
     down.style.setProperty('--pos', downPos.toFixed(3));

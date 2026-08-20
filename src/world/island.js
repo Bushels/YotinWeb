@@ -1,5 +1,6 @@
 // Assembles the world (spec §3): terrain (bench topology), forest, well system, the WellFi tool at the
-// open-hole anchor (the candle), the wellhead receiver ring, the lease pad, and the candle field. Exposes a
+// authored collar anchor inside the intermediate (the candle, round 11), the wellhead receiver ring, the lease
+// pad, and the candle field. Exposes a
 // pure update(t, elapsed, channels) so the conductor drives it from chapter state. No bullet pulse; the 12 s
 // island cycle only shapes ambient light. Flow chevrons are sand-tinted at the surface and muted where the
 // chapter's `flow` channel says so.
@@ -32,8 +33,10 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
   const casedFlow = createPulseMaterial({ base: { color: COLORS.casing, roughness: 0.35, metalness: 0.85, transparent: true, opacity: 1 }, pulseColor: SAND_FLOW, flowCount: 10, flowColor: SAND_FLOW });
   // Open-hole bores: base at or below the pay so the slot floor never out-lights the bench (round 2); the
   // chevrons stay readable as dim flow inside a dark slot, not a lit ribbon.
-  const trunkFlow = createPulseMaterial({ base: { color: '#2b1e14', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 12, flowColor: '#8a7455' });
-  const legFlow = createPulseMaterial({ base: { color: '#261a11', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 8, flowColor: '#8a7455' });
+  // Round 11: the leg bores carry a little more of their own albedo and a warmer sand chevron, so the
+  // fishbone reads in the chapter-0 pose. Still sand/steel, still below the bench — no cyan, no emissive.
+  const trunkFlow = createPulseMaterial({ base: { color: '#33241a', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 12, flowColor: '#a48a63' });
+  const legFlow = createPulseMaterial({ base: { color: '#312217', roughness: 0.9, metalness: 0 }, pulseColor: SAND_FLOW, flowCount: 8, flowColor: '#a48a63' });
 
   const terrain = buildTerrain();
   const forest = buildForest(tier);
@@ -98,8 +101,8 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     const flow = channels.flow ?? L;
     const flowTime = elapsed % 20;
     casedFlow.setFlow(0.9 * flow, flowTime);
-    trunkFlow.setFlow(0.35 * flow, flowTime);
-    legFlow.setFlow(0.25 * flow, flowTime);
+    trunkFlow.setFlow(0.45 * flow, flowTime);
+    legFlow.setFlow(0.42 * flow, flowTime); // round 11: the legs were the quietest thing in the hero pose
     const cut = Math.max(channels.cutaway, 0);
     casedFlow.setCutaway(1 - 0.72 * cut, cut < 0.05);
     tool.update(channels.candle, state.toolFocus);
