@@ -20,6 +20,10 @@ const CAPTION = {
   },
   verdict: { strong: 'strong fit — WellFi lights at the proposed placement', review: 'likely fit — review required', future: 'high-temp version in development — tool dimmed' },
 };
+/* The standoff rule of thumb is printed in three places (masked caption, projected DOM caption,
+   downloaded PNG); all three carry the provenance below, so the number never travels bare. */
+const STANDOFF_SOURCE = 'Yotin deployment practice — internal rule of thumb, not a published figure';
+// source: Yotin deployment practice — internal rule of thumb, not a published figure
 const STANDOFF_TEXT = 'standoff line drawn — 10 % of intermediate';
 const SPEC_LINE = '10,000 psia · 150 °C · 46 mm OD · 5+ yr · MODBUS RS-485 / 4-20 mA';
 const FOOT_LINE = 'representative · not to scale · generated locally';
@@ -100,7 +104,10 @@ export function drawSchematic(ctx, s, W = 1200, H = 630) {
     const sy = top + (shoeY - top) * 0.9;
     ctx.setLineDash([8, 6]); ctx.strokeStyle = SAND; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(cx - 70, sy); ctx.lineTo(cx + 70, sy); ctx.stroke(); ctx.setLineDash([]);
+    // source: STANDOFF_SOURCE — drawn under the caption, because the PNG is the artefact that gets forwarded.
     ctx.fillStyle = SAND; ctx.fillText('standoff — 10 % of intermediate', cx + 90, sy - 18);
+    ctx.save(); ctx.font = '11px ui-monospace, monospace'; ctx.fillStyle = MUTED;
+    ctx.fillText(STANDOFF_SOURCE, cx + 90, sy - 4); ctx.restore();
   }
   // pump marker at the answered band
   if (s.landing) {
@@ -130,7 +137,7 @@ export function drawSchematic(ctx, s, W = 1200, H = 630) {
     ['Fluid', s.fluid ? CAPTION.fluid[s.fluid] : '—'],
     ['Temperature', s.temp ? CAPTION.temp[s.temp] : '—'],
     ['Pump landing', s.landing ? (s.landing === 'deeper' ? 'deeper than the standoff line' : 'shallower than the standoff line') : '—'],
-    ['WellFi', s.landing ? (toolInside ? 'inside the intermediate (tubing-conveyed)' : 'outside the intermediate (open hole)') : 'per pump landing'],
+    ['WellFi', s.landing ? (toolInside ? 'inside casing, on the tubing' : 'below the intermediate shoe (open hole)') : 'per pump landing'],
     ['Verdict', VERDICT_LABEL[s.verdict] || '—'],
   ];
   rows.forEach(([k, v]) => {
@@ -179,7 +186,7 @@ export function mountFit() {
     return builder;
   }
   // Standoff caption: "standoff — 10 % of intermediate" projected at the 0.9 line whenever the line is shown
-  // (spec §4 row 6; round 2). Uses toolViz's projected-caption channel; no digits beyond the public 10 % rule.
+  // (spec §4 row 6; round 2). source: Yotin deployment practice — internal rule of thumb, not a published figure.
   let standoffEl = null, vizRef = null;
   function syncStandoffCaption(b) {
     const show = active && state && (state.hasLength || state.landing) && b.objects && b.objects.standoff;
@@ -188,6 +195,8 @@ export function mountFit() {
       standoffEl.className = 'surface-caption standoff-caption';
       standoffEl.setAttribute('data-standoff-caption', '');
       standoffEl.textContent = 'standoff — 10 % of intermediate';
+      // source: STANDOFF_SOURCE — provenance rides on the element so a read of the DOM carries it too.
+      standoffEl.setAttribute('data-source', STANDOFF_SOURCE);
       standoffEl.hidden = true;
       document.body.appendChild(standoffEl);
     }

@@ -890,9 +890,15 @@
       over: "above 150 °C",
       unsure: "a bottomhole temperature you could not confirm"
     };
-    var LANDING_WORD = {
-      shallower: "the pump landed shallower than the standoff line, so WellFi runs inside the tubing",
-      deeper: "the pump landed deeper than the standoff line, so WellFi runs outside the intermediate"
+    var LANDING_FACT = {
+      shallower: "the pump landed shallower than the standoff line",
+      deeper: "the pump landed deeper than the standoff line"
+    };
+    /* The consequence is a *deployment* statement, so it is suppressed on the
+       `future` path — that well is on a waitlist and will not be deployed. */
+    var LANDING_THEN = {
+      shallower: ", so WellFi runs inside casing, on the tubing above the shoe",
+      deeper: ", so WellFi is set below the intermediate shoe, in open hole"
     };
     var REASON_TAIL = {
       strong: "nothing you entered sits outside the operating envelope.",
@@ -905,7 +911,9 @@
       if (LIFT_WORD[s.lift]) parts.push(LIFT_WORD[s.lift]);
       if (FLUID_WORD[s.fluid]) parts.push(FLUID_WORD[s.fluid]);
       if (TEMP_WORD[s.temp]) parts.push(TEMP_WORD[s.temp]);
-      var clause = LANDING_WORD[s.landing] || (answers.landing ? "the pump landing still to pin down" : "");
+      var clause = LANDING_FACT[s.landing]
+        ? LANDING_FACT[s.landing] + (result.fit === "future" ? "" : (LANDING_THEN[s.landing] || ""))
+        : (answers.landing ? "the pump landing still to pin down" : "");
       var lead = parts.join(", ");
       if (clause) lead = lead ? lead + " and " + clause : clause;
       if (!lead) return "";

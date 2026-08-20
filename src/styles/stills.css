@@ -143,4 +143,5 @@ html.stills-capture .chatfi-launcher,
 html.stills-capture .chatfi-panel,
 html.stills-capture .scroll-rail,
 html.stills-capture .skip-link,
+html.stills-capture body > .surface-caption, /* projected level/earlier/pump-off captions live on <body> */
 html.stills-capture .stills { visibility: hidden !important; }

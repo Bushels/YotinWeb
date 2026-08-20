@@ -28,6 +28,7 @@
 
   /* The standoff rule, isolated because it is the one piece of arithmetic on
      this page that an operator acts on.
+     source: Yotin deployment practice — internal rule of thumb, not a published figure.
 
      The collar needs roughly 10% of the intermediate casing's length of
      standoff above the shoe:
@@ -171,8 +172,9 @@
   // Each note explains WHY something needs review, in the engineer's terms.
   var NOTES = {
     temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
-    external: "Landed that deep, WellFi would run outside the intermediate rather than inside the tubing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. Running it outside is routine, but it changes the install and is worth confirming early.",
-    landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs inside the tubing or outside the intermediate. Worth pinning down before the changeout gets scoped.",
+    // source: Yotin deployment practice — internal rule of thumb, not a published figure.
+    external: "Landed that deep, WellFi would be set below the intermediate shoe, in open hole, rather than on the tubing inside casing. The collar wants roughly 10% of the intermediate's length of standoff above the shoe; any closer and an emitter sitting at the cemented shoe barely couples to the formation. It is a supported configuration, but it changes the install and is worth confirming early.",
+    landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs on the tubing inside casing or is set below the shoe, in open hole. Worth pinning down before the changeout gets scoped.",
     timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
     lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",
     thermal: "Thermal and SAGD wells sit closest to the temperature ceiling, so the operating profile matters more than usual."

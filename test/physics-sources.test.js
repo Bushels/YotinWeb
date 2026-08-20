@@ -7,8 +7,8 @@
  * a `source:` field within 300 characters of the figure. Files under src/world/ and the rest of src/
  * are scanned and listed for visibility only (comments and shader math are not printed).
  *
- * Today no DOM-facing file prints a physics figure, so this asserts the harness itself: the matcher
- * finds figures in a fixture, the enforcement passes on the real files, and the report is empty.
+ * The standoff rule of thumb ("10 % of intermediate") is the one figure DOM-facing files do print, in
+ * src/ui/fit.js (three sites) and qualifier-logic.js; each carries its provenance within the window.
  *
  *   node --test test/physics-sources.test.js
  */
@@ -27,6 +27,8 @@ const FIGURES = [
   { name: '503 (skin-depth constant)', re: /(?<![\w#.])503(?![\w.])/g },
   { name: '100x / 100× (attenuation ratio)', re: /\b100\s*[x×](?![a-z])|\b100\s*&times;/gi },
   { name: 'n × m product', re: /\d\s*(?:×|&times;)\s*\d/g },
+  // The standoff rule of thumb, in both printed forms: "10 % of intermediate" and "10% of the intermediate's length".
+  { name: '% of intermediate (standoff rule)', re: /\d+\s*%\s*of (?:the )?intermediate/gi },
 ];
 const SOURCE = /data-source=|\bsource:/;
 
@@ -50,7 +52,9 @@ function walk(dir, out = []) {
   return out;
 }
 
-const domFacing = [path.join(root, 'index.html'), ...walk(path.join(root, 'src', 'ui'))];
+// qualifier-logic.js sits at the repo root but is loaded into the page, and its NOTES strings are printed
+// verbatim in the verdict block — DOM-facing by any honest reading, so the gate must see it.
+const domFacing = [path.join(root, 'index.html'), path.join(root, 'qualifier-logic.js'), ...walk(path.join(root, 'src', 'ui'))];
 const informational = walk(path.join(root, 'src')).filter((p) => !domFacing.includes(p));
 
 describe('physics figures carry a source', () => {
