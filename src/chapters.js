@@ -17,20 +17,26 @@ export const CHAPTERS = [
   { id: 'fit',        section: '#contact',           dwell: 1.3, world: { light: 0.42, cutaway: 0.8, candle: 0.12, field: 0.2, wind: 0.15, flow: 0.25, fog: 0.02 } },
 ];
 
-// Camera poses (9): one per chapter, two for signal (collar → the surface references once the circuit stage is in view), two for deployment. Targets: the candle at the heel ≈ (-0.67,-2.43,3.32)
-// (chapters 2 and 4 aim here — the tool lives at the inside-intermediate anchor, cased u 0.90, since Kyle's ch0 direction; the shoe was landed deeper past it so this target never moved), wellhead (-5.2, 0.05, 5).
+// Camera poses (9): one per chapter, two for signal (collar → the surface references once the circuit stage is
+// in view), two for deployment.
+//
+// Round 12 re-anchor: the intermediate now lands just into the top of the pay and the collar moved UP the well
+// with it, onto the EXPOSED front-face run of the cased string — the candle is at (-2.55, -2.55, 5.05), the
+// shoe at (-0.95, -2.53, 4.20), the wellhead unchanged at (-5.2, 0.05, 5). Every pose below that frames the
+// tool was re-authored against those landmarks with the offline projector (scratch/geo/pose-lab.mjs, same
+// camera math as cameraRig.js): the pixel positions in each comment are measured, not guessed.
 export const POSES = [
   { id: 'surface',      position: [27.8, 22.0, 30.9], target: [-1.8, -1.3, 2.2],  fov: 20, mobile: { position: [24.0, 22.5, 30.5], target: [-1.2, -3.2, 2.2], fov: 30 } },
-  { id: 'descent',      position: [-0.2, 2.3, 15.2],  target: [-4.9, -1.2, 5.0],  fov: 28, mobile: { position: [-0.6, 1.4, 16.5], target: [-4.9, -2.4, 5.0], fov: 38 } },
-  { id: 'tool',         position: [0.55, -1.9, 5.3],  target: [-0.55, -2.45, 3.3], fov: 18, mobile: { position: [1.35, -1.95, 7.8], target: [-0.55, -3.15, 3.3], fov: 34 } }, // mobile: the tool fills its 38 vh band rather than sitting tiny at its top edge (round 5)
-  { id: 'signal',       position: [4.1, 1.3, 13.2],   target: [-2.8, -1.75, 4.0], fov: 28, mobile: { position: [2.0, -0.4, 21.0], target: [-0.6, -5.4, 3.2], fov: 36 } }, // collar right of centre AND the wellhead/front-face return in frame (round 2); mobile: collar in the 42 vh band
+  { id: 'descent',      position: [-0.25, 2.25, 15.5], target: [-5.32, -1.54, 5.26], fov: 30, mobile: { position: [0.5, 1.5, 16.5], target: [-3.84, 0.11, 4.52], fov: 36 } }, // the whole cased run reads: wellhead (752,225) in the free band above the copy, kop (758,445), the collar (1100,640) in the gap between the paragraph and the cards, the shoe (1364,637) clear of it — and the pay top crosses 20 px above the landed string (round 12); mobile: wellhead (49,428), collar (306,698) in the free stack below the copy
+  { id: 'tool',         position: [-2.07, -2.16, 6.95], target: [-2.40, -2.57, 5.01], fov: 20, mobile: { position: [-2.42, -2.02, 7.69], target: [-2.55, -2.87, 5.12], fov: 30 } }, // the tool is now INSIDE the intermediate on the front cut face, so the close-up looks at the section from the front: tool 238→809 px, centred (520,430) in the free band between the channel cards and the spec tiles, clear of the chip panel (x > 855) and the Inspect button; the pay-top boundary reads 200 px above it. The orbit still pivots on the tool (toolViz.startOrbit) (round 12); mobile: tool 60→324 px in the 38 vh band
+  { id: 'signal',       position: [4.1, 1.3, 13.2],   target: [-4.08, -2.0, 6.07], fov: 28, mobile: { position: [2.0, -0.4, 21.0], target: [-2.46, -5.2, 5.42], fov: 36 } }, // same eye as round 2 — re-aimed only, so the candle stays right of centre (1010,560) above the journey cards now that it lives on the face, with the wellhead (731,94) and the front-face return in frame; mobile: collar (196,214) in the 42 vh band
   // signal-b: while the Close-the-Circuit panel (left ≤ 60 %) is in view, the wellhead reference, the road and the
   // stake sit in the free right column; the camera looks across the pad from the front-left (round 4)
   { id: 'signal-b',     position: [1.0, 11.0, 16.0],  target: [-8.0, 0.0, 5.0],   fov: 28, mobile: { position: [1.4, 12.0, 19.5], target: [-7.4, -0.6, 5.0], fov: 38 } }, // the reading returns to surface: the camera lifts to the lease so the wellhead (V₁), the road and the ground stake (V₂) all read in the free right column — a road is only legible from above (pose search, round 5)
   { id: 'deployment-a', position: [-0.8, -0.4, 12.3], target: [-6.0, -2.1, 5.4],  fov: 26, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
   { id: 'yotin',        position: [-6.5, 8.0, 15.0],  target: [-4.6, -0.3, 3.6],  fov: 34, mobile: { position: [-6.0, 5.8, 19.5], target: [-4.6, -1.2, 3.6], fov: 44 } }, // the pad + wind in the upper 60 vh band, paper below (round 2) // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
-  { id: 'fit',          position: [-3.0, 1.5, 17.0],  target: [-5.0, -2.5, 5.0],  fov: 26, mobile: { position: [-2.6, 1.9, 20.5], target: [-4.6, -2.9, 5.0], fov: 36 } }, // BOTH proposed placements are framed in the free right column — inside-the-tubing (-3.83,-2.38,4.86) and the below-shoe/open-hole anchor (-0.67,-2.45,3.32; the authored default now sits inside the intermediate at ≈(-0.64,-2.43,3.38)) — so the verdict's candle never lands behind the qualifier column (pose search, round 6)
+  { id: 'fit',          position: [-3.0, 1.5, 17.0],  target: [-4.95, -2.56, 5.0],  fov: 26, mobile: { position: [-2.6, 1.9, 20.5], target: [-3.23, -2.94, 5.16], fov: 36 } }, // the same eye as round 6, re-aimed for the round-12 anchors: all three proposed placements sit in the free right column — the authored default inside the intermediate (1090,470), below-pump further up the string, and the below-shoe/open-hole anchor past the shoe (1333,438) — so the verdict's candle never lands behind the qualifier column; mobile: collar (250,390)
 ];
 
 export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);

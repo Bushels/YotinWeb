@@ -80,28 +80,55 @@ export function buildForest(tier = 'high') {
     const geom = spruceGeometry(variant);
     const count = counts[vi];
     const mat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, flatShading: true });
-    // Wind sway: bend the tree top in the wind direction; amplitude grows with local height.
+    // Wind sway: the stand answers the wind field — gust fronts travel through it (see the shader below).
     mat.customProgramCacheKey = () => 'spruce-wind';
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uWind = wind;
       shader.uniforms.uWindTime = windTime;
       shader.uniforms.uPointer = pointer;
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', '#include <common>\nuniform float uWind;\nuniform float uWindTime;\nuniform vec3 uPointer;\nvarying float vTreeH;')
+        .replace('#include <common>', `#include <common>
+        uniform float uWind; uniform float uWindTime; uniform vec3 uPointer; varying float vTreeH;
+        // A GUST THAT TRAVELS (round 12, Kyle: "when that wind shows up it blows the trees and the physics of
+        // it look realistic?"). The wind strokes in wind.js drift along -x over the lease; the stand has to
+        // answer that same field rather than wobble on its own clock. Three fronts sweep -x across the slab at
+        // the wind's own speed: a tree leans as a front reaches it (with a short lead-in, because air piles up
+        // ahead of a gust), then springs back with a damped oscillation in its wake. Between fronts the stand
+        // is calm — that silence is the point; idle uniform sway is what reads as fake.
+        const float GUST_SPAN = 15.0;    // wrap length: the slab (14 wide) plus run-out either side
+        const float GUST_X0 = 7.5;       // fronts enter at the +x edge and sweep to -x, like the motes
+        float gustAt(float x, float z, float t, float seed, float speed) {
+          float front = GUST_X0 - mod(t * speed + seed * GUST_SPAN, GUST_SPAN);
+          // a gust front is not a plane: stagger its arrival along strike so it visibly rakes through the stand
+          front += 0.42 * sin(z * 0.85 + seed * 6.28);
+          float d = x - front;                                        // > 0 = the front has passed: the wake
+          float w = max(d, 0.0);
+          float lead = smoothstep(-1.15, 0.05, d);                    // the push just ahead of the front
+          float wake = exp(-w * 0.72) * (0.78 + 0.22 * cos(w * 3.1)); // springy, damped return
+          return lead * wake;
+        }`)
         .replace('#include <begin_vertex>', `#include <begin_vertex>
         {
           vec4 wp = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
           float h = clamp(position.y / 1.6, 0.0, 1.0);
-          float phase = wp.x * 0.9 + wp.z * 1.3;
-          float gust = sin(uWindTime * 1.1 + phase) * 0.6 + sin(uWindTime * 2.3 + phase * 1.7) * 0.4;
-          float sway = uWind * h * h * (0.05 + 0.05 * gust);
+          // gust speed rides the wind channel — the same (0.4 + uWind) law the motes drift by
+          float speed = 1.05 * (0.45 + 0.95 * uWind);
+          float g = gustAt(wp.x, wp.z, uWindTime, 0.0, speed)
+                  + 0.72 * gustAt(wp.x, wp.z, uWindTime, 0.41, speed * 0.86)
+                  + 0.55 * gustAt(wp.x, wp.z, uWindTime, 0.73, speed * 1.17);
+          g = min(g, 1.35);
+          // needle flutter: only while a gust is actually on the tree, and only near the top
+          float flutter = sin(uWindTime * 5.7 + wp.x * 2.3 + wp.z * 3.9) * 0.22 * g;
+          // spruce are stiff: a few degrees at the leader, nothing at the trunk base (h squared)
+          float sway = uWind * h * h * (0.062 * g + 0.022 * flutter);
           // pointer parting: trees near the pointer lean away
           vec2 d = wp.xz - uPointer.xz;
           float dist = length(d);
           float part = smoothstep(1.4, 0.0, dist) * uPointer.y; // uPointer.y carries strength
           vec2 dir = dist > 1e-4 ? d / dist : vec2(0.0);
-          transformed.x += sway + dir.x * part * h * h * 0.35;
-          transformed.z += sway * 0.35 + dir.y * part * h * h * 0.35;
+          // the wind blows toward -x, so the stand leans DOWNWIND (it used to lean into it)
+          transformed.x += -sway + dir.x * part * h * h * 0.35;
+          transformed.z += -sway * 0.3 + dir.y * part * h * h * 0.35;
           vTreeH = h;
         }`);
       shader.fragmentShader = shader.fragmentShader

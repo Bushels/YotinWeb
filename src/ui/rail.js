@@ -11,13 +11,15 @@ const LABELS = { surface: 'Surface', descent: 'Descent', tool: 'Tool', signal: '
 const ANCHORS = { surface: '#top', descent: '#wellfi', tool: '#wellfi', signal: '#wellfi', deployment: '#insight', yotin: '#company', fit: '#contact' };
 
 // Casing tally by name — lit as the descent passes each mark (exact progress thresholds within chapter 1).
-// Round 11: WellFi is set INSIDE the intermediate, on the tubing above the shoe (wellPath.js —
-// DEFAULT_WELLFI_VIEW). The tally is a depth tally, so the tool now lights BEFORE the shoe, not after it.
+// Round 12: the tally reads ALONG-HOLE, the way a wellbore diagram is read — the build crosses the pay top
+// (u ≈ 0.43) while still cased, passes the WellFi collar (u ≈ 0.72), and lands the shoe just into the pay
+// (u = 1.0). TVD order would differ (the pay top is shallower than the shoe); along-hole is the honest
+// sequence for a descent that follows the string.
 const TALLY = [
   { id: 'surface-casing', label: 'Surface casing', at: 0.12 },
-  { id: 'wellfi', label: 'WellFi · in casing', at: 0.58 }, // same 18 chars as the old 'WellFi · open hole': it fits the rail gutter without truncating, and it is what the qualifier's readback already says ("inside casing, on the tubing")
-  { id: 'intermediate-shoe', label: 'Intermediate shoe', at: 0.72 },
-  { id: 'pay-top', label: 'Pay top', at: 0.88 },
+  { id: 'pay-top', label: 'Pay top', at: 0.43 },
+  { id: 'wellfi', label: 'WellFi · in casing', at: 0.72 }, // same 18 chars as the old 'WellFi · open hole': it fits the rail gutter without truncating, and it is what the qualifier's readback already says ("inside casing, on the tubing")
+  { id: 'intermediate-shoe', label: 'Intermediate shoe', at: 1.0 },
 ];
 
 export function mountRail() {

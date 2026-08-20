@@ -19,6 +19,7 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   const base = new THREE.Color(glowColor);
   const SAND = new THREE.Color(COLORS.sand || '#e8dcc8');
   const REST = new THREE.Color('#9aa3a8'); // the collar at rest is a steel band, not the brightest thing on the tool
+  const EMBER_WARM = new THREE.Color(COLORS.ember || '#f27622'); // pre-signal warmth only — never a saturated hue at full strength
   const glow = new THREE.Color(SAND);
   const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -44,11 +45,14 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   const gloss = new THREE.MeshStandardMaterial({ color: '#d2d7db', metalness: 0.85, roughness: 0.24 });
   const dark = new THREE.MeshStandardMaterial({ color: '#2a2622', metalness: 0.2, roughness: 0.7 });
   const L = TOOL_LENGTH;
+  // Proportions read off Kyle's device renders (wellfi_device_campaign_hero_v2 /
+  // wellfi_carrier_ghost_architecture_v1): one slim carrier with a MACHINED STEP where the sub sits, and a
+  // narrow band at the gap — not a stack of equal drums. Cheap fidelity only; the tool is not rebuilt here.
   const volumes = [
-    { name: 'battery',  len: L * 0.28, r: 0.05, mat: matte,  x: -L * 0.36 },
-    { name: 'sensors',  len: L * 0.26, r: 0.05, mat: gloss,  x: -L * 0.05 },
-    { name: 'gap',      len: L * 0.12, r: 0.047, mat: dark,  x: L * 0.16 },   // the isolation gap — dark band
-    { name: 'sleeve',   len: L * 0.30, r: 0.05, mat: steel,  x: L * 0.36 },
+    { name: 'battery',  len: L * 0.28, r: 0.048, mat: matte,  x: -L * 0.36 },
+    { name: 'sensors',  len: L * 0.26, r: 0.052, mat: gloss,  x: -L * 0.05 },  // the sub steps up a hair
+    { name: 'gap',      len: L * 0.12, r: 0.045, mat: dark,  x: L * 0.16 },    // the isolation gap — dark band
+    { name: 'sleeve',   len: L * 0.30, r: 0.048, mat: steel,  x: L * 0.36 },
   ];
   const hotspots = {};
   volumes.forEach((vdef) => {
@@ -58,10 +62,13 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
     body.add(m);
     hotspots[vdef.name] = m;
   });
-  // gap edge rings: the isolation gap reads as a ring, not a notch
+  // Gap edge rings (the isolation gap reads as a ring, not a notch) plus three machined grooves at the sleeve's
+  // outer end — the connection detail from the campaign render. All five rings merge into ONE mesh, so the
+  // extra fidelity costs a few hundred triangles and no draw call.
   const edgeMat = new THREE.MeshStandardMaterial({ color: '#1c1916', metalness: 0.3, roughness: 0.6 });
-  const edgeGeoms = [-1, 1].map((side) => { const g = new THREE.TorusGeometry(0.054, 0.007, 8, 24); g.rotateY(Math.PI / 2); g.translate(L * 0.16 + side * L * 0.06, 0, 0); return g; });
-  const edges = new THREE.Mesh(mergeIndexed(edgeGeoms), edgeMat); edges.name = 'gap-edges'; body.add(edges); // one draw call for both rings
+  const edgeGeoms = [-1, 1].map((side) => { const g = new THREE.TorusGeometry(0.052, 0.007, 8, 24); g.rotateY(Math.PI / 2); g.translate(L * 0.16 + side * L * 0.06, 0, 0); return g; });
+  for (let i = 0; i < 3; i++) { const g = new THREE.TorusGeometry(0.049, 0.004, 6, 20); g.rotateY(Math.PI / 2); g.translate(L * 0.44 + i * 0.022, 0, 0); edgeGeoms.push(g); }
+  const edges = new THREE.Mesh(mergeIndexed(edgeGeoms), edgeMat); edges.name = 'gap-edges'; body.add(edges); // one draw call for all five rings
   edgeGeoms.forEach((g) => g.dispose());
   group.add(body);
 
@@ -71,7 +78,7 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   witness.rotation.z = Math.PI / 2; witness.renderOrder = 24;
   group.add(witness);
   const sleeveMat = new THREE.MeshBasicMaterial({ color: SAND, depthTest: false, depthWrite: false, toneMapped: false });
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 16), sleeveMat); // thin band, not a wide halo
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.057, 0.057, 0.036, 16), sleeveMat); // a narrow proud band, like the render's — not a drum
   collar.rotation.z = Math.PI / 2; collar.position.x = L * 0.16; collar.renderOrder = 25; collar.name = 'collar-band';
   group.add(collar);
 
@@ -92,12 +99,22 @@ export function buildWellFiTool(placement, { glowColor = COLORS.emGlow } = {}) {
   function update(boost, focus) {
     const k = Math.max(EMBER, boost);
     const sig = smooth(0.28, 0.55, k);              // 0 = sand (rest/ember), 1 = cyan (transmission)
-    const warm = smooth(0.16, 0.34, k);             // steel → sand as the collar wakes
-    glow.copy(REST).lerp(SAND, warm).lerp(base, sig);
-    sleeveMat.color.copy(glow).multiplyScalar(0.28 + 1.75 * k); // > 1 at full signal: the brightest non-sky pixel of ch. 3
+    const warm = smooth(0.10, 0.26, k);             // steel → sand as the collar wakes
+    // PRE-SIGNAL PRESENCE (round 12, Kyle: "we did have a version that showed the WellFi glowing in the
+    // intermediate, I cannot see it in the current version"). Before transmission is the subject the collar is
+    // not a beacon — it is an ember-warm presence inside the casing at the cutaway. The witness capsule and the
+    // halo carry it (both already draw with depthTest off, so they read THROUGH the half-proud casing), it
+    // fades out exactly as the cyan comes in, and it is sand/ember only — no cyan before chapter 3.
+    const presence = smooth(0.10, 0.24, k) * (1 - sig);
+    glow.copy(REST).lerp(SAND, warm).lerp(EMBER_WARM, 0.45 * presence).lerp(base, sig);
+    sleeveMat.color.copy(glow).multiplyScalar(0.28 + 1.75 * k + 0.40 * presence); // > 1 at full signal: the brightest non-sky pixel of ch. 3
     haloMat.color.copy(glow);
-    haloMat.opacity = Math.min(0.72, 0.02 + 0.7 * k * k);
-    witnessMat.opacity = Math.min(0.3, 0.04 + 0.26 * k);
+    // The halo is 0.9 units across: at chapter-2 range that is most of the frame, so the pre-signal presence
+    // pulls it IN (a lamp inside a pipe, not a fog bank) and leans on the tool-scale witness capsule instead —
+    // which shrinks with distance the way the tool does.
+    haloMat.opacity = Math.min(0.72, 0.02 + 0.7 * k * k + 0.05 * presence);
+    halo.scale.setScalar(0.9 - 0.34 * presence);
+    witnessMat.opacity = Math.min(0.32, 0.04 + 0.26 * k + 0.13 * presence);
     inspectionSleeveMat.color.copy(glow);
     inspectionSleeveMat.opacity = 0.02 + 0.08 * focus;
     ringMatA.color.copy(glow); ringMatB.color.copy(glow);

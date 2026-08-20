@@ -13,16 +13,29 @@ export const Z_FACE = 5; // front cut face — the cased bore rides ON it (half-
 export const BORE_LIFT = 0.0; // bore centreline ON the bench plane (spec §3) — the trough is drawn as a flattened dark slot, not a raised mound
 
 export const WELLFI_VIEW_IDS = ['inside-intermediate', 'below-pump', 'outside-intermediate'];
-// Round 11 (Kyle, lead design decision): the landing page shows WellFi INSIDE the intermediate — on the
-// tubing above the shoe — not in open hole below it. The collar did not move in world space (chapters 2–4 are
-// authored around it, chapter 2 is an fov-18 close-up on it); the intermediate was landed deeper instead, so
-// the heel/shoe now sits ~10 % of the intermediate's length BELOW the collar. That is the same standoff rule
-// the qualifier states ("roughly 10 % of the intermediate's length of standoff above the shoe"), read from the
-// other end.
+// Round 11 (Kyle) put WellFi INSIDE the intermediate — the right call — but paid for it by landing the shoe
+// DEEPER, past a collar that was not allowed to move: the whole landed run then sat at y = -2.43, its OD in
+// the Clearwater Mudstone, and the open hole appeared to start in the mudstone ("it looks like we are
+// producing from the mudstone" — Kyle, round 12).
+//
+// Round 12 fixes it from the other end, which is the honest one: the intermediate lands where a real
+// intermediate lands — just into the TOP OF THE PAY — and the collar moves UP the well to stay above it. The
+// landed run is at BENCH_Y (0.15 into the Clearwater Lower Sand, casing crown 0.05 clear of PAY_TOP), it runs
+// along the exposed front cut face, and the collar rides that exposed stretch: visible through the casing at
+// the cutaway, "right in the section right before the intermediate hides in the formation" (Kyle). The shoe
+// lands a short way into the notch, on the bench, and everything past it — trunk and all six legs — is open
+// hole in the Lower Sand.
 export const DEFAULT_WELLFI_VIEW = 'inside-intermediate';
-export const WELLFI_INSIDE_INTERMEDIATE_PARAM = 0.90; // on the cased string, the standoff line above the shoe
+// On the cased string, on the exposed face run just before the string turns into the formation (u = 0.72;
+// the dive is at u ≈ 0.76), ≈ 28 % of the intermediate above the shoe.
+// This is ABOVE the 10 % standoff line (wellBuilder.STANDOFF_U = 0.9), not on it: 10 % is the minimum the
+// qualifier states, and the authored placement keeps more than the minimum.
+export const WELLFI_INSIDE_INTERMEDIATE_PARAM = 0.72;
 export const WELLFI_BELOW_PUMP_CASING_PARAM = 0.5;   // inside the 7-in string, below a shallow pump landing
-export const WELLFI_OUTSIDE_INTERMEDIATE_PARAM = 0.03; // on the open-hole trunk, just below the shoe (the "deeper" answer)
+// On the open-hole trunk, below the shoe (the "deeper" answer). At u = 0.03 the anchor was only 0.25 units
+// past the heel — less than the tool's own half-length, so the collar STRADDLED the shoe and half of the
+// "outside the intermediate" configuration was still inside it (round 12).
+export const WELLFI_OUTSIDE_INTERMEDIATE_PARAM = 0.075;
 
 const v = (x, y, z) => new Vector3(x, y, z);
 
@@ -44,8 +57,20 @@ function bendPoint(a, b, f, side) {
   return v(x + nx * w, BENCH_Y + BORE_LIFT, z + nz * w);
 }
 
-function toolAnchor(curve, param) {
-  return { position: curve.getPointAt(param), tangent: curve.getTangentAt(param).normalize().clone() };
+// The section-cut convention keeps tubulars WHOLE on the cut plane (the cased string rides half-proud on
+// z = Z_FACE). A tool drawn on that same centreline would be half-buried in the rock and would read as a
+// sliced cylinder from any off-normal angle — including the chapter-2 close-up and its ±0.3 rad orbit. So a
+// tool anchored on the face run rides the PROUD half of the string it is inside: +0.045 in z puts its 0.05 OD
+// between the casing's centreline and its outer wall — whole, visible, still inside the pipe.
+export const TOOL_FACE_BIAS = 0.045;
+// The same argument on the bench: the open-hole bores are drawn as slots sunk past half, so a tool anchored on
+// a bore centreline would be half in the floor. It rides the proud half of its own bore.
+export const TOOL_BORE_LIFT = 0.045;
+
+function toolAnchor(curve, param, offset = null) {
+  const position = curve.getPointAt(param);
+  if (offset) { position.z += offset.z || 0; position.y += offset.y || 0; }
+  return { position, tangent: curve.getTangentAt(param).normalize().clone() };
 }
 
 // Where a curve crosses the plane axis = value (first crossing), or null. axis: 'z' (default) or 'x'.
@@ -64,11 +89,17 @@ function crossing(curve, plane, samples = 200, axis = 'z') {
 
 export function buildWellPaths() {
   const wellhead = v(-5.2, 0.05, Z_FACE);
-  // The heel is where the intermediate lands. It sits down the trunk far enough that the authored collar
-  // (cased u = 0.90) has ~10 % of the intermediate's length of standoff above the shoe (round 11).
-  const heel = v(0.03, BENCH_Y + 0.12, 3.04);
+  // The heel: where the intermediate lands, just inside the notch, sitting in the bench plane with the shoe
+  // ring standing proud of the floor. Its lift is bounded by the truth this whole round is about — the 7-in
+  // crown (RADII.casedShell) must stay below PAY_TOP, so the landed intermediate is never seen in the
+  // Clearwater Mudstone (round 12; BENCH_Y + 0.02 leaves 0.023 of margin).
+  const heel = v(-0.95, BENCH_Y + 0.02, 4.20);
+  // The build stays ON the front cut face (z = Z_FACE) the whole way down, crosses the Mudstone while still
+  // descending, and lands at BENCH_Y — so every part of the LANDED run, casing OD included, is below PAY_TOP.
+  // Only the last ~13 % turns in plan, dives behind the face and crosses the x = -1.6 wall to the heel.
   const cased = new CatmullRomCurve3([
-    wellhead.clone(), v(-5.2, -0.9, Z_FACE), v(-5.08, -1.7, Z_FACE), v(-4.45, -2.25, Z_FACE), v(-3.1, heel.y, 4.6), heel.clone(),
+    wellhead.clone(), v(-5.2, -1.05, Z_FACE), v(-5.02, -1.88, Z_FACE), v(-4.34, -2.44, Z_FACE),
+    v(-3.45, BENCH_Y, Z_FACE), v(-2.25, BENCH_Y, 4.94), heel.clone(),
   ], false, 'catmullrom', 0.5);
 
   const toe = v(6.6, BENCH_Y + BORE_LIFT, 0.5);
@@ -90,9 +121,9 @@ export function buildWellPaths() {
 
   const shoe = cased.getPointAt(1);
   const wellfiTools = {
-    insideIntermediate: toolAnchor(cased, WELLFI_INSIDE_INTERMEDIATE_PARAM),
-    outsideIntermediate: toolAnchor(openHole, WELLFI_OUTSIDE_INTERMEDIATE_PARAM),
-    belowPump: toolAnchor(cased, WELLFI_BELOW_PUMP_CASING_PARAM),
+    insideIntermediate: toolAnchor(cased, WELLFI_INSIDE_INTERMEDIATE_PARAM, { z: TOOL_FACE_BIAS }),
+    outsideIntermediate: toolAnchor(openHole, WELLFI_OUTSIDE_INTERMEDIATE_PARAM, { y: TOOL_BORE_LIFT }),
+    belowPump: toolAnchor(cased, WELLFI_BELOW_PUMP_CASING_PARAM, { z: TOOL_FACE_BIAS }),
   };
 
   // Bore mouths: where bores pass from the notch into solid rock — the cased curve at the x = -1.6 wall

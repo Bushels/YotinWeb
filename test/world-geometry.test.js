@@ -39,10 +39,10 @@ describe('well geometry', () => {
   });
   test('the heel lands on the bench and every bore point lies on the bench plane', () => {
     const heel = paths.cased.getPointAt(1);
-    assert.ok(Math.abs(heel.y - (layout.BENCH_Y + 0.12)) < 0.02, `heel y ${heel.y}`);
+    assert.ok(Math.abs(heel.y - (layout.BENCH_Y + 0.02)) < 0.02, `heel y ${heel.y}`);
     const bores = [paths.openHole, ...paths.laterals];
     bores.forEach((c, ci) => {
-      // the open hole leaves the shoe 0.12 above the bench and settles onto it within its first ~15 %; the
+      // the open hole leaves the shoe a hair above the bench and settles onto it within its first ~15 %; the
       // first junction (t = 0.10) sits on that descent, so a lateral's first sample may inherit it
       for (let i = ci === 0 ? 3 : 1; i <= 20; i++) {
         const y = c.getPointAt(i / 20).y;
@@ -50,6 +50,42 @@ describe('well geometry', () => {
       }
     });
     assert.equal(wellPath.BORE_LIFT, 0, 'bore centrelines lie ON the bench plane (spec §3) — troughs are slots, not mounds');
+  });
+  // Round 12 (Kyle: "the positioning of our intermediate looks like we are producing from the mudstone"). The
+  // intermediate lands JUST INTO THE TOP OF THE PAY and the open hole below it is pay only. These three tests
+  // are the depth truth of the whole schematic — they are why the heel moved.
+  test('the intermediate shoe lands just into the top of the pay, below the Clearwater Mudstone', () => {
+    const mudstone = layout.STRATA.find((s) => s.name === 'middleMudstone');
+    const shoe = paths.shoe;
+    assert.ok(shoe.y < layout.PAY_TOP, `shoe y ${shoe.y} must be below PAY_TOP ${layout.PAY_TOP}`);
+    assert.ok(shoe.y <= mudstone.bottomY, 'the shoe is out of the mudstone');
+    assert.ok(shoe.y > layout.PAY_TOP - 0.3, `shoe y ${shoe.y} — JUST into the top of the pay, not landed deep in it`);
+    // and the shoe is inside the notch, on the bench, where the open hole can be seen
+    assert.ok(shoe.x > layout.NOTCH.minX, `shoe x ${shoe.x} is inside the notch`);
+  });
+  test('the LANDED run of the intermediate — casing OD included — lies inside the pay', () => {
+    // "landed" = the part of the cased string that has stopped descending. Its crown (centre + the 7-in shell
+    // radius) must clear PAY_TOP, or a viewer reads the horizontal section as producing from the mudstone.
+    const R = wellPath.RADII.casedShell;
+    let landed = 0;
+    for (let i = 0; i <= 200; i++) {
+      const u = i / 200, p = paths.cased.getPointAt(u), t = paths.cased.getTangentAt(u);
+      if (Math.abs(t.y) > 0.08) continue;             // still building
+      landed++;
+      assert.ok(p.y + R <= layout.PAY_TOP, `landed casing crown ${(p.y + R).toFixed(3)} at u ${u} is above PAY_TOP`);
+    }
+    assert.ok(landed > 30, 'there is a landed (horizontal) run to check');
+  });
+  test('the open hole and every lateral live in the Clearwater Lower Sand only', () => {
+    const pay = layout.STRATA.find((s) => s.name === 'lowerSand');
+    const R = wellPath.RADII.openHole;
+    [paths.openHole, ...paths.laterals].forEach((c) => {
+      for (let i = 0; i <= 20; i++) {
+        const p = c.getPointAt(i / 20);
+        assert.ok(p.y + R < pay.topY, `bore crown ${(p.y + R).toFixed(3)} is above the pay top`);
+        assert.ok(p.y - R > pay.bottomY, `bore ${p.y} is below the pay`);
+      }
+    });
   });
   test('six legs from four staggered junctions (1/1/2/2), never a fan from one node', () => {
     assert.equal(paths.laterals.length, 6);
@@ -67,23 +103,38 @@ describe('well geometry', () => {
     assert.ok(casedMouth && casedMouth.plane === 'left', 'cased bore mouth on the notch wall');
     assert.ok(Math.abs(casedMouth.point.x - layout.NOTCH.minX) < 0.03);
   });
-  // Round 11 (Kyle): the landing page shows WellFi INSIDE the intermediate. The collar stayed put in world
-  // space (chapter 2 is an fov-18 close-up on it); the intermediate was landed deeper so the shoe is now below
-  // it, with the standoff the qualifier states.
-  test('the candle (default view) is inside the intermediate, on the bench near the x = -1.6 wall', () => {
+  // Round 11 (Kyle): the landing page shows WellFi INSIDE the intermediate. Round 12: it sits on the EXPOSED
+  // front-face run of that string, above the shoe — which is why the shoe could be brought back up to the top
+  // of the pay. Kyle: "it was right in the section right before the intermediate hides in the formation."
+  test('the candle (default view) is inside the intermediate, on the exposed front-face run', () => {
     const p = wellPath.getWellFiPlacement(paths, wellPath.DEFAULT_WELLFI_VIEW);
     assert.equal(p.id, 'inside-intermediate');
-    assert.ok(p.position.x > layout.NOTCH.minX && p.position.x < layout.NOTCH.minX + 1.2, `x ${p.position.x}`);
-    assert.ok(Math.abs(p.position.y - (layout.BENCH_Y + 0.12)) < 0.1);
+    // on the cut face (the casing is half-proud there, so the collar reads through it in the cutaway)…
+    assert.ok(Math.abs(p.position.z - wellPath.Z_FACE) < 0.12, `z ${p.position.z} — not on the front cut face`);
+    assert.ok(p.position.x < layout.NOTCH.minX, `x ${p.position.x} — the exposed face run is x < ${layout.NOTCH.minX}`);
+    // …and still ahead of the point where the string turns and dives into the formation
+    const dive = paths.boreMouths.find((m) => m.id === 'cased-dive');
+    assert.ok(dive && wellPath.WELLFI_INSIDE_INTERMEDIATE_PARAM < dive.u, 'the collar is above the dive, not buried');
+    // landed depth: inside the pay, casing OD clear of the mudstone
+    assert.ok(p.position.y + wellPath.RADII.casedShell <= layout.PAY_TOP, `collar crown ${p.position.y + wellPath.RADII.casedShell}`);
   });
-  test('the default collar sits above the shoe with ~10 % of the intermediate as standoff', () => {
+  test('the default collar sits above the shoe, above the standoff line, with at least 10 % standoff', () => {
     const p = wellPath.getWellFiPlacement(paths, wellPath.DEFAULT_WELLFI_VIEW);
-    const standoff = paths.cased.getLength() * (1 - wellPath.WELLFI_INSIDE_INTERMEDIATE_PARAM);
-    assert.ok(Math.abs(standoff / paths.cased.getLength() - 0.10) < 0.02, `standoff share ${standoff / paths.cased.getLength()}`);
+    const L = paths.cased.getLength();
+    const share = 1 - wellPath.WELLFI_INSIDE_INTERMEDIATE_PARAM;
+    // 10 % of the intermediate is the MINIMUM standoff the qualifier states; the authored placement keeps more
+    // than the minimum and must never fall below it.
+    assert.ok(share >= 0.10, `standoff share ${share} is below the 10 % rule`);
+    assert.ok(share <= 0.35, `standoff share ${share} — still recognisably "above the shoe", not mid-build`);
+    assert.ok(L * share > 0.5, 'the standoff is a visible length, not a hairline');
     assert.ok(p.position.distanceTo(paths.shoe) > 0.5, 'the collar is clear of the shoe');
-    // and the "deeper" answer still puts the collar BELOW the shoe, in open hole
+    // the collar is ABOVE the qualifier's 10 % standoff line, and the line is above the shoe
+    assert.ok(wellPath.WELLFI_INSIDE_INTERMEDIATE_PARAM < 0.9, 'the collar sits above the standoff line at u = 0.9');
+    // and the "deeper" answer still puts the collar BELOW the shoe, in open hole — the WHOLE tool, not half of
+    // it: the tool is 0.62 long (wellfiTool.TOOL_LENGTH), so its up-hole end must clear the shoe too
     const outside = wellPath.getWellFiPlacement(paths, 'outside-intermediate');
     assert.ok(outside.position.x > paths.shoe.x, 'outside-intermediate is past the shoe, down the open-hole trunk');
+    assert.ok(outside.position.distanceTo(paths.shoe) > 0.42, `outside-intermediate is only ${outside.position.distanceTo(paths.shoe).toFixed(2)} from the shoe — the tool would straddle it`);
   });
   test('the below-pump placement is inside the intermediate string on the front face', () => {
     const p = wellPath.getWellFiPlacement(paths, 'below-pump');

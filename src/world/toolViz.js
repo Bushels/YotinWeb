@@ -179,6 +179,12 @@ export function createToolViz(world) {
   // which means it also draws straight through the chapter-2 tool close-up and its DOM panel. Fade it out as the
   // camera closes on the tool, and kill it in orbit (round 5).
   const casedGhost = island.well.group.getObjectByName('cased-ghost');
+  // Same problem, same fix, for the bore mouths (round 12): the collar now sits on the exposed face run, a
+  // quarter-unit from the 'cased-dive' mouth, so at chapter-2 range that mouth's black disc and sand rim are a
+  // 300 px hole floating beside the tool. They are chapter-distance landmarks — fade them as the camera closes.
+  const boreMouths = island.well.mouths || null;
+  const mouthMats = [];
+  if (boreMouths) boreMouths.traverse((o) => { if (o.isMesh && o.material && o.material.transparent) mouthMats.push({ m: o.material, base: o.material.opacity }); });
   const _ghostA = new THREE.Vector3(), _ghostB = new THREE.Vector3();
   const cutBase = cutEdges ? cutEdges.material.opacity : 0.35;
   let cutBoost = 0;
@@ -353,10 +359,15 @@ export function createToolViz(world) {
     pumpMat.emissiveIntensity = 0.10 + THREE.MathUtils.smoothstep(drawdown, 0.55, 1) * 0.55; // a readable body before pump-off; the warm lift is smaller now that the body is 1.6× (round 9)
     // drive head keeps turning at one constant rate (chapter 4)
     if (chapterActive.deployment && !world.paused && island.pad && island.pad.motor) island.pad.motor.rotateY(dt * 1.6);
-    if (casedGhost) {
+    if (casedGhost || mouthMats.length) {
       const d = camera.getWorldPosition(_ghostA).distanceTo(tool.group.getWorldPosition(_ghostB));
-      casedGhost.material.opacity = orbit.active ? 0 : 0.38 * THREE.MathUtils.smoothstep(d, 4.5, 9);
-      casedGhost.visible = casedGhost.material.opacity > 0.01;
+      const near = THREE.MathUtils.smoothstep(d, 4.5, 9);
+      if (casedGhost) {
+        casedGhost.material.opacity = orbit.active ? 0 : 0.38 * near;
+        casedGhost.visible = casedGhost.material.opacity > 0.01;
+      }
+      for (const e of mouthMats) e.m.opacity = e.base * (orbit.active ? 0 : near);
+      if (boreMouths) boreMouths.visible = (orbit.active ? 0 : near) > 0.02;
     }
     // halo / bench / cut edges
     haloMat.opacity += (haloTarget - haloMat.opacity) * k; if (haloMat.opacity < 0.01 && haloTarget === 0) halo.visible = false;
