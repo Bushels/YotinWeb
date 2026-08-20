@@ -1,0 +1,193 @@
+# Yotin-web changelog — the three.js world build
+
+A step-by-step record of the rebuild: what changed, the rules we keep, who did the work
+(agents, skills, MCPs), what broke, what improved, and what we learned. Newest first within
+each era. Companion docs: the authoritative spec
+(`docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`), the effort study
+(`docs/effort-evaluator-2026-08-19.md`), and the dated handover notes in `docs/`.
+
+**Status:** all work is on local `master` — nothing pushed; production (yotin-energy.vercel.app)
+still serves the old static site. Launch blocker: the brand-architecture paragraph (Kyle, spec §14).
+
+---
+
+## The rules we keep (binding, spec §0 / §6 / §13b)
+
+These survived ten critique rounds and are what the critics rated highest. They are not style
+preferences — each one exists because breaking it produced a measured defect.
+
+1. **One candle.** Saturated cyan appears only where the signal is: chapter 3, the verdict
+   candle/badge, and the logomark after the circuit closes. Everything else is sand (readable
+   light) and ember (CTAs, warmth). Enforced by a colour gate + per-frame cyan census.
+2. **Truth discipline.** The site prints only defensible figures: 10,000 psia · 150 °C · 46 mm
+   OD · 5+ yr battery · 160+ installs · MODBUS RS-485 / 4-20 mA. Everything else carries
+   "representative values". The site never prints metres as its own claim (echoing the
+   visitor's own entered values is allowed). No invented trends, no ROI claims, no fake data.
+   A physics-sources CI gate requires a source on any figure-shaped claim.
+3. **Copy grounds are washes, never panes.** Feathered to zero *inside* their own box; a flat
+   scrim puts a one-pixel luminance step across the render. (Regressed once in round 8's fixes,
+   caught in round 9 by pixel-scanning edges.)
+4. **Time-based easing only.** A per-frame `* 0.06` is ~20× slower under SwiftShader / on a
+   slow phone. (Round 6: the loop drew 40 % while the caption said "closed".)
+5. **Chapter state is `floor(p + 0.002)`**, never raw float comparison.
+6. **One transient at a time** in the fixed layer (rail / pause / ChatFi / panels), and the
+   world is an *enhancement*: all copy, FAQ, numbers and the qualifier live in `index.html`, and
+   a capability gate serves a complete stills page when WebGL can't run.
+7. **Poses are composed offline** (landmark projection search scripts), not by nudging.
+8. **Interaction states must be spatially true**, not captioned into truth — at separation 0 the
+   stake literally stands on the wellhead and the digits go to dashes.
+9. **Regenerate stills + frames before every critique round**, and tell the critics what changed
+   so they re-verify rather than re-raise.
+10. **Evidence before verdicts.** Findings are measured (pixel scans, contrast ratios, projected
+    coordinates) and adversarially verified before anything is fixed.
+
+---
+
+## Era 3 — rounds 9–10: orchestration swap, Mobbin research, interaction redesigns (2026-08-19, session 2)
+
+### 989718a — round-10 fixes (six confirmed P1s, all on the newest surfaces)
+- Future verdict no longer asserts a present-tense deployment for a well on the waitlist.
+- Placement language unified in five places: "on the tubing inside casing" / "set below the
+  intermediate shoe, in open hole" (was four incompatible phrasings).
+- The 10 %-of-intermediate standoff rule sourced in place and added to the physics-sources gate.
+- Verdict block left-aligned (centre-aligned under a hard-justified table was "the one dated tell").
+- Stills capture hides body-level projected captions — `ch4.webp` no longer bakes
+  "fluid level · now" through the benefits cards.
+- FAQ hedges the exterior mount: "subject to casing size (confirm per well)" — JSON-LD parity kept.
+
+### 48e0aac + 6a72eaa — round-9 batch 2: Mobbin-researched interaction redesigns
+- **Qualifier verdict is a result, not a button**: readback of the visitor's six answers →
+  VERDICT eyebrow → plain 28 px label in its earned colour → one reasoning sentence derived from
+  the actual answers → demoted actions. (Pattern: Hers' echo-then-verdict, Origin's dark verdict.)
+- **Close-the-Circuit slider is a measurement instrument**: sand hairline track, ticks every
+  10 %, taller detent tick at "on the wellhead — no difference" (keyboard snaps onto it), the
+  V₁−V₂ reading in the same card; ember only on focus/active.
+- **Orbit is one panel**: chips · hairline · "drag to rotate · Esc closes · Close" (sand outline,
+  not a white pill); Inspect and the panel swap through one slot.
+- Capture script gains companion `fit-*-verdict` frames so critics can see the DOM block.
+
+### 749d1b1 — round-9 batch 1: confirmed P1s + measured P2s + two Mobbin quick wins
+- Copy-ground washes restored on the two regressed panes (measured max step 22–38 → 1–3 px).
+- Fallback path prints units correctly (kPa / mm/s RMS / 4-20 mA); rm-smoke now asserts casing.
+- "Deeper" pump marker actually lands deeper than the standoff line (geometry test added).
+- X-ray pressed state: sand fill + filled dot. Side captions project without world-space lift.
+- Deployment pump moved out of the build (74° → ~27°), 1.6× silhouette with shoulders.
+- Phone ch2 dead strip collapsed. ChatFi launcher: sand at rest, ember when warmed, hidden in
+  ch2/ch3. Phone rail bar: 2 px progress rule (cyan tip only in the signal state), CONTENTS sheet
+  with all seven chapters.
+
+### Process changes this session
+- **Orchestration swap (Kyle's direction):** Fable orchestrates only; Opus 5 critiques and
+  implements; Codex returned as a critic — run *foreground* via the companion CLI with output to
+  a file (its `--background` job store lost round 6's job entirely).
+- **Effort evaluator** (`docs/effort-evaluator-2026-08-19.md`): craft critique @ medium is the
+  sweet spot; high pays off only on the truth lens; implementation @ medium with verifier-fix
+  briefs needed zero rework across three batches.
+- Round 9 scores 8.2–8.6 (2 P1s). Round 10: Codex said stop at 8.7; Opus craft/truth 7.6/6.5
+  found 6 P1s on the new surfaces — fixed same session. 1 finding refuted by source+pixel checks.
+
+## Era 2 — the self-improvement loop, rounds 1–8 (2026-08-19, session 1)
+
+Scores went **4.0 / 4.5 / 5.5 → 7.5 / 6.5 / 7.8** over eight rounds (three critics; Codex was
+dropped after hanging twice, replaced by a second Fable critic).
+
+- **Round 8** (`21fe6cf`, `023c8e4`): the EM field's fourth plane carries the return current up
+  the casing (line-source term); slab silhouette gets its sand cut-edge; the wellhead is a real
+  assembly and no longer out-lights the darkest chapter; thesis line on one quiet ground; wind
+  hugs the ground, quieter, varied. Verdict: two critics said stop.
+- **Round 7** (`db8af11`): copy washes fade to zero inside their box (the radial's ending shape
+  was still 0.3 at the edge — a repeated trap); Close-the-Circuit works on the reduced-motion
+  path (DOM state machine, world twins); honest coupling (the field swells less for a casing-
+  shorted collar). Mobile eyebrows earn their own ground (`9994e06`, 1.09:1 → 4.54:1).
+- **Round 6** (`663e995`): time-based easing everywhere; fit pose frames both verdict
+  placements; candle casts a tight local light; golden hour authored.
+- **Round 5** (`62bc1a5`): continuous pose map + guard test; the circuit tells the spatial truth
+  (stake on the wellhead at zero separation, instant loop collapse, cleared road corridor);
+  signal-b re-aimed by offline pose search; feathered copy washes; phone header strip closed.
+- **Round 4** (`24f305e`): opaque phone bar; matte casing + dull shoe ("no syringe"); instrument
+  on the face with level rules; loop as a tube; wind gated by camera height; bedding noise.
+- **Round 3** (`30974f3`): rail gutter ground + index-gated cyan; cased bore mouth on the notch
+  wall; field density ∝ magnitude; qualifier before the fallback at every width; launcher yields
+  on phone scroll; frames job fails fast on boot errors.
+- **Rounds 1–2** (`ea105ec` through `741ae7b`): the P0s — one candle enforced, slots not
+  ladders, no false spec tweens; runtime diet; rail contrast; stills colour gate; interaction
+  frames driven through DOM twins (`8a446d8`).
+
+## Era 1 — the world build itself (2026-08-19, session 1)
+
+Rebuilt the static site as **one persistent three.js world under the existing DOM**: seven
+chapters, nine camera poses, native scroll, bench topology, a representative Clearwater well
+(casing → shoe → heel → open hole → laterals). Vite build; capability gate → complete stills
+page. CI gates: `npm run check` (build + budgets + stills colour gate + 127 tests),
+`check:rm` (zero world bytes on the fallback), `check:runtime` (draw-call/triangle caps at every
+anchor: 68 / 107,734 desktop, 54 / 44,022 phone), `check:scroll`. A Flutter rewrite was
+evaluated and dropped earlier (2026-08-06): 39 KB static vs ~2,300 KB Flutter.
+
+Pre-world history (the old static site) runs `4968977` through `025718a` — baseline, WellFi
+story, ChatFi/Deep Chat integration, yotinenergy.com launch.
+
+---
+
+## Who did the work — agents, skills, MCPs, tools
+
+| Layer | What | Notes |
+| --- | --- | --- |
+| Orchestrator | **Claude Fable 5** (Claude Code) | Briefs, launches, gates, stills/captures, commits; adjudicates disputed findings by looking at one frame |
+| Critique | **Opus 5** subagents via the Workflow tool | craft lens @ medium, engineering-truth lens @ high, adversarial verifiers @ medium; structured-output schemas |
+| Critique | **Codex** (GPT-5.x) via the codex plugin CLI | Foreground `task` call, stdout → file; its P1s route through a verifier like everyone else's |
+| Implementation | **Opus 5** subagents @ medium | Briefs carry verifier-written fixes with file:line; zero rework in 3 batches |
+| Design research | **Mobbin MCP** (`search_screens/flows/sections`) | 5 patterns → top-5 ranked changes (verdict block, launcher, slider, orbit, phone rail) |
+| Capture/measure | Playwright (headless chromium) via project scripts | `stills.mjs`, `capture-all.mjs`, `interactions.mjs`, `frames.mjs`, pose-search scripts |
+| Gates | node --test (127), budget.mjs, colour-gate.mjs, rm-smoke.mjs, scroll-length.mjs | Never loosened to make a fix pass |
+| Skills/process | superpowers (brainstorming → spec → plans), codex plugin skills | Spec §13b records the binding loop lessons |
+| Memory | Claude auto-memory + Hindsight banks | Shared across Claude / Codex / Gemini sessions |
+
+## Issues we hit (and their fixes)
+
+- **Codex background jobs vanish** — the plugin's job store lost round 6's task ("No job
+  found"). Fix: run the companion CLI foreground with stdout to a file. Worked both rounds since.
+- **WebGL context loss flake** — `check:runtime` fails when two headless browsers share the
+  :5174 dev server. Fix: re-run serially once before treating it as a regression.
+- **Orphaned Vite/headless processes across sessions** — `page.goto` times out while curl is
+  healthy. Fix: kill extra `vite` node processes, keep the one owning :5174.
+- **SwiftShader easing trap** — per-frame lerp ~20× slower without GPU. Fix: time-based easing.
+- **The radial-wash trap (twice)** — a radial gradient's ending shape is ~0.24–0.3 at the box
+  edge, and a bleed can be eaten by the section's `overflow-x: clip`, reinstating the hard edge.
+  Fix: linear wash + mask ramping across the box's own padding.
+- **Misleading measurements** — the STRONG FIT badge is deliberately cyan (trips a naive cyan
+  scan); anti-aliased glyph edges tank naive contrast metrics (measure glyph cores vs median
+  ground); a critic measured caption distance to the *wrong line* (the fix was already in).
+- **Stale stills at the same immutable URL** — public assets regenerate in place; regenerate +
+  colour-gate before every round, and the ch6 screenshot once went silently stale (timeout
+  raised, gate now catches staleness).
+- **Critique frames cropped the evidence** — the new verdict block was below the fold at the
+  authored anchor, so a critic called it "not evidenced". Fix: companion `-verdict` frames.
+
+## Improvements (measured)
+
+- Critic scores: 4.0/4.5/5.5 (round 1) → 7.5/6.5/7.8 (round 8) → 8.2–8.6 (round 9) →
+  8.7 Codex / 7.6 craft / 6.5 truth (round 10, new surfaces judged hardest).
+- Contrast: mobile eyebrows 1.09:1 → 4.54:1; every text block ≥ 9:1 worst-column (round-9 census).
+- Colour budget: cyan census per 1366 frame — 0 px outside ch3/verdict/logomark.
+- Runtime: 68 calls / 107,734 tris desktop, 54 / 44,022 phone — within caps incl. shadow pass.
+- Payload: old static baseline 39 KB; world build critical CSS 17.3 / 22 KB cap, world chunk
+  204.4 / 215 KB cap, reduced-motion first paint 71.7 / 127 KB.
+- Tests: 0 → 127, plus four scripted gates wired into `check:all`.
+
+## Lessons learned
+
+1. **Independent critics at different lenses beat one big critic** — every confirmed P1 in
+   rounds 9–10 was found by exactly one of the four critics.
+2. **Adversarial verification pays for itself** — round 10's most dramatic finding ("open hole
+   renders as pipe") was refuted by source + pixel checks; Codex's round-9 P1 was a misread of
+   an authored wash. Nothing gets fixed on a critic's word alone.
+3. **Medium effort + a verifier-fix brief beats high effort + a vague brief** — three
+   implementation batches, zero rework. Put file:line and the binding rules in the brief.
+4. **Fixes regress the rules they were made under** — round 8's contrast fixes reintroduced the
+   pane-edge defect §13b had banned. Confirmation rounds after every batch are not optional.
+5. **New surfaces need their own truth pass** — the batch-2 verdict block shipped with a truth
+   bug (future path asserting a deployment) that only the truth lens caught.
+6. **Make the capture show the work** — critics can only judge what the frames contain.
+7. **Truth is a register, not a checklist** — the highest-praise items (skin-depth chip with
+   citation, dashes instead of fake digits, geometry-as-argument) all came from refusing to
+   caption things into being true.
