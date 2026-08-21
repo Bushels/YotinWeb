@@ -81,6 +81,14 @@ await browser.close();
 console.log(JSON.stringify(report, null, 1));
 const over = report.stills.filter((s) => s.bytes && s.bytes > CAPS[s.i]);
 if (over.length) { console.error('over cap: ' + over.map((s) => `ch${s.i} ${s.bytes}B`).join(', ')); process.exit(1); }
+// Record WHICH desktop pose data these stills were shot from, so colour-gate.mjs can tell a real pose change
+// from a clock tick (scripts/pose-fingerprint.mjs). Written last: only a capture that cleared the caps counts.
+try {
+  const { poseFingerprint, FINGERPRINT_FILE } = await import('./pose-fingerprint.mjs');
+  const fp = poseFingerprint();
+  fs.writeFileSync(FINGERPRINT_FILE, fp + '\n');
+  console.error(`stills pose fingerprint: ${fp} → ${FINGERPRINT_FILE}`);
+} catch (e) { console.error('pose fingerprint not written: ' + e.message); }
 
 // Quality search: start at q=80 and step down until the encoded WebP fits the cap; never below MIN_W wide.
 async function encodeUnderCap(pngPath, webpPath, cap) {

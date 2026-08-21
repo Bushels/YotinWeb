@@ -11,10 +11,16 @@ const args = Object.fromEntries(process.argv.slice(2).map((a, i, arr) => a.start
 const url = typeof args.url === 'string' ? args.url : 'http://localhost:5174/?world=1';
 const strict = Boolean(args.strict);
 
+// `cap: null` measures and reports without asserting — for a geometry we have only just started watching.
 const VIEWPORTS = [
   { w: 1440, h: 900, cap: 10.7, label: 'desktop' },
   { w: 1366, h: 768, cap: 11.9, label: 'desktop' },
   { w: 390, h: 844, cap: 14.7, label: 'phone' },
+  // Round 16: the tall phone (iPhone 17 Pro Max class, logical 440 × 956) joined the capture matrix after Kyle's
+  // first real-device audit. The ratio here is comfortably under the 390 × 844 cap — the document is a little
+  // shorter and the viewport a lot taller — but the number is REPORTED, not asserted: a cap is a promise about
+  // a geometry we have measured across several rounds, and this one has been watched for exactly one.
+  { w: 440, h: 956, cap: null, label: 'phone (tall)' },
 ];
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -33,9 +39,9 @@ for (const v of VIEWPORTS) {
   const live = await page.evaluate(() => document.documentElement.classList.contains('world-live'));
   const m = await page.evaluate(() => ({ sh: document.documentElement.scrollHeight, ih: window.innerHeight }));
   const ratio = m.sh / m.ih;
-  const pass = ratio <= v.cap;
+  const pass = v.cap == null ? true : ratio <= v.cap;
   if (!pass) failed += 1;
-  rows.push({ viewport: `${v.w}x${v.h}`, label: v.label, path: live ? 'world' : (worldOn ? 'world (not live)' : 'stills'), scrollHeight: m.sh, innerHeight: m.ih, ratio: Number(ratio.toFixed(2)), cap: v.cap, result: pass ? 'PASS' : 'FAIL' });
+  rows.push({ viewport: `${v.w}x${v.h}`, label: v.label, path: live ? 'world' : (worldOn ? 'world (not live)' : 'stills'), scrollHeight: m.sh, innerHeight: m.ih, ratio: Number(ratio.toFixed(2)), cap: v.cap == null ? '—' : v.cap, result: v.cap == null ? 'report' : (pass ? 'PASS' : 'FAIL') });
   await ctx.close();
 }
 await browser.close();

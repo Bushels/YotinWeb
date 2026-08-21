@@ -17,6 +17,9 @@ export function bootWorld() {
   if (!canvas) return null;
   const html = document.documentElement;
   const isMobile = () => window.innerWidth <= 820;
+  // Cached at resize (the frame loop reads it every tick): phones get the chapter-2 pose/light hold in
+  // chapters.js, because the tool chapter is one screen of copy on a laptop and two and a quarter on a phone.
+  let mobileNow = isMobile();
   const dprCap = gate.tier >= 3 ? 1.75 : gate.tier === 2 ? 1.5 : 1.35;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false });
@@ -68,8 +71,9 @@ export function bootWorld() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    rig.setMobile(isMobile());
-    island.setCompact(isMobile());
+    mobileNow = isMobile();
+    rig.setMobile(mobileNow);
+    island.setCompact(mobileNow);
     dirty = true;
   }
   window.addEventListener('resize', resize, { passive: true });
@@ -138,12 +142,12 @@ export function bootWorld() {
     if (arriving > 0 || !firstFrame) { if (arriving > 0) arriving--; conductor.jumpTo(); lastState = conductor.getState(); }
     const st = lastState || conductor.getState();
     const p = st.smooth;
-    const w = worldAt(p);
+    const w = worldAt(p, mobileNow);
     interactions.update();
     // spring the parting strength toward its target so the wind/spruce ease in and out
     partStrength += (partTarget - partStrength) * (1 - Math.exp(-4 * dt));
     if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
-    rig.apply(poseProgress(p), dt, camera.aspect);
+    rig.apply(poseProgress(p, mobileNow), dt, camera.aspect);
     island.wind.setCameraHeight(camera.getWorldPosition(_camWorld).y); // WORLD height (the camera sits inside the rig): the wind is only seen from above ground
     island.update(elapsed % 12, elapsed, w);
     scene.fog.density = (w.fog || 0) * 0.6;

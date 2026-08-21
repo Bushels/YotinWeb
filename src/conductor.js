@@ -7,7 +7,8 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
   const els = Array.from(sections);
   if (!els.length) throw new Error('conductor: no sections');
   let anchors = [], exact = 0, smooth = 0, direction = 0, prevY = 0, active = -1;
-  let running = false, frame = 0, lastTime = 0, dirty = true, widthAtMeasure = 0, ro = null;
+  let running = false, frame = 0, lastTime = 0, dirty = true, widthAtMeasure = 0, heightAtMeasure = 0, ro = null;
+  let resizeTimer = 0;
   let reduce = reducedMotion;
 
   const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
@@ -16,6 +17,7 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
   function measure() {
     const max = maxScroll();
     widthAtMeasure = innerWidth;
+    heightAtMeasure = innerHeight;
     const docTop = (el) => el.getBoundingClientRect().top + (scrollY || 0); // document space, not offsetParent space
     anchors = els.map((el, i) => {
       if (i === 0) return 0;
@@ -89,8 +91,21 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
   function onResize() {
     const widthChanged = innerWidth !== widthAtMeasure;
     const coarse = matchMedia && matchMedia('(pointer: coarse)').matches;
-    if (coarse && !widthChanged) return;
-    measure(); readScroll();
+    if (widthChanged || !coarse) { clearTimeout(resizeTimer); resizeTimer = 0; measure(); readScroll(); return; }
+    // Coarse pointer, HEIGHT ONLY — mobile Safari's collapsing URL bar (round 16, Kyle's first real-device
+    // audit). This used to return unconditionally, which is right for the thrash but wrong for the geometry:
+    // three of the seven anchors are computed from innerHeight (the centred ones use `- innerHeight * 0.5`, the
+    // last uses `- innerHeight * 0.15`), and on iOS `vh` is pinned to the LARGE viewport, so when the bar
+    // collapses the document height does NOT change — the body ResizeObserver never fires and nothing else
+    // re-measures. The anchors then stay computed against the small viewport for the rest of the session while
+    // the visitor scrolls the large one. Measured at 440 × 956 → 1028: the anchors want to move 36 / 55 / 77 /
+    // 76 / 120 px. So: re-measure, but only once the bar has SETTLED (the collapse fires a burst of resizes
+    // mid-flick — re-measuring inside the burst is what the blanket early-return was protecting) and only when
+    // the height really moved. No jumpTo: `smooth` damps into the corrected progress, and a 36 px anchor shift
+    // is ~0.02 chapter units, so the correction is invisible rather than a cut.
+    if (Math.abs(innerHeight - heightAtMeasure) < 24) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { resizeTimer = 0; measure(); readScroll(); }, 250);
   }
   function onVisibility() {
     if (document.hidden) { cancelAnimationFrame(frame); frame = 0; lastTime = 0; return; }
@@ -104,6 +119,9 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
     measure(); prevY = scrollY || 0; exact = progressAt(prevY); smooth = exact;
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onResize, { passive: true });
+    // visualViewport is the API that actually reports the URL-bar geometry; on iOS it fires where window resize
+    // is unreliable. Both routes land in the same debounced handler, so a burst costs one measure.
+    if (typeof visualViewport !== 'undefined' && visualViewport) visualViewport.addEventListener('resize', onResize, { passive: true });
     addEventListener('orientationchange', onResize, { passive: true });
     addEventListener('pageshow', onResize);
     addEventListener('hashchange', onResize);
@@ -121,7 +139,9 @@ export function createScrollConductor({ sections, damping = 5.2, reducedMotion =
   function stop() {
     if (!running) return;
     running = false; cancelAnimationFrame(frame); frame = 0;
+    clearTimeout(resizeTimer); resizeTimer = 0;
     removeEventListener('scroll', onScroll); removeEventListener('resize', onResize);
+    if (typeof visualViewport !== 'undefined' && visualViewport) visualViewport.removeEventListener('resize', onResize);
     removeEventListener('orientationchange', onResize); removeEventListener('pageshow', onResize); removeEventListener('hashchange', onResize);
     document.removeEventListener('visibilitychange', onVisibility);
     if (ro) ro.disconnect(); ro = null;

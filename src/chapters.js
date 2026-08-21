@@ -50,7 +50,37 @@ export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);
 //   4.8 → 5.3: the RISE — deployment-b → yôtin, beginning under the FAQ scrim and landing a third of the way into the band
 //   5.3 → 5.8: hold the pad + wind while the paper is read
 //   5.8 → 6: ease into fit
-export function poseProgress(p) {
+// Chapter 2 on a phone (round 16, Kyle's first real-device audit: "you scroll past some parts of say the Flow
+// insight at the tool to Inspect the tool and you cannot see the tool"). The tool chapter's DOM is ONE screen on
+// a laptop (945 px against a 900 px viewport at 1440×900) and TWO AND A QUARTER on a phone (1832–1883 px against
+// 758–956) — the five channel cards, the four volume chips and the Inspect row cannot sit side by side there, so
+// they stack. The pose map spreads 2 → 3 linearly across that whole span, so the local progress at which the
+// visitor reaches each control is a function of viewport height, and the two platforms are simply out of phase:
+//
+//   station              1440×900        440×956        440×758 (real Safari, bar out)
+//   Inspect centred      local 0.10      local 0.56     local 0.60
+//   tool on screen       864 px tall     155 px         112 px
+//
+// By the chapter's ONE INVITED ACTION the phone camera is 56–60 % of the way to the next chapter's pose — a wide
+// shot 21 units back at fov 36 — so the subject of the chapter is a sliver behind the last card. The fix is the
+// hold this file already uses twice (the deployment hold at 4 → 4.8, the commissioning hold at CH3_LIGHT): the
+// tool pose is HELD while the tool's own controls are being read, and the flight to the collar happens over the
+// tail, under the spec tiles and the signal strip — copy that does not refer to the tool.
+//
+// The knot is measured, not guessed. Across 390×844, 430×932, 440×956, 440×758 and 440×855 the stations land at
+// local 0.35–0.39 (CH-05 "Flow Insight" centred), 0.56–0.60 (Inspect centred) and 0.755–0.769 (the spec grid
+// arriving) — so the hold has to outlast 0.60 and hand over at the spec grid, not before it.
+const CH2_HOLD = 0.72;
+
+// `mobile` is the viewport predicate boot.js already owns (innerWidth ≤ 820). Desktop is untouched: called with
+// one argument this function is exactly what it was for fifteen rounds.
+export function poseProgress(p, mobile = false) {
+  if (mobile && p > 2 && p < 3) {
+    const l = p - 2;
+    if (l <= CH2_HOLD) return 2;                                    // the tool holds while its own controls are read
+    const u = (l - CH2_HOLD) / (1 - CH2_HOLD);
+    return 2 + u * u * (3 - 2 * u);                                 // smoothstep out, so the departure is a swing and not a snap
+  }
   if (p <= 3) return p;
   if (p < 4) {
     const l = p - 3;
@@ -82,6 +112,15 @@ export function poseProgress(p) {
 //   l ≤ 0.80   0.30  held through the commissioning act and the acquire beat
 //   l = 1.00   0.32  hands to chapter 4 at chapter 4's own value
 const CH3_LIGHT = [[0, 0.03], [0.05, 0.03], [0.18, 0.30], [0.8, 0.30], [1, 0.32]];
+
+// The chapter-2 light holds WITH THE POSE on phones (round 16) — the exact mirror of CH3_LIGHT above, and needed
+// for the same reason. Holding the camera on the tool is not enough if the key fades out from under it: the
+// ledger ramps light 0.24 → 0.03 linearly across chapter 2, so the frame the mobile tool pose was authored
+// against (0.240) is down to 0.114 by the Inspect control and 0.081 at the spec grid — 2.1× and 3× darker than
+// the frame that was signed off. On a laptop this never showed because the whole chapter is read at local ≤ 0.25.
+// Endpoints are the ledger's own values (0.24 at l = 0, chapter 3's 0.03 at l = 1) so the blend is continuous on
+// both sides and chapter 3 still opens on the darkest frame on the site — the one-candle contract is untouched.
+const CH2_LIGHT = [[0, 0.24], [CH2_HOLD, 0.24], [1, 0.03]];
 function curveAt(table, l) {
   for (let i = 1; i < table.length; i++) {
     const [x1, y1] = table[i], [x0, y0] = table[i - 1];
@@ -90,16 +129,18 @@ function curveAt(table, l) {
   return table[table.length - 1][1];
 }
 export function chapter3Light(local) { return curveAt(CH3_LIGHT, Math.min(1, Math.max(0, local))); }
+export function chapter2Light(local) { return curveAt(CH2_LIGHT, Math.min(1, Math.max(0, local))); }
 
 // Interpolate adjacent chapter channel values.
 const lerp = (a, b, t) => a + (b - a) * t;
-export function worldAt(p) {
+export function worldAt(p, mobile = false) {
   const i = Math.min(CHAPTERS.length - 2, Math.max(0, Math.floor(p)));
   const t = Math.min(1, Math.max(0, p - i));
   const a = CHAPTERS[i].world, b = CHAPTERS[Math.min(CHAPTERS.length - 1, i + 1)].world;
   const out = {};
   for (const k of Object.keys(a)) out[k] = lerp(a[k], b[k] ?? a[k], t);
   if (i === 3) out.light = chapter3Light(t);
+  if (i === 2 && mobile) out.light = chapter2Light(t);
   return out;
 }
 

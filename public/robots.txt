@@ -1,5 +1,15 @@
 User-agent: *
-Allow: /
+# Disallow rules are listed before the blanket Allow so the file reads correctly
+# under both matching strategies: longest-match crawlers (Google, Bing) pick the
+# specific rule either way, and first-match crawlers hit the Disallow first.
 Disallow: /s/
+# Unlisted operator screening pages. These carry a meta noindex, but a robots.txt
+# Disallow blocks the fetch outright, which is the stronger control against
+# crawlers that do not parse meta directives. They stay reachable by direct link,
+# which is how they are shared.
+Disallow: /baytex
+Disallow: /obsidian
+Disallow: /tamarack
+Allow: /
 
 Sitemap: https://yotinenergy.com/sitemap.xml

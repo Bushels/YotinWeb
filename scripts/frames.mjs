@@ -43,7 +43,12 @@ if (worldOn) {
     await page.waitForTimeout(args.settle ? Number(args.settle) : 2500);
     const info = await page.evaluate(() => { const w = window.__yotinWorld; const r = w.renderer.info.render; return { calls: r.calls, tris: r.triangles, chapter: document.documentElement.dataset.chapter, exact: w.state.exact, smooth: w.state.smooth, overflowX: document.documentElement.scrollWidth > window.innerWidth }; });
     const file = path.join(out, `ch${i}-${W}x${H}.png`);
-    await page.screenshot({ path: file });
+    // Playwright's default screenshot timeout is 30 s, which SwiftShader can exceed on the heaviest chapters —
+    // scripts/stills.mjs already carries this note ("the default 30 s screenshot timeout was silently leaving ch6
+    // stale", round 5) and capture-all.mjs hit the same wall at 1440×900 in round 16 once the matrix grew a
+    // fourth viewport. Same 120 s here: a capture that times out costs the whole viewport's report, and a missing
+    // report reads as a passing one.
+    await page.screenshot({ path: file, timeout: 120000 });
     report.frames.push({ i, y: anchors[i], file, ...info });
   }
 } else {

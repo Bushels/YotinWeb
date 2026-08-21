@@ -33,12 +33,12 @@ html.world-on .fit-caption {
   html.world-on .contact-section .fit-stage {
     position: sticky;
     top: var(--header-h, 64px);
-    height: 40vh;
+    height: 40svh;
     z-index: 0;
   }
   html.world-on .contact-section .fit-caption {
     position: sticky;
-    top: calc(var(--header-h, 64px) + 40vh - 64px);
+    top: calc(var(--header-h, 64px) + 40svh - 64px);
     z-index: 0;
     margin: -56px 0 0 8px;
     max-width: calc(100% - 16px);

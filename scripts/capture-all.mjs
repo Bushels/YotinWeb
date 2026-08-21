@@ -21,6 +21,13 @@ function run(extra, key) {
 run(['--w', '1440', '--h', '900'], '1440x900');
 run(['--w', '1366', '--h', '768'], '1366x768');
 run(['--w', '390', '--h', '844'], '390x844');
+// Round 16: a TALL phone pass. Kyle's first real-device audit (iPhone 17 Pro Max, logical 440 × 956) found a
+// world-vs-copy phase error in the tool chapter that fifteen rounds of 390 × 844 capture never showed — not
+// because 390 × 844 is immune (it has the same bug) but because this harness only ever shoots chapter ANCHORS,
+// and the failure lives mid-chapter. The geometry pass is cheap insurance against band heights and poses that
+// were composed for one phone aspect; scratch/mobile-phase.mjs is the companion that walks the scroll STATIONS
+// inside chapter 2 and is the one that actually catches phase.
+run(['--w', '440', '--h', '956'], '440x956');
 // reduced-motion stills path (no ?world): one frame per chapter anchor (rm-0 .. rm-6)
 {
   const r = spawnSync(process.execPath, ['-e', `
