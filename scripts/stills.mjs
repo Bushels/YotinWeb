@@ -46,6 +46,13 @@ async function ensureLive() {
 }
 let anchors = await ensureLive();
 
+// Freeze world time at one canonical phase for every capture (round 13): with the clock running, the
+// ambient cycle / wind / field phase drifted seconds between runs and across the seven captures, and the
+// ch3 webp — which rides its 22 KB cap at q20 — flipped over/under the cap depending on the phase it
+// happened to catch. Paused, the world still re-renders on demand (scroll/jumpTo), so poses are unaffected;
+// the stills just all share the boot-time phase and encode to repeatable bytes.
+await page.evaluate(() => window.__yotinWorld.pause());
+
 const report = { url, viewport: [W, H], stills: [], logs };
 for (let i = 0; i < anchors.length; i++) {
   anchors = await ensureLive();
