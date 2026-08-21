@@ -187,6 +187,8 @@ html.stills-on .brand-mini-copy small { animation: none; }
 
 .site-header[data-scrolled] .brand-mini { transform: scale(0.86); transform-origin: left center; }
 .site-header[data-scrolled] .brand-mini-copy small { opacity: 0; }
+/* …and the divider rule goes with it, or a pipe dangles with nothing after it (round 14). */
+.site-header[data-scrolled] .brand-mini-copy { border-left-color: transparent; padding-left: 0; }
 
 .desktop-nav { display: flex; align-items: center; gap: clamp(28px, 3.4vw, 52px); margin-left: auto; }
 .desktop-nav a {
@@ -490,7 +492,14 @@ html.stills-on .brand-mini-copy small { animation: none; }
    WellFi section
    ========================================================================== */
 
-.wellfi-section { padding: clamp(88px, 9vw, 148px) 0; background: var(--deep); }
+/* MUST own its own layer, above .hero-scrim (z-index 1) — the same omission the signal strip had below, and the
+   same fix. The scrim is a wash, not a pane: it bleeds 170 px PAST the bottom of the hero so its ramp reaches
+   alpha 0 outside the frame. That bleed lands on the top of this section, and its 100deg side gradient is still
+   at ~0.87 alpha over there — so at the chapter-1 anchor the scrim's bottom edge cut straight through the first
+   line of "Data Below.", dimming it to ~13 % above y=401 and leaving it full-strength below (round 14: a stable
+   mid-state at 1366 and 1440 both, which read as a rendering failure on the section the rail's DESCENT link
+   deposits you on). The scrim still darkens the artwork behind it; it just no longer darkens the next chapter. */
+.wellfi-section { position: relative; z-index: 2; padding: clamp(88px, 9vw, 148px) 0; background: var(--deep); }
 .section-intro { display: grid; grid-template-columns: 0.9fr 1.1fr; column-gap: clamp(42px, 8vw, 120px); align-items: end; }
 .section-intro .eyebrow { grid-column: 1 / -1; }
 .section-intro h2 {
@@ -1730,6 +1739,14 @@ html.stills-on .brand-mini-copy small { animation: none; }
   .brand-mini img { height: 34px; }
   .brand-mini-copy { padding-left: 9px; }
   .brand-mini-copy small { font-size: 8.5px; max-width: 150px; }
+  /* Spec §4: the pause control (fixed, right: 66px, 44px wide → left edge x=280 at 390) and the menu button own
+     the right gutter, and copy never enters it. At 390 the tagline box ran to x≈308, so the ring stroke cut
+     through "Services" and orphaned "Company" on the first phone paint (round 14). The line is not load-bearing
+     at this width — it already vanishes on the first scroll — and hiding the block takes its divider rule with
+     it, so no orphan pipe remains. */
+  @media (max-width: 430px) {
+    .brand-mini-copy { display: none; }
+  }
   .desktop-nav { display: none; }
   /* ChatFi already has a row in the mobile menu and a floating launcher;
      a third entry here only crowds the brand and the toggle. */

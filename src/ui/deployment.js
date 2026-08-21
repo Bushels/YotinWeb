@@ -32,16 +32,23 @@ export function mountDeployment() {
      Move the fluid level, stop, and 400 ms later the card says what a tool down there would be reading —
      plus what changed since the last time it settled. The value model is a straight line between the two
      ends of the instrument the visitor is already holding: more fluid over the pump = more head on the
-     gauge and a marginally warmer tool; at pump-off it lands exactly on the chapter-3 readout (158 kPa,
-     26 °C) so the two never contradict each other. Representative throughout: no live data, no WellFi
-     figure, and the readout says so on every line.
+     gauge and a warmer tool once the inflow past it stops; with fluid over the pump it lands exactly on the
+     chapter-3 readout (2600 kPa, 26 °C) so the two never contradict each other. Representative throughout: no
+     live data, no WellFi figure, and the readout says so on every line.
+
+     Round 14 (engineering truth): the span used to be 420 → 158 kPa, i.e. ~28 m of fluid column — an order of
+     magnitude too small for the event the instrument is named after, and it pinned the site's canonical
+     reading to the PUMPED-OFF well. A Clearwater PCP losing a healthy fluid level over the pump drops the
+     intake by a few hundred metres of column, so the two ends are now ~2600 kPa (producing, ≈250 m of column
+     over the pump at a ~9.5 kPa/m heavy-oil gradient) and ~300 kPa (pumped off, near-nothing over the intake),
+     and chapter 3's canonical figure is the producing end.
 
      Deliberately mounted OUT here rather than inside attach(): on the reduced-motion / no-WebGL path the
      world never arrives, but the slider still moves and must still answer. */
   const valuesEl = insight.querySelector('[data-fluid-values]');
   const deltaEl = insight.querySelector('[data-fluid-delta]');
-  const P_ABOVE = 420, P_PUMPOFF = 158;   // kPa, representative
-  const T_ABOVE = 26.9, T_PUMPOFF = 26.0; // °C, representative
+  const P_ABOVE = 2600, P_PUMPOFF = 300;  // kPa, representative — ~250 m of column collapses at pump-off
+  const T_ABOVE = 26.0, T_PUMPOFF = 26.9; // °C, representative — the pump runs warmer once it is pumped off (line 4), and the above-pump end holds chapter 3's 26 °C
   const readingFor = (d) => ({ p: P_ABOVE + (P_PUMPOFF - P_ABOVE) * d, t: T_ABOVE + (T_PUMPOFF - T_ABOVE) * d });
   const signed = (n, dec) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(dec);
 

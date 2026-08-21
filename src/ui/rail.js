@@ -159,15 +159,42 @@ export function mountRail() {
   fit.href = '#contact';
   fit.textContent = 'Check your well fit';
   rail.appendChild(fit);
-  let fitOn = null, atQualifier = false;
+  let fitOn = null, atQualifier = false, fitShy = null;
+  // Round 14: at 390 the chip is a fixed overlay and the chapters scroll under it — in chapters 3, 4 and 5 it
+  // came to rest on live copy and on the interactive cards (commissioning step 03's body, the CH-03 card, the
+  // deployment controls). Its own ground cannot help: the copy is UNDER it, so it is hidden either way. So the
+  // chip stands down while something readable is beneath it and comes back the moment it clears — the same
+  // "a label over the wrong thing hides rather than clamps" rule the world captions use. Five hit tests per
+  // scroll frame, no rect sweep over the document.
+  const SHY_UNDER = 'p, li, h1, h2, h3, h4, button, a, input, label, summary, .channel-card, .commission-step, .deploy-controls, .device-banner';
+  const fitOccluded = () => {
+    if (!fit.isConnected || getComputedStyle(fit).display === 'none') return false;
+    const r = fit.getBoundingClientRect();
+    if (!r.width) return false;
+    const pts = [[r.left + 4, r.top + 4], [r.right - 4, r.top + 4], [r.left + 4, r.bottom - 4], [r.right - 4, r.bottom - 4], [(r.left + r.right) / 2, (r.top + r.bottom) / 2]];
+    return pts.some(([x, y]) => (document.elementsFromPoint ? document.elementsFromPoint(x, y) : [])
+      .some((el) => el !== fit && !fit.contains(el) && !el.closest('.rail') && el.matches && el.matches(SHY_UNDER)));
+  };
   const syncFit = () => {
     const on = (window.scrollY || 0) > 44 && !atQualifier;
-    if (on === fitOn) return;
-    fitOn = on;
-    rail.classList.toggle('has-fit', on);
-    fit.tabIndex = on ? 0 : -1;
+    if (on !== fitOn) {
+      fitOn = on;
+      rail.classList.toggle('has-fit', on);
+      fit.tabIndex = on ? 0 : -1;
+    }
+    const shy = on && fitOccluded();
+    if (shy !== fitShy) {
+      fitShy = shy;
+      fit.classList.toggle('is-shy', shy);
+      fit.tabIndex = on && !shy ? 0 : -1;
+    }
   };
-  window.addEventListener('scroll', syncFit, { passive: true });
+  let fitTicking = false;
+  window.addEventListener('scroll', () => {
+    if (fitTicking) return;
+    fitTicking = true;
+    requestAnimationFrame(() => { fitTicking = false; syncFit(); });
+  }, { passive: true });
   const contact = document.querySelector('#contact');
   if (contact && typeof IntersectionObserver === 'function') {
     new IntersectionObserver((entries) => {

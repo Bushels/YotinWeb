@@ -47,10 +47,18 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 .rail-caption { position: fixed; left: 14px; bottom: 142px; margin: 0; width: 168px; font-size: 9.5px; letter-spacing: 0.04em; text-transform: none; color: var(--sand-mute, #b3aa9a); line-height: 1.4; pointer-events: none; }
 
 /* Legend: visible twins for the strata. */
-.rail-legend { display: flex; flex-direction: column; gap: 2px; opacity: 0.55; transform: none; transition: opacity 320ms ease; } /* exists from first paint, dim; lights by name as the descent passes (spec §4 row 1) */
-.rail-legend.is-visible { opacity: 1; }
-.rail-legend-item { all: unset; cursor: pointer; color: var(--sand-mute, #b3aa9a); padding: 3px 8px; min-height: 22px; border-left: 1px solid rgba(232, 220, 200, 0.18); font: inherit; letter-spacing: inherit; text-transform: inherit; transition: color 200ms ease, border-color 200ms ease; }
-.rail-legend-item:hover, .rail-legend-item:focus-visible, .rail-legend-item.is-active { color: var(--sand); border-left-color: var(--sand); }
+/* The resting dim is a COLOUR step, never opacity — the same round-2 rule as the chapter nav above. At
+   opacity 0.55 the composite of --sand-mute over the gutter wash measured 3.2:1 in chapters 0, 5 and 6 (the
+   three where `is-visible` is off), under §6's ≥ 4.5:1 persistent-copy gate; these are live buttons with a
+   hover twin, so they are neither decorative nor disabled. #7e7a72 = 4.57:1 on #0a0a0b and still reads a full
+   step below the lit list (round 14). */
+.rail-legend { display: flex; flex-direction: column; gap: 2px; opacity: 1; transform: none; } /* exists from first paint, dim; lights by name as the descent passes (spec §4 row 1) */
+.rail-legend-item { all: unset; cursor: pointer; color: #7e7a72; padding: 3px 8px; min-height: 22px; border-left: 1px solid rgba(232, 220, 200, 0.18); font: inherit; letter-spacing: inherit; text-transform: inherit; transition: color 200ms ease, border-color 200ms ease; }
+.rail-legend.is-visible .rail-legend-item,
+html.stills-on .rail-legend .rail-legend-item { color: var(--sand-mute, #b3aa9a); } /* the stills path has no progress stream to light the legend by name — it keeps the lit colour it had when this dim was an opacity override */
+html .rail-legend .rail-legend-item:hover,
+html .rail-legend .rail-legend-item:focus-visible,
+html .rail-legend .rail-legend-item.is-active { color: var(--sand); border-left-color: var(--sand); }
 .rail-legend-item:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 
 /* The paper chapter: the paper is a sheet laid on the world, inset from the rail gutter, so the rail keeps its
@@ -141,4 +149,6 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
     transition: opacity 200ms ease, transform 200ms ease;
   }
   .rail.has-fit .rail-fit { display: inline-flex; }
+  /* stands down while it is resting on live copy or a card, and comes back the moment it clears (round 14) */
+  .rail-fit.is-shy { opacity: 0; pointer-events: none; transform: translateY(6px); }
 }

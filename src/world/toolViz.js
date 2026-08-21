@@ -375,6 +375,18 @@ export function createToolViz(world) {
     benchLift += (benchTarget - benchLift) * k; if (benchMat && benchMat.emissive) benchMat.emissiveIntensity = benchLift * 0.14;
     cutBoost += (cutTarget - cutBoost) * k; if (cutEdges) cutEdges.material.opacity = cutBase + 0.5 * cutBoost;
     // projected captions: the surface caption (wellhead) and the standoff caption (the 0.9 line, chapter 6)
+    // One rect per frame, shared by both side chips: the union of chapter 4's FOREGROUND panels — the heading,
+    // the device figure card and the deployment controls — which the level chips must not land on (round 14;
+    // see the cap.side branch below). Deliberately not `#insight .shell`: that box runs to x≈1270 at 1366, i.e.
+    // most of the world, and testing against it would hide the chips everywhere. The panels end at x≈772.
+    let sideRect = null;
+    for (const el of document.querySelectorAll('#insight .insight-head, #insight .device-banner, #insight .deploy-controls')) {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      sideRect = sideRect
+        ? { left: Math.min(sideRect.left, r.left), top: Math.min(sideRect.top, r.top), right: Math.max(sideRect.right, r.right), bottom: Math.max(sideRect.bottom, r.bottom) }
+        : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+    }
     for (const cap of [surfaceCaption, standoffCaption, levelCaption, earlierCaption]) {
       if (!cap) continue;
       rig.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
@@ -401,7 +413,13 @@ export function createToolViz(world) {
       }
       if (cap.side) {
         // level labels: flush right of the rule's end, never clamped — hidden when the point is off-screen or behind
-        const off = behind || x < minX - 60 || x > maxX || y < minY || y > maxY;
+        // The level chips label a rule out in the world. When the rule's end projects behind the chapter's copy
+        // column the chip lands on the device figure and reads as a caption on the product photograph (round 14:
+        // at pump-off "fluid level · now" sat at x 411–543, y 200–220, inside the .device-banner card and 170 px
+        // above the rule it names). Same rule as the standoff caption: a label pointing at nothing hides rather
+        // than clamps — clamping x would move the chip off a rule that is not screen-horizontal in this camera.
+        const occluded = !!sideRect && (x + 42) < sideRect.right + 12 && y > sideRect.top - 8 && y < sideRect.bottom + 8;
+        const off = behind || occluded || x < minX - 60 || x > maxX || y < minY || y > maxY;
         el.style.visibility = off ? 'hidden' : '';
         if (!off) el.style.transform = `translate(${(x + 42).toFixed(1)}px, ${y.toFixed(1)}px) translate(0, -50%)`;
         continue;

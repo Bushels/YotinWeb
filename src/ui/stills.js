@@ -92,10 +92,20 @@ export function mountStills() {
       if (i === anchors.length - 1) { const f = el.querySelector('[data-anchor-focus]'); if (f && window.innerWidth < 1100) return f.getBoundingClientRect().top + window.scrollY - headerH(); return top - h * 0.15; }
       if (el.dataset && el.dataset.anchor === 'top') return top - headerH();
       if (el.dataset && el.dataset.anchor === 'top-mobile' && window.innerWidth <= 820) return top - headerH() - 36;
-      return top + r.height * 0.5 - h * 0.5;
+      // The conductor's centre-at-centre rule is right for a CONTINUOUS camera — between two anchors it is
+      // mid-transition, so the picture is never a chapter behind. A crossfade between seven discrete stills is
+      // not: holding the previous still until the section's centre reaches the viewport centre meant the
+      // chapter-3 commissioning copy was read with the chapter-2 tool close-up behind it for most of its scroll
+      // (round 14). The still now swaps as the chapter's heading settles into the upper third — never LATER
+      // than the conductor's anchor, so the two paths cannot disagree about which chapter has arrived.
+      return Math.min(top + r.height * 0.5 - h * 0.5, top - h * 0.35);
     }
     function pick() {
-      const y = window.scrollY + 1;
+      // 12 px of arrival tolerance: a `data-anchor="top"` chapter (commissioning, chapter 4, chapter 5) arrives
+      // at `top − header`, and landing a handful of pixels short of that — which anything that adds its own
+      // breathing room above the heading does — left the picture on the PREVIOUS chapter while the whole
+      // heading and its first card were on screen (round 14).
+      const y = window.scrollY + 12;
       let best = 0;
       anchors.forEach((el, i) => { if (anchorY(el, i) <= y) best = i; });
       show(best);

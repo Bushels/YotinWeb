@@ -38,6 +38,12 @@ async function pass(label, { launchArgs, contextOptions }) {
     railCurrent: Array.from(document.querySelectorAll('#rail .rail-chapters a[aria-current="true"]')).map((a) => a.dataset.railChapter),
     // typographic truth (round 9): mA is milliamps, MA is megaamps. The unit-casing correction used to be
     // scoped to html.world-on, so this path printed "4-20 MA" and "KPA" — case-sensitive here on purpose.
+    // art direction is not path-specific (round 14): the h2 second lines are sand on EVERY path. The sand rule
+    // was scoped html.world-on, so this path shipped the retired solid-ember two-line headline.
+    headSpans: ['wellfi-title', 'insight-title', 'contact-title'].map((id) => {
+      const el = document.getElementById(id); const s = el && el.querySelector('span');
+      return `${id}=${s ? getComputedStyle(s).color : 'missing'}`;
+    }),
     chipOut: (document.querySelector('.readout .chip-out') || {}).textContent || '',
     readoutUnits: Array.from(document.querySelectorAll('.readout-list b')).map((b) => b.textContent).join(' | '),
   }));
@@ -78,6 +84,10 @@ async function pass(label, { launchArgs, contextOptions }) {
     if (dom.railCurrent.join() !== 'surface') problems.push(`rail aria-current at top = [${dom.railCurrent}] (expected surface)`);
     if (after.join() !== 'descent') problems.push(`rail aria-current after scrolling to descent = [${after}] (expected descent)`);
   }
+  { // the h2 second lines are sand here too — never the retired solid ember (round 14)
+    const SAND = 'rgb(232, 220, 200)';
+    for (const entry of dom.headSpans) if (!entry.endsWith(SAND)) problems.push(`h2 second line is not sand on the stills path: ${entry} (expected ${SAND})`);
+  }
   { // the commissioning list is functional, and its truth states hold: no receiver → no reading
     const c = commission;
     if (c.before.s2 !== 'todo' || c.before.s3 !== 'todo') problems.push(`at rest 02/03 = ${c.before.s2}/${c.before.s3} (expected todo/todo)`);
@@ -85,7 +95,7 @@ async function pass(label, { launchArgs, contextOptions }) {
     if (c.before.footArrived) problems.push('the surface-output line is revealed before any reading arrived');
     if (!c.before.resetHidden) problems.push('the reset control is offered before there is anything to reset');
     if (c.placed.s2 !== 'done' || c.placed.s3 !== 'done') problems.push(`after placing, 02/03 = ${c.placed.s2}/${c.placed.s3} (expected done/done)`);
-    if (!/158 kPa/.test(c.placed.digits)) problems.push(`after placing, the readout is "${c.placed.digits}" (expected the settled values)`);
+    if (!/2600 kPa/.test(c.placed.digits)) problems.push(`after placing, the readout is "${c.placed.digits}" (expected the settled values)`);
     if (!c.placed.footArrived) problems.push('the surface-output line did not arrive with the reading');
     if (c.placed.resetHidden) problems.push('no way back after placing the receiver (spec §5: interactions are reversible)');
     if (c.after.s2 !== 'todo' || c.after.s3 !== 'todo') problems.push(`after lifting the receiver, 02/03 = ${c.after.s2}/${c.after.s3} (expected todo/todo)`);

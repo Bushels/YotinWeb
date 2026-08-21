@@ -314,12 +314,14 @@ html.world-on .device-banner {
     linear-gradient(to left, rgba(3, 7, 11, 0.78) 0%, rgba(3, 7, 11, 0.48) 28%, rgba(3, 7, 11, 0) 64%),
     rgba(3, 7, 11, 0.82);
 }
-/* The tool is the subject of this chapter and the site was DIMMING it: brightness(0.82) on an already dark
-   approved render put the panel at mean luminance 0.058 (max 0.71 in two specular hits), so the left third
-   carried no edge information at laptop size. No site-side dimming of the approved render — saturate(0.22)
-   is untouched, so the one-candle rule (a HUE rule) still holds the figure to steel. */
-html.world-on .device-banner img { max-height: 220px; object-fit: contain; filter: saturate(0.22) brightness(1.35) contrast(1.1); transition: filter 600ms ease; }
-html.world-on.xray-on .device-banner img { filter: saturate(0.22) brightness(1.55) contrast(1.32); } /* x-ray on: the figure lifts with the world, no hue */
+/* The tool is the subject of this chapter, and the grade now lives in the ASSET (round 14: see
+   scratch/regrade-device.mjs — the round-12a crop of the Blender campaign render, re-graded with a real tone
+   curve; the tool body went 48 → 77 mean and the two speculars stopped clipping at 255). Round 13 tried to
+   rescue an ungraded near-black render with brightness(1.35) contrast(1.1) here, which only blew the speculars
+   harder without recovering the collar or the sensor-package edges. So no site-side lift at rest — only
+   saturate(0.22), the one-candle rule (a HUE rule), which still holds the figure to steel. */
+html.world-on .device-banner img { max-height: 220px; object-fit: contain; filter: saturate(0.22); transition: filter 600ms ease; }
+html.world-on.xray-on .device-banner img { filter: saturate(0.22) brightness(1.12) contrast(1.06); } /* x-ray on: a small readable step above rest, no hue — the asset carries the tone, so this is a step and not a rescue */
 html.world-on .device-caption { position: relative; z-index: 1; margin-top: 18px; color: var(--sand); }
 @media (max-width: 820px) { html.world-on .device-banner img { max-height: 150px; } html.world-on .device-banner { background: rgba(3, 7, 11, 0.92); } } /* phones already measure neutral corner-to-corner at 0.92 — no bleed here, so no second layer */
 html.world-on .portal-note { margin-top: 20px; }
@@ -429,13 +431,21 @@ html.motion-paused .device-banner img { animation: none !important; }
 html.motion-paused [data-motion],
 html.motion-paused [data-hero-step] { opacity: 1 !important; transform: none !important; }
 
-/* Display type over the world (round 1, two critics): one ember word per page — the hero's full stop. The h2
-   second lines set in sand so ember stays a surface accent (eyebrows, CTAs, counters), not a floodlight. The
-   chapter-5 chapter keeps ember for its eyebrow and the `yôtin` italic — the one word the chapter is about;
-   the qualifier verdict keeps its own colours. */
+/* Display type on every path (round 1, two critics; unscoped round 14): one ember word per page — the hero's
+   full stop. The h2 second lines set in sand so ember stays a surface accent (eyebrows, CTAs, counters), not a
+   floodlight. The chapter-5 chapter keeps ember for its eyebrow and the `yôtin` italic — the one word the
+   chapter is about; the qualifier verdict keeps its own colours.
+   Round 14: the rule was scoped `html.world-on` only, so the reduced-motion / Save-Data / tier-0 / no-WebGL2
+   path (html.stills-on — gate.js stamps the two mutually exclusively) still shipped the retired solid-ember
+   two-line headline. The stills path shows the same world as imagery, so it owes the same art direction.
+   Duplicated rather than unscoped: the class qualifier keeps this winning over /styles.css regardless of
+   bundle link order, and leaves the no-JS / pre-gate document rendering as authored. */
 html.world-on .section-intro h2 span,
 html.world-on .insight-head h2 span,
-html.world-on .contact-section h2 span { color: var(--sand); }
+html.world-on .contact-section h2 span,
+html.stills-on .section-intro h2 span,
+html.stills-on .insight-head h2 span,
+html.stills-on .contact-section h2 span { color: var(--sand); }
 
 /* Phone layout diet (spec §4 shed order, round 1): two-up channel cards and spec tiles at ≤ 560 px — the
    world carries the dwell, the DOM gets tighter rhythm. Tiles keep their 44 px twins. */
