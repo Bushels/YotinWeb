@@ -24,16 +24,16 @@ Method: orchestrated-build + design-improvement-loop skills, both current.
 
 ## In flight / blocked on Kyle
 
-1. **ChatFi deploy** (from `C:/Users/kyle/MPS/chatfi-server`):
-   `gcloud run deploy chatfi-server --source . --region=us-central1 --project=wellfi-chatfi --quiet "--update-env-vars=VERTEX_LOCATION=global,GEMINI_MODEL=gemini-3.7-flash"`
-   then the live gate:
-   `BASE_URL=https://chatfi-server-851855129205.us-central1.run.app npx tsx src/evals/run-evals.ts`
-   then re-probe until it deflects: POST /chat with
-   `"is there an isolation sub or gap in the tubing string?"` — expect acknowledge-then-pivot
-   (proprietary / not published → formation effect → MODBUS + spec), never the dipole.
-   Any Claude session can run the live gate + re-probe (plain HTTPS); only the deploy needs
-   Kyle's terminal. `mechanism-lateral` is the probe most likely to need matcher tuning
-   against a real response.
+1. **ChatFi deploy — DONE (2026-08-21, later this session).** Kyle's first deploy attempt
+   died on the gcloud project-drift trap (active project was agnonymous; Cloud Run API not
+   enabled there, so nothing deployed anywhere); the retry with `--project=wellfi-chatfi`
+   landed rev `chatfi-server-00029-jsf`. The isolation-sub probe now serves the
+   acknowledge-then-pivot deflection verbatim. Live gate: first run 22/24 — both failures
+   proven from the transcript log to be MATCHER false-positives on correct answers ("150 °C"
+   spec citation; a denial echoing "booking tool here"). Matchers tuned per the probes-file
+   doctrine (spec-unit exemption on both bracket twins; assertive lead-ins on both booking
+   arms), 10/10 correct-behavior resamples, offline evidence pinned in evals.test.ts,
+   **final gate 24/24** (chatfi commits `083c69e` + `b74a5e2`; README stamped).
 2. **On-device confirmation, rounds 16–17** — Kyle re-scrolls the tool chapter AND the
    Benefits→FAQ stretch (post-pump-off) on the iPhone 17 Pro Max. Emulation cannot prove
    ProMotion/Safari compositing/safe-area (protocol doc, Lane A limits).
