@@ -88,6 +88,16 @@ findings: **3 refuted, 10 confirmed** (most re-severitied downward), one genuine
   here); the launcher's rest state at page top is opacity 0 with no state classes (do not read
   that as stand-down evidence); the physics-sources gate reads a "440 × 956" viewport in a
   src/ui comment as an unsourced figure product.
+- **Confirmation pass (production, same day): 10/10 PASS, zero regressions.** Every fix
+  measured on yotinenergy.com within a few px of the implementer's locals (hero chips 953.5,
+  end labels 946.1, capsule 161.9 px, desktop caption 844.9/97.5, chip arrival focus-top 72.4);
+  the launcher stand-down re-arms across a second qualifier completion and works on the stills
+  lane; the round-16 tool guard holds (tool group 532.6×650.3 px, dominant at the ch2 station);
+  cyan census clean; zero horizontal overflow at all seven anchors across 440/390/1440; the
+  audit's protect list works end-to-end. Capture-environment fact for the next auditor:
+  **production does not boot the world headless by default** — a bare URL yields the stills page
+  at tier 0; world items must be captured on `?world=1` (the stills lane is then verified
+  separately on the bare URL).
 
 ## Era 7 — round 15: convergence (2026-08-21)
 
