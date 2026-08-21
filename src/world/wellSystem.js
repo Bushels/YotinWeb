@@ -42,7 +42,16 @@ export function buildWellSystem(paths, mats) {
   const rimMat = new THREE.MeshStandardMaterial({ color: COLORS.boreRim, roughness: 0.9, metalness: 0 });
   const boreMeshes = [];
   const rimMeshes = [];
-  const bores = [{ curve: paths.openHole, r: RADII.openHole, name: 'open-hole', mat: mats.openHole }, ...paths.laterals.map((c, i) => ({ curve: c, r: RADII.lateral, name: `lateral-${i}`, mat: mats.lateral, meta: c.userData }))];
+  // Tessellation is per-bore. Round 14a doubled the leg count (the fishbone runs both sides of the trunk now),
+  // so the legs — 0.07 OD slots a few dozen pixels wide in every authored pose — drop to the coarsest ring that
+  // still reads as round, and the trunk keeps its own. Measured: the eight-leg fishbone at these numbers costs
+  // FEWER triangles than the old six at 48×6/56×8.
+  const TRUNK_SEG = { lip: [48, 6], bore: [56, 8] };
+  const LEG_SEG = { lip: [30, 5], bore: [36, 6] };
+  const bores = [
+    { curve: paths.openHole, r: RADII.openHole, name: 'open-hole', mat: mats.openHole, seg: TRUNK_SEG },
+    ...paths.laterals.map((c, i) => ({ curve: c, r: RADII.lateral, name: `lateral-${i}`, mat: mats.lateral, meta: c.userData, seg: LEG_SEG, leg: true })),
+  ];
   const meanY = (curve) => { let m = 0; const N = 9; for (let k = 0; k < N; k++) m += curve.getPointAt(k / (N - 1)).y; return m / N; };
   // Flatten each trough tube to a slot (y-scale 0.18) about its own mean height and sink it so the crown sits a
   // hairline proud of the bench: the lip 8 mm, the darker trough inside it 4 mm, the bore a sliver. Read: a dark
@@ -51,18 +60,33 @@ export function buildWellSystem(paths, mats) {
   const squash = (geom, my, sink) => { geom.translate(0, -my, 0); geom.scale(1, SQ, 1); geom.translate(0, my - sink, 0); return geom; };
   // Lips and troughs share one material each, so all seven merge into two draw calls (runtime budget, spec §6).
   const lipGeoms = [], troughGeoms = [];
+  // The LEG bores share one material, so they merge into a single mesh: eight legs would otherwise be eight
+  // draw calls against an 80-call cap that the six-leg build already ran at 76 (round 14a). The trunk keeps its
+  // own mesh — it carries a different flow material. The merge bakes the -r*0.88 sink into the geometry, so the
+  // slot floor still shows only the crown's sliver.
+  const legGeoms = [];
   bores.forEach((b) => {
     const my = meanY(b.curve);
-    lipGeoms.push(squash(new THREE.TubeGeometry(b.curve, 48, b.r * 2.6, 6, false), my, b.r * 2.6 * SQ - 0.008));
-    troughGeoms.push(squash(new THREE.TubeGeometry(b.curve, 48, b.r * 2.0, 6, false), my, b.r * 2.0 * SQ - 0.004));
+    lipGeoms.push(squash(new THREE.TubeGeometry(b.curve, b.seg.lip[0], b.r * 2.6, b.seg.lip[1], false), my, b.r * 2.6 * SQ - 0.008));
+    troughGeoms.push(squash(new THREE.TubeGeometry(b.curve, b.seg.lip[0], b.r * 2.0, b.seg.lip[1], false), my, b.r * 2.0 * SQ - 0.004));
     // the bore itself, buried past half: only a sliver of the flow material shows in the slot floor
-    const bore = new THREE.Mesh(new THREE.TubeGeometry(b.curve, 56, b.r, 8, false), b.mat);
+    const geom = new THREE.TubeGeometry(b.curve, b.seg.bore[0], b.r, b.seg.bore[1], false);
+    if (b.leg) { geom.translate(0, -b.r * 0.88, 0); legGeoms.push(geom); return; }
+    const bore = new THREE.Mesh(geom, b.mat);
     bore.position.y = -b.r * 0.88; // only the crown's sliver above the slot floor
     bore.name = b.name;
     bore.userData = { ...(b.meta || {}), bore: true };
     group.add(bore);
     boreMeshes.push(bore);
   });
+  if (legGeoms.length) {
+    const legs = new THREE.Mesh(mergeIndexed(legGeoms), mats.lateral);
+    legs.name = 'lateral-bores';
+    legs.userData = { bore: true, legs: true };
+    legGeoms.forEach((g) => g.dispose());
+    group.add(legs);
+    boreMeshes.push(legs);
+  }
   const lipMesh = new THREE.Mesh(mergeIndexed(lipGeoms), rimMat); lipMesh.name = 'bore-lips';
   const troughMesh = new THREE.Mesh(mergeIndexed(troughGeoms), troughMat); troughMesh.name = 'bore-troughs';
   lipGeoms.concat(troughGeoms).forEach((g) => g.dispose());

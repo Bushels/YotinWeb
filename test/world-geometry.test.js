@@ -87,10 +87,42 @@ describe('well geometry', () => {
       }
     });
   });
-  test('six legs from four staggered junctions (1/1/2/2), never a fan from one node', () => {
-    assert.equal(paths.laterals.length, 6);
-    assert.deepEqual(wellPath.JUNCTIONS.map((j) => j.t), [0.1, 0.3, 0.5, 0.72]);
-    assert.deepEqual(wellPath.JUNCTIONS.map((j) => j.toes.length), [1, 1, 2, 2]);
+  // Round 14a (Kyle: "We need fish scale drilling on the other side as well of the OHML"). The six legs used
+  // to leave the trunk on one side in plan, which reads as a rake. The fishbone now runs BOTH sides, and it
+  // has to stay a fishbone: alternating, staggered stations, never a mirrored pair at one u.
+  test('eight legs, both sides of the trunk, one station each — a fishbone, not a fan and not a mirror', () => {
+    assert.equal(paths.laterals.length, 8);
+    assert.equal(wellPath.LEGS.length, 8);
+    const ts = wellPath.LEGS.map((l) => l.t);
+    for (let i = 1; i < ts.length; i++) {
+      assert.ok(ts[i] > ts[i - 1], `stations run down the trunk: ${ts}`);
+      assert.ok(ts[i] - ts[i - 1] >= 0.07, `stations are staggered, never shared: ${ts[i - 1]} → ${ts[i]}`);
+    }
+    const sides = wellPath.LEGS.map((l) => l.side);
+    assert.equal(sides.filter((s) => s === 1).length, 4, 'four legs on the open side');
+    assert.equal(sides.filter((s) => s === -1).length, 4, 'four legs on the back side');
+    for (let i = 1; i < sides.length; i++) assert.notEqual(sides[i], sides[i - 1], 'the sides alternate down the trunk');
+    // and each leg really leaves its own side of the trunk in plan (the cross product against the local tangent)
+    paths.laterals.forEach((c, i) => {
+      const kop = paths.openHole.getPointAt(wellPath.LEGS[i].t);
+      const tan = paths.openHole.getTangentAt(wellPath.LEGS[i].t);
+      const toe = c.getPointAt(1);
+      const cross = tan.x * (toe.z - kop.z) - tan.z * (toe.x - kop.x);
+      assert.ok(Math.sign(cross) === wellPath.LEGS[i].side, `leg ${i} is on side ${Math.sign(cross)}, authored ${wellPath.LEGS[i].side}`);
+      assert.ok(toe.distanceTo(kop) > 1.2, `leg ${i} is a lateral, not a stub`);
+    });
+  });
+  test('no leg stabs out of the slab, and none reaches the front cut face where the cased build rides', () => {
+    const R = wellPath.RADII.lateral * 2.6; // the trough lip is the widest thing a leg draws
+    paths.laterals.forEach((c, i) => {
+      for (let k = 0; k <= 40; k++) {
+        const p = c.getPointAt(k / 40);
+        assert.ok(p.x + R < layout.SLAB.maxX, `leg ${i} punches the right face at x ${p.x}`);
+        assert.ok(p.x - R > layout.NOTCH.minX - 0.3, `leg ${i} crosses the x = ${layout.NOTCH.minX} notch wall`);
+        assert.ok(p.z + R < wellPath.Z_FACE - 0.2, `leg ${i} reaches the front cut face at z ${p.z}`);
+        assert.ok(p.z - R > layout.SLAB.minZ, `leg ${i} leaves the slab at the back, z ${p.z}`);
+      }
+    });
   });
   test('at least two legs leave the notch into solid rock and produce bore mouths on the back wall', () => {
     const leaving = paths.laterals.filter((c) => c.userData.leavesNotch);

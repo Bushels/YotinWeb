@@ -2,9 +2,10 @@
 //
 // Casing telescope (spec, engineer-vetted): 0.175 surface collar > 0.127 7-in shell > 0.100 cased >
 // 0.086 open-hole trunk > 0.070 legs. The cased J-build rides half-proud on the front cut face (z = +5)
-// and lands the heel on the bench; the open-hole trunk runs flat across the bench; six legs leave four
-// staggered junctions (1/1/2/2) — no fan from one node, no leg plunging. Two legs cross the back notch
-// wall (z = -0.6) into solid rock and terminate as bore mouths on that cut face.
+// and lands the heel on the bench; the open-hole trunk runs flat across the bench; eight legs leave eight
+// staggered stations, ALTERNATING SIDES (round 14a) — no fan from one node, no mirrored pair at one station,
+// no leg plunging. Two legs cross the back notch wall (z = -0.6) into solid rock and terminate as bore
+// mouths on that cut face.
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { BENCH_Y, NOTCH } from './layout.js';
 
@@ -23,7 +24,7 @@ export const WELLFI_VIEW_IDS = ['inside-intermediate', 'below-pump', 'outside-in
 // landed run is at BENCH_Y (0.15 into the Clearwater Lower Sand, casing crown 0.05 clear of PAY_TOP), it runs
 // along the exposed front cut face, and the collar rides that exposed stretch: visible through the casing at
 // the cutaway, "right in the section right before the intermediate hides in the formation" (Kyle). The shoe
-// lands a short way into the notch, on the bench, and everything past it — trunk and all six legs — is open
+// lands a short way into the notch, on the bench, and everything past it — trunk and all eight legs — is open
 // hole in the Lower Sand.
 export const DEFAULT_WELLFI_VIEW = 'inside-intermediate';
 // On the cased string, on the exposed face run just before the string turns into the formation (u = 0.72;
@@ -39,13 +40,31 @@ export const WELLFI_OUTSIDE_INTERMEDIATE_PARAM = 0.075;
 
 const v = (x, y, z) => new Vector3(x, y, z);
 
-// Four staggered junctions along the trunk (fractions from the correction spec) and their toes (plan).
-// J3b and J4b leave the notch (z < -0.6) — they enter solid rock and end as bore mouths on the back wall.
-export const JUNCTIONS = [
-  { t: 0.10, toes: [[3.9, 4.6]] },
-  { t: 0.30, toes: [[5.6, 4.1]] },
-  { t: 0.50, toes: [[6.6, 3.2], [4.9, -1.9]] },
-  { t: 0.72, toes: [[6.8, 1.35], [6.4, -1.5]] },
+// Round 14a (Kyle: "We need fish scale drilling on the other side as well of the OHML."). The six authored
+// toes all sat on the SAME side of the trunk in plan — the two that crossed the back wall left at such a
+// shallow angle that they read as a continuation, not as a branch — so the multilateral read as a rake with
+// every tine on one edge, not as a fishbone.
+//
+// The legs are now authored the way a fishbone is drilled: as (station, side, angle off the trunk, length),
+// alternating sides down the trunk, with NO two legs at the same station. A mirrored pair at one u is a CAD
+// flourish — a real fishbone staggers the windows so the junctions never share a joint, and the eye reads the
+// stagger as drilling rather than symmetry. Toes are DERIVED from the authored trunk (below) rather than
+// hand-placed in plan, so a change to the trunk can never leave a leg hanging off it.
+//
+// side +1 = the open (front/right) side of the trunk, toward the z = +5 face — short legs, because the notch
+// floor runs out there. side -1 = the back side, toward the z = -0.6 wall — longer, and the two longest cross
+// that wall into solid rock and terminate as bore mouths on the cut face (spec §3, "at least two legs leave
+// the notch"). Every leg is flat in the pay at BENCH_Y; none reaches the x = -1.6 wall (all have a +x
+// component), and every +1 toe stays clear of the z = +5 front face where the cased J-build rides.
+export const LEGS = [
+  { t: 0.12, side: 1,  deg: 48, len: 1.80 },
+  { t: 0.22, side: -1, deg: 44, len: 2.30 },
+  { t: 0.34, side: 1,  deg: 46, len: 2.55 },
+  { t: 0.44, side: -1, deg: 42, len: 2.60 },
+  { t: 0.56, side: 1,  deg: 44, len: 2.80 },
+  { t: 0.65, side: -1, deg: 46, len: 3.30 },
+  { t: 0.77, side: 1,  deg: 42, len: 1.70 },
+  { t: 0.87, side: -1, deg: 44, len: 2.95 },
 ];
 
 function bendPoint(a, b, f, side) {
@@ -119,16 +138,20 @@ export function buildWellPaths() {
     heel.clone(), bendPoint(heel, toe, 0.25, 1), bendPoint(heel, toe, 0.5, -1), bendPoint(heel, toe, 0.75, 0.6), toe,
   ], false, 'catmullrom', 0.5);
 
+  // The fishbone. Each leg leaves the trunk at its own station, on its own side, at its authored angle off the
+  // local trunk tangent (plan only — y stays on the bench). Derived, not hand-placed: see LEGS above.
   const laterals = [];
-  JUNCTIONS.forEach((j) => {
-    const kop = openHole.getPointAt(j.t);
-    j.toes.forEach((t2, k) => {
-      const toeV = v(t2[0], BENCH_Y + BORE_LIFT, t2[1]);
-      const side = k % 2 === 0 ? 1 : -1;
-      const c = new CatmullRomCurve3([kop.clone(), bendPoint(kop, toeV, 0.35, side), bendPoint(kop, toeV, 0.7, -side * 0.5), toeV], false, 'catmullrom', 0.5);
-      c.userData = { junction: j.t, leavesNotch: t2[1] < NOTCH.minZ };
-      laterals.push(c);
-    });
+  LEGS.forEach((leg) => {
+    const kop = openHole.getPointAt(leg.t);
+    const tan = openHole.getTangentAt(leg.t);
+    const dx = tan.x, dz = tan.z, dl = Math.hypot(dx, dz) || 1;
+    // in-plan unit tangent and the perpendicular whose cross with it is positive (the open/front side)
+    const ux = dx / dl, uz = dz / dl, px = -uz, pz = ux;
+    const a = (leg.deg * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a) * leg.side;
+    const toeV = v(kop.x + (ux * ca + px * sa) * leg.len, BENCH_Y + BORE_LIFT, kop.z + (uz * ca + pz * sa) * leg.len);
+    const c = new CatmullRomCurve3([kop.clone(), bendPoint(kop, toeV, 0.35, leg.side), bendPoint(kop, toeV, 0.7, -leg.side * 0.5), toeV], false, 'catmullrom', 0.5);
+    c.userData = { junction: leg.t, side: leg.side, leavesNotch: toeV.z < NOTCH.minZ };
+    laterals.push(c);
   });
 
   const shoe = cased.getPointAt(1);

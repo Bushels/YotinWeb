@@ -541,6 +541,12 @@ html.stills-on .brand-mini-copy small { animation: none; }
 .channel-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .channel-card {
   position: relative;
+  /* Round 14a (Kyle: "the bar that says representative values… make sure it is on the bottom and even across
+     the bottom, not all at different heights"). The five bodies are different lengths, so a chip that simply
+     followed the copy landed at five different heights across one row. The card is a flex column and the HUD
+     row is pushed to the floor with margin-top: auto, so the chips line up whatever the copy does. */
+  display: flex;
+  flex-direction: column;
   min-height: 186px;
   /* clip so the enclosed .channel-sweep keeps a working view() timeline */
   overflow: hidden;
@@ -621,23 +627,41 @@ html.stills-on .brand-mini-copy small { animation: none; }
 /* Entrance, once, on first scroll into view — main.js stages the tiles 60 ms apart and adds .is-in.
    .is-armed is set from JS so a page without it renders the tiles complete (fail open). */
 @media (prefers-reduced-motion: no-preference) {
+  /* Round 14a: the armed grid OWNS its tiles' entrance. Each tile also carries `data-motion="rise"`, whose
+     view()-timeline animation drives the same opacity/transform across `cover 0% cover 30%`; a CSS animation
+     wins the cascade over plain declarations, so the two ran on the same pixels and the scroll-linked one hid
+     the staged one underneath it (Kyle: "we still don't have any type of animation happening"). Cancelling the
+     animation here hands the tile back to the transitions below — and only when JS has armed the grid, so a
+     page without JS still gets the generic reveal and never a hidden tile. */
+  .spec-grid.is-armed > div[data-motion] {
+    animation: none;
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  .spec-grid.is-armed > div.is-in[data-motion] {
+    opacity: 1;
+    transform: none;
+    transition: opacity 460ms var(--ease), transform 620ms var(--ease);
+  }
   .spec-grid.is-armed > div > i { opacity: 0; transform: translateY(10px) scale(0.9); }
   .spec-grid.is-armed > div.is-in > i {
     opacity: 0.62;
     transform: none;
-    transition: opacity 560ms var(--ease), transform 560ms var(--ease);
+    transition: opacity 560ms var(--ease) 120ms, transform 560ms var(--ease) 120ms;
   }
+  /* The ember top rule: 2 px and brighter than the hairline it was, because it is the beat that says a tile
+     has ARRIVED and a 1 px 0.45-alpha line at 34 px from the icon was not readable in motion. */
   .spec-grid.is-armed > div::after {
     content: "";
     position: absolute;
     inset: -1px 0 auto 0;
-    height: 1px;
+    height: 2px;
     background: var(--ember);
-    opacity: 0.45;
+    opacity: 0.72;
     transform: scaleX(0);
     transform-origin: left center;
   }
-  .spec-grid.is-armed > div.is-in::after { transform: scaleX(1); transition: transform 620ms var(--ease); }
+  .spec-grid.is-armed > div.is-in::after { transform: scaleX(1); transition: transform 650ms var(--ease) 60ms; }
 }
 .spec-grid dt { color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; }
 .spec-grid dd { margin: 20px 0 0; font-family: var(--font-display); font-size: clamp(38px, 4vw, 58px); line-height: 1; font-weight: 700; letter-spacing: -0.045em; }

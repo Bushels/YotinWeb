@@ -11,7 +11,12 @@
 .channel-card[data-hotspot] { cursor: pointer; }
 .channel-card[data-hotspot]:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
 .channel-card.is-hover, .channel-card.is-active { border-color: rgba(232, 220, 200, 0.45); }
-.channel-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.04em; color: var(--sand); font-variant-numeric: tabular-nums; }
+/* margin-top: auto — the chip row sits on the card floor, one even line across the five cards (round 14a).
+   Selected as `.channel-card .channel-hud` on purpose: `styles.css` carries `.channel-card p { margin: 0 }`,
+   which is (0,1,1) and was silently beating the (0,1,0) `.channel-hud` margin — the reason the row's own
+   12 px top margin never applied either, and the reason `margin-top: auto` alone did nothing. */
+.channel-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.04em; color: var(--sand); font-variant-numeric: tabular-nums; }
+.channel-card .channel-hud { margin: auto 0 0; padding-top: 14px; }
 .channel-hud-value { min-width: 7ch; opacity: 0.55; transition: opacity 240ms ease; }
 .channel-card.is-hover .channel-hud-value, .channel-card.is-active .channel-hud-value, .channel-card.has-value .channel-hud-value { opacity: 1; }
 /* icon settle: once per enter (IntersectionObserver toggles .is-visible); webfont glyphs, so opacity + scale, not stroke. */

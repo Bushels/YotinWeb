@@ -3,7 +3,7 @@
 // the rock (pointer/tap → local field reveal with decaying memory). Everything is qualitative: no distance
 // scale, no separation axis, no S/N bar, no numbers — and the wellhead end is never labelled a "reference".
 import { ROAD_RECT, SLAB, NOTCH, BENCH_Y } from './layout.js';
-import { buildReceiverPanel } from './panel.js';
+import { buildWellheadCharts } from './charts.js';
 // THREE is injected by the caller (the world chunk owns three; UI chunks must never import it — spec §6).
 
 export function createCircuit(island, THREE) {
@@ -39,13 +39,18 @@ export function createCircuit(island, THREE) {
   // flare, and a good stride off the wellhead — near it, plainly not it.
   const RECEIVER = new THREE.Vector3(-4.3, 0.05, 4.3);
   let sep = 0.6; // kept for the road walk (0 = on the wellhead, 1 = the far end of the road)
+  // The chart glyphs rise out of the receiver, so moving the receiver moves them (assigned once the bloom is
+  // built, below — the receiver is seated before the glyphs exist).
+  let chartsRef = null;
+  const CHART_LIFT = 1.02;
+  function anchorCharts() { if (chartsRef) chartsRef.setAnchor(stake.position.x, stake.position.y + CHART_LIFT, stake.position.z); }
   function placeStake(t) {
     sep = THREE.MathUtils.clamp(t, 0, 1);
     if (sep < 0.15) stake.position.lerpVectors(AT_WELLHEAD, ROAD_HEAD, sep / 0.15);
     else stake.position.lerpVectors(ROAD_HEAD, ROAD_TOE, (sep - 0.15) / 0.85);
-    updateLoop();
+    updateLoop(); anchorCharts();
   }
-  function placeStakeAt(p) { stake.position.copy(p); updateLoop(); }
+  function placeStakeAt(p) { stake.position.copy(p); updateLoop(); anchorCharts(); }
 
   // The footprint reticle: two hairline sand rings lying on the pad, lit before anything is placed so the spot
   // reads as a real place to put something (Target / Google Arts). It is not a target to shoot at — it is the
@@ -113,19 +118,24 @@ export function createCircuit(island, THREE) {
   //   0 → 0.70 s   THE CLIMB — the field's own line-source term (field.js: the fourth plane carries the return
   //                up the casing) walked in time: a travelling window along the sheath, collar → wellhead. No
   //                second stroke set, no extra draw call.
-  //   0.60 → 1.22 s THE PANEL — the instrument face ON THE RECEIVER wakes: three empty numeric windows light in
-  //                sequence and a needle sweeps once and settles (panel.js, one draw call). Round 13 retired the
-  //                chart-glyph bloom, which billboarded over the tank battery attached to nothing and whose
-  //                shapes (a stepped bar set, a crested trace with a live end-dot) were the sparklines §0 bans.
+  //   0.60 → 1.22 s THE BLOOM — three chart glyphs unfold and hold (charts.js, one draw call).
+  //
+  // Round 13 replaced the bloom with an instrument-panel face on the receiver; round 14a puts the glyphs back
+  // as the acquire payoff (Kyle, 2026-08-21, recorded as a lead decision in spec §0: abstract chart glyphs
+  // carrying no printed values or axes are licensed marketing iconography). The one thing the panel round
+  // proved out is kept: the glyphs no longer bloom in free air over the tank battery — their rise origin is
+  // the RECEIVER the visitor just planted, and it follows the receiver when the receiver moves.
   //   1.50 s        the caller's honest wait (ui/signal.js WAIT_MS) ends and the reading lands.
   const CLIMB_S = 0.70, BLOOM_AT = 0.60;
-  // Mounted ON the receiver (a child of the stake group), so the answer appears on the object the visitor just
-  // placed and moves with it — no floating panel over the lease, and one contact point instead of none.
-  const panel = buildReceiverPanel(THREE, stake);
+  // CHART_LIFT above the receiver's own base: the row unfolds up out of the mast, not out of the middle of
+  // the lease (the one thing the retired panel round got right).
+  const charts = buildWellheadCharts(THREE, stake.position.clone().setY(stake.position.y + CHART_LIFT));
+  group.add(charts.mesh);
+  chartsRef = charts; anchorCharts();
   let acquire = -1;             // < 0: nothing is being acquired
   function startAcquire() { if (acquire >= 0) return; acquire = 0; island.field.setClimb(island.field.collarT, 0); }
-  function settleAcquire() { acquire = 99; island.field.setClimb(-1, 0); panel.settle(); }
-  function clearAcquire() { acquire = -1; island.field.setClimb(-1, 0); panel.clear(); }
+  function settleAcquire() { acquire = 99; island.field.setClimb(-1, 0); charts.settle(); }
+  function clearAcquire() { acquire = -1; island.field.setClimb(-1, 0); charts.clear(); }
   function stepAcquire(dt, camera) {
     if (acquire < 0) return false;
     let busy = false;
@@ -142,8 +152,8 @@ export function createCircuit(island, THREE) {
     } else if (acquire < 99) {
       acquire += dt;
     }
-    if (acquire >= BLOOM_AT) panel.start();
-    busy = panel.update(dt, camera) || busy;
+    if (acquire >= BLOOM_AT) charts.start();
+    busy = charts.update(dt, camera) || busy;
     return busy;
   }
 
@@ -153,7 +163,7 @@ export function createCircuit(island, THREE) {
   function set(next) {
     const wasClosed = state.closed, wasPlaced = state.placed;
     Object.assign(state, next);
-    // The receiver is lifted: the climb residue and the panel go AT ONCE — the same hard-reset discipline the
+    // The receiver is lifted: the climb residue and the charts go AT ONCE — the same hard-reset discipline the
     // loop already keeps, because the caption is about to say nothing is listening (round 5, round 12d).
     if (wasPlaced && !state.placed) clearAcquire();
     state.closed = state.placed;
@@ -203,5 +213,5 @@ export function createCircuit(island, THREE) {
     return null;
   }
 
-  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop, panel, startAcquire, settleAcquire, clearAcquire };
+  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop, charts, startAcquire, settleAcquire, clearAcquire };
 }

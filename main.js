@@ -190,32 +190,59 @@
   }
 
   /* Spec grid entrance (Kyle, 2026-08-20: "I would like the icons bigger and this section also lacks some
-     kind of additional animation"). One observer on the whole <dl>: the tiles arrive 60 ms apart, each one
-     drawing its ember rule, settling its icon and then assembling its numeral. Once only, never idle
-     (spec §5). The hidden start state is armed from here, so with no JS the tiles simply render. */
+     kind of additional animation"). One observer on the whole <dl>: the tiles arrive in a stagger, each one
+     rising, drawing its ember top rule, settling its icon and then assembling its numeral. Once only, never
+     idle (spec §5). The hidden start state is armed from here, so with no JS the tiles simply render.
+
+     Round 14a (Kyle: "we still don't have any type of animation happening with the number boxes"). Two things
+     were wrong and neither raised an error, which is why it looked like nothing at all:
+
+       1. WHERE it fired. `rootMargin: 0 0 -10% 0` on the whole <dl> makes the observer fire the instant the
+          grid's TOP EDGE crosses 90 % of the viewport height — i.e. while the grid is a sliver at the very
+          bottom of the screen. Six tiles 60 ms apart plus a 620 ms transition is over inside ~1 s, so at any
+          normal scroll speed the entire entrance played, and finished, in the last 10 % strip of the window
+          before the section was ever being looked at. The gate is now the element's own visible FRACTION
+          (threshold 0.35), with a top-of-viewport fallback for grids taller than the window.
+
+       2. WHAT it competed with. Each tile also carries `data-motion="rise"`, whose scroll-linked view()
+          animation drives the tile's opacity 0.45 -> 1 across `cover 0% cover 30%` — the same pixels, the same
+          window, and a CSS animation beats a plain declaration in the cascade. The glyph assembly underneath
+          was being multiplied by a tile that was itself fading in, so the one beat that was supposed to read
+          (the numeral assembling) arrived through a scrim. The armed grid now owns its tiles' rise outright
+          (styles.css sets `animation: none` on armed tiles) and the two no longer share the frame. */
   function buildSpecGrid() {
     var grid = document.querySelector(".spec-grid");
     if (!grid) return null;
     var tiles = Array.prototype.slice.call(grid.children);
     function enter() {
       tiles.forEach(function (tile, i) {
-        window.setTimeout(function () {
-          tile.classList.add("is-in");
-          var n = tile.querySelector("[data-count]");
-          if (n) runCounter(n);
-        }, reduceMotion ? 0 : i * 60);
+        var at = reduceMotion ? 0 : i * 95; // 95 ms: a stagger you can see the direction of, ~570 ms end to end
+        window.setTimeout(function () { tile.classList.add("is-in"); }, at);
+        var n = tile.querySelector("[data-count]");
+        // the numeral assembles AFTER its own tile has arrived and its rule has started drawing — the beats
+        // read in order (tile → rule → digits) instead of landing on top of each other
+        if (n) window.setTimeout(function () { runCounter(n); }, reduceMotion ? 0 : at + 180);
       });
     }
     if (!("IntersectionObserver" in window)) { enter(); return grid; }
     if (!reduceMotion) grid.classList.add("is-armed");
     var io = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
-        if (!entries[i].isIntersecting) continue;
+        var e = entries[i];
+        if (!e.isIntersecting) continue;
+        // Fire when the grid is genuinely BEING LOOKED AT, not when its top edge clips the bottom of the
+        // window: 60 % of it visible, or — for a grid taller than the window, where that ratio may never be
+        // reached — once its top has climbed above 68 % of the viewport. Measured before/after: the old gate
+        // fired with the grid's top at y = 810 of 900 (a 90-px sliver at the very bottom of the screen and the
+        // whole entrance over before it rose); this one fires with the top at ~610 and roughly 290 px of grid
+        // on screen. The thresholds are every 10 % so the callback is dense enough for the top-edge test to
+        // catch its crossing on any scroll speed.
+        if (e.intersectionRatio < 0.6 && e.boundingClientRect.top > window.innerHeight * 0.68) continue;
         io.disconnect();
         enter();
         return;
       }
-    }, { rootMargin: "0px 0px -10% 0px" });
+    }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] });
     io.observe(grid);
     return grid;
   }

@@ -89,7 +89,31 @@ html.world-on .contact-section, html.world-on .company-section { overflow-x: cli
 html.world-on .faq-section .shell { background: rgba(3, 7, 11, 0.92); border-radius: 8px; padding-top: 32px; padding-bottom: 32px; }
 html.world-on .channel-card, html.world-on .spec-grid > div { background: rgba(3, 7, 11, 0.82); }
 html.world-on .commission-card { background: rgba(3, 7, 11, 0.72); border-radius: 6px; }
-html.world-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.82); }
+/* Benefits cards (round 14a, Kyle: "it highlights behind it when you drag your cursor over it… let's make the
+   cards more transparent so we can actually see that though"). The cross-highlight these six cards drive — one
+   focus rig moving a single highlight to a named element in the world — was landing behind a 0.82 ground that
+   showed almost none of it. 0.5 with a real blur instead.
+   Measured at the ch4 anchor (glyph cores at p98.5 vs box median, the method of every prior round): the ground
+   alpha was never what was carrying this copy — the same measurement at 0.82 reads 6.5 / 6.7 / 6.4:1 — so the
+   alpha is free to go. NO feathered inner wash here, deliberately: an inner wash would put its darkest pixels
+   exactly where the world's highlight has to read, which is the thing Kyle asked to be able to see. The blur
+   is what keeps a busy frame off the glyph edges. */
+html.world-on .drill-fallback ul li {
+  background: rgba(3, 7, 11, 0.5);
+  -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
+}
+/* The hover/focus cross-highlight is the point of the transparency, so the lit state gains too. This selector
+   is (0,3,2) and the sand tint in tool.css is (0,2,1), so before round 14a the lit card kept the opaque ground
+   and the tint never rendered at all — the hover read as a border change and nothing else. The tint is layered
+   OVER an opened ground here, so both survive. */
+html.world-on [data-drill-benefits] li.is-hover,
+html.world-on [data-drill-benefits] li.is-active {
+  background: linear-gradient(rgba(232, 220, 200, 0.075), rgba(232, 220, 200, 0.075)), rgba(3, 7, 11, 0.4);
+}
+@media (prefers-contrast: more) {
+  html.world-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.86); }
+}
 html.world-on .qualifier { background: rgba(3, 7, 11, 0.9); }
 
 /* Rail styles live in src/styles/rail.css (imported by src/ui/rail.js). */
