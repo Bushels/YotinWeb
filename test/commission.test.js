@@ -16,7 +16,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const signalJs = fs.readFileSync(path.join(root, 'src', 'ui', 'signal.js'), 'utf8');
 const signalCss = fs.readFileSync(path.join(root, 'src', 'styles', 'signal.css'), 'utf8');
 const circuitJs = fs.readFileSync(path.join(root, 'src', 'world', 'circuit.js'), 'utf8');
-const chartsJs = fs.readFileSync(path.join(root, 'src', 'world', 'charts.js'), 'utf8');
+const panelJs = fs.readFileSync(path.join(root, 'src', 'world', 'panel.js'), 'utf8');
 const chaptersJs = fs.readFileSync(path.join(root, 'src', 'chapters.js'), 'utf8');
 const interactionsMjs = fs.readFileSync(path.join(root, 'scripts', 'interactions.mjs'), 'utf8');
 
@@ -119,7 +119,11 @@ describe('commission the well', () => {
   });
 
   test('the four journey beats survive as the checklist sublines', () => {
-    for (const beat of ['The tool speaks', 'The formation carries it up', 'Surface hears it', 'lands in your RTU']) {
+    // Round 13: 01's beat was "The tool speaks: a reading leaves the well" — anthropomorphic, and it asserted
+    // the very reading 03's "NO READING" denies two rows below it. A ticked row has to be an install FACT; any
+    // "reading" verb belongs to 03, after the digits exist.
+    assert.ok(!html.includes('The tool speaks'), 'the tool does not speak, and 01 does not claim a reading');
+    for (const beat of ['Made up in the tubing string', 'The formation carries it up', 'Surface hears it', 'lands in your RTU']) {
       assert.ok(html.includes(beat), `"${beat}" survives`);
     }
     assert.ok(!html.includes('class="journey-list"'), 'the journey cards are gone');
@@ -131,23 +135,41 @@ describe('commission the well', () => {
     const wait = Number(signalJs.match(/const WAIT_MS = (\d+);/)[1]);
     const climb = Number(circuitJs.match(/const CLIMB_S = ([\d.]+), BLOOM_AT = ([\d.]+);/)[1]);
     const bloomAt = Number(circuitJs.match(/const CLIMB_S = [\d.]+, BLOOM_AT = ([\d.]+);/)[1]);
-    const delays = JSON.parse(chartsJs.match(/const DELAY = (\[[^\]]*\]);/)[1]);
-    const rise = Number(chartsJs.match(/const RISE = ([\d.]+);/)[1]);
+    const delays = JSON.parse(panelJs.match(/const DELAY = (\[[^\]]*\]);/)[1]);
+    const rise = Number(panelJs.match(/const RISE = ([\d.]+);/)[1]);
     const settled = (bloomAt + Math.max(...delays) + rise) * 1000;
     assert.ok(climb > 0.5 && climb < 1, `the climb is a beat, not a wait: ${climb}s`);
-    assert.ok(wait >= settled, `the wait (${wait} ms) outlasts the bloom settling (${settled.toFixed(0)} ms)`);
+    assert.ok(wait >= settled, `the wait (${wait} ms) outlasts the panel settling (${settled.toFixed(0)} ms)`);
     assert.ok(wait <= 1600, 'and it is still a wait, not a loading screen');
   });
 
-  test('no receiver, no charts: the bloom is a response to the act and it is reversible at once', () => {
-    assert.match(chartsJs, /mesh\.visible = false;/, 'the charts ship invisible — nothing is drawn until something is placed');
+  test('no receiver, no panel: the arrival is a response to the act and it is reversible at once', () => {
+    assert.match(panelJs, /mesh\.visible = false;/, 'the panel ships invisible — nothing is drawn until something is placed');
     assert.match(circuitJs, /if \(wasPlaced && !state\.placed\) clearAcquire\(\);/);
-    const clear = chartsJs.slice(chartsJs.indexOf('clear()'), chartsJs.indexOf('get busy'));
-    assert.match(clear, /mesh\.visible = false/, 'lifting the receiver takes the charts away at once — no eased fade past the claim');
-    // and they are glyphs, not charts claiming data: nothing here draws text
-    assert.ok(!/fillText|strokeText|font\s*=/.test(chartsJs), 'no numbers, no axis labels — the glyphs claim nothing (§13b)');
+    const clear = panelJs.slice(panelJs.indexOf('clear()'), panelJs.indexOf('get busy'));
+    assert.match(clear, /mesh\.visible = false/, 'lifting the receiver takes the panel away at once — no eased fade past the claim');
     // the climb reuses the field's own line source rather than inventing a second stroke set
     assert.match(circuitJs, /island\.field\.setClimb\(/);
+  });
+
+  /* Round 13 — the no-invented-data test, re-pinned from the retired chart glyphs to the panel face that
+     replaced them. §0: "No sparklines, no invented data." The ban is on the FORM: a bar set with differing
+     heights asserts a distribution and a crested trace asserts a trend, whether or not either carries numbers.
+     The panel is allowed to be an instrument; it is not allowed to be a readout. */
+  test('the panel face claims nothing: no text, no series, no chart shapes', () => {
+    // the header block names what was retired, so the assertions read the CODE, not the prose above it
+    const code = panelJs.slice(panelJs.indexOf('function drawPlate'));
+    assert.ok(!/fillText|strokeText|font\s*=/.test(code), 'no digits, no labels, no axis text');
+    assert.ok(!/bars|sparkline|roundRect/.test(code), 'no bar sets and no rounded SaaS cards');
+    // no authored series: the retired tile 0 was a nine-point polyline and tile 1 a six-value list
+    assert.ok(!/const \w+ = \[\s*0?\.\d/.test(code), 'no list of authored values is drawn on the face');
+    // the numeric windows are EMPTY by construction — the shader lights the recess, it never fills a value
+    assert.match(panelJs, /EMPTY numeric windows/);
+    // it is mounted on the receiver, not floating: a child of the stake group, never re-aimed at the camera
+    assert.match(circuitJs, /buildReceiverPanel\(THREE, stake\)/);
+    assert.ok(!/quaternion\.copy\(camera\.quaternion\)/.test(panelJs), 'the panel is not billboarded at the camera');
+    // and the retired surface is gone, not merely unused
+    assert.ok(!fs.existsSync(path.join(root, 'src', 'world', 'charts.js')), 'src/world/charts.js is deleted');
   });
 
   test('the commissioning hold is lit: chapter 3 ramps up as the pose moves to surface', () => {

@@ -387,16 +387,26 @@ html.stills-on .brand-mini-copy small { animation: none; }
   pointer-events: none;
 }
 
-/* Scrim: seats the copy on the art instead of letting it float in a void. */
+/* Scrim: seats the copy on the art instead of letting it float in a void.
+   Round 13: it was a PANE, not a wash. `inset: 0` ended the box at the rail gutter (main takes 96 px of
+   padding-right on laptops) and at the hero's baseline, and the vertical layer carried ~0.6–0.88 alpha all the
+   way to both of those edges — measured as a straight vertical step at x = 1344 (1440) / 1270 (1366) and a
+   horizontal step at the strip's baseline, cutting the treeline in half with a visible corner. Spec §13b:
+   "copy grounds are washes, never panes". So: bleed the box past the gutter and past the baseline, drive every
+   layer to alpha 0 INSIDE that bleed, and mask the right-hand edge over ~140 px. The hero clips the horizontal
+   bleed (overflow-x: clip only — clipping y would eat the vertical feather). */
 .hero-scrim {
   position: absolute;
-  inset: 0;
+  inset: 0 -160px -170px 0;
   z-index: 1;
   pointer-events: none;
   background:
     linear-gradient(100deg, rgba(3, 7, 11, 0.95) 0%, rgba(3, 7, 11, 0.82) 26%, rgba(3, 7, 11, 0.18) 54%, rgba(3, 7, 11, 0) 72%),
-    linear-gradient(to top, rgba(3, 7, 11, 0.88) 0%, rgba(3, 7, 11, 0) 34%);
+    linear-gradient(to top, rgba(3, 7, 11, 0) 0, rgba(3, 7, 11, 0.88) 170px, rgba(3, 7, 11, 0) 46%);
+  -webkit-mask-image: linear-gradient(to right, #000 0 calc(100% - 300px), rgba(0, 0, 0, 0) calc(100% - 160px));
+  mask-image: linear-gradient(to right, #000 0 calc(100% - 300px), rgba(0, 0, 0, 0) calc(100% - 160px));
 }
+.hero { overflow-x: clip; overflow-y: visible; }
 
 .scroll-cue {
   position: absolute;

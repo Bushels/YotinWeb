@@ -500,14 +500,14 @@
         <div class="commission-block" data-chapter="signal" data-anchor="top" data-commission-block>
           <div class="commission-card">
             <p class="eyebrow commission-title">Commission the well</p>
-            <p class="commission-lede" data-motion="rise">The tool is already in the string. Put the receiver on the pad — the rest arrives on its own.</p>
+            <p class="commission-lede" data-motion="rise">The tool is already in the string. Set the receiver on the pad.</p>
             <ol class="commission" aria-label="Commissioning steps">
               <li class="commission-step" data-motion="rise" data-step="01" data-state="done">
                 <span class="commission-num" aria-hidden="true">01</span>
                 <span class="commission-tick" aria-hidden="true"></span>
                 <div class="commission-body">
                   <h3>Tool in the string</h3>
-                  <p>The tool speaks: a reading leaves the well, deep downhole.</p>
+                  <p>Made up in the tubing string, sitting where you landed it.</p>
                 </div>
                 <span class="commission-state" data-step-state>in the string</span>
               </li>
@@ -525,7 +525,7 @@
                 <span class="commission-num" aria-hidden="true">03</span>
                 <span class="commission-tick" aria-hidden="true"></span>
                 <div class="commission-body">
-                  <h3>Reading on SCADA</h3>
+                  <h3>Reading at surface</h3>
                   <p>Surface hears it and it lands in your RTU — the system you already run.</p>
                 </div>
                 <span class="commission-state" data-step-state>no reading</span>
@@ -552,7 +552,10 @@
       </div>
     </section>
 
-    <section class="insight-section" id="insight" aria-labelledby="insight-title">
+    <!-- data-anchor="top": chapter 4 arrives on its own heading. Centring the section put the anchor mid-column,
+         so an arriving visitor landed on the middle of a sentence ("…that comes with running a cable") with no
+         eyebrow and no H2 on screen (round-13 critique). -->
+    <section class="insight-section" id="insight" data-anchor="top" aria-labelledby="insight-title">
       <div class="shell">
         <div class="insight-head">
           <p class="eyebrow" data-motion="rise">THE TOOL</p>
@@ -578,6 +581,7 @@
             decoding="async"
             data-device-img
           >
+          <figcaption class="device-caption">WellFi on the tubing string — collar, sensor package and pin end.</figcaption>
         </figure>
 
         <!--

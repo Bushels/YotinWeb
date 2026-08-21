@@ -147,6 +147,36 @@ export function mountRail() {
     if (barTally.textContent !== text) barTally.textContent = text;
   });
   document.addEventListener('world:chapter', (e) => { if (!hasProgress) setBarProgress(e.detail.index); });
+
+  // Phones (≤ 820 px): the one-tap conversion path. The header's "Check your well fit" only exists at
+  // ≥ 1101 px, and round 11 took the hero CTA pair out — so on the device a production engineer actually
+  // carries, §6's "one click to Q1" was two taps and a hunt through the burger (round-13 critique). One chip,
+  // 44 px, ember outline, appearing after the first scroll and standing down while the qualifier is on screen
+  // (a CTA pointing at something already in front of you is noise). Not the hero pair, and not a new surface
+  // on desktop.
+  const fit = document.createElement('a');
+  fit.className = 'rail-fit';
+  fit.href = '#contact';
+  fit.textContent = 'Check your well fit';
+  rail.appendChild(fit);
+  let fitOn = null, atQualifier = false;
+  const syncFit = () => {
+    const on = (window.scrollY || 0) > 44 && !atQualifier;
+    if (on === fitOn) return;
+    fitOn = on;
+    rail.classList.toggle('has-fit', on);
+    fit.tabIndex = on ? 0 : -1;
+  };
+  window.addEventListener('scroll', syncFit, { passive: true });
+  const contact = document.querySelector('#contact');
+  if (contact && typeof IntersectionObserver === 'function') {
+    new IntersectionObserver((entries) => {
+      atQualifier = entries.some((e) => e.isIntersecting);
+      syncFit();
+    }, { rootMargin: '0px 0px -15% 0px' }).observe(contact);
+  }
+  syncFit();
+
   setActive('surface');
   return { rail, links, setActive, focusStratum };
 }

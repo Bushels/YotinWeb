@@ -21,7 +21,7 @@ function run(extra, key) {
 run(['--w', '1440', '--h', '900'], '1440x900');
 run(['--w', '1366', '--h', '768'], '1366x768');
 run(['--w', '390', '--h', '844'], '390x844');
-// reduced-motion stills path (no ?world): capture top and three scroll positions
+// reduced-motion stills path (no ?world): one frame per chapter anchor (rm-0 .. rm-6)
 {
   const r = spawnSync(process.execPath, ['-e', `
     import('playwright').then(async ({ chromium }) => {
@@ -31,9 +31,24 @@ run(['--w', '390', '--h', '844'], '390x844');
       const logs = []; p.on('console', m => { if (m.type()==='error') logs.push(m.text()); }); p.on('pageerror', e => logs.push('pageerror '+e.message));
       await p.goto('${base}/', { waitUntil: 'load', timeout: 60000 });
       await p.waitForTimeout(1200);
-      const h = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
-      for (const [i, f] of [[0,0],[0.33,1],[0.66,2],[1,3]]) { await p.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), Math.round(h * i)); await p.waitForTimeout(700); await p.screenshot({ path: '${out.replace(/\\\\/g, '/')}/rm-' + f + '-1440x900.png' }); }
-      console.log(JSON.stringify({ stillsOn: await p.evaluate(() => document.documentElement.classList.contains('stills-on')), logs, ratio: await p.evaluate(() => document.documentElement.scrollHeight / innerHeight) }));
+      // One frame per CHAPTER, not four evenly-spaced scroll positions: rm-0..rm-3 covered only the first half
+      // of the page, so the stills path for chapters 4 (device figure), 5 (windbreak) and 6 (qualifier) went
+      // unreviewed for a whole round. Same names, extended to the full seven.
+      const SECTIONS = ['.hero', '[data-chapter=descent]', '[data-chapter=tool]', '[data-chapter=signal]', '#insight', '#company', '#contact'];
+      const missing = [];
+      for (let i = 0; i < SECTIONS.length; i++) {
+        const ok = await p.evaluate((sel) => {
+          const el = document.querySelector(sel);
+          if (!el) return false;
+          const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
+          window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - header - 8), behavior: 'instant' });
+          return true;
+        }, SECTIONS[i]);
+        if (!ok) { missing.push(SECTIONS[i]); continue; }
+        await p.waitForTimeout(700);
+        await p.screenshot({ path: '${out.replace(/\\\\/g, '/')}/rm-' + i + '-1440x900.png' });
+      }
+      console.log(JSON.stringify({ stillsOn: await p.evaluate(() => document.documentElement.classList.contains('stills-on')), logs, missing, rmFrames: 7 - missing.length, ratio: await p.evaluate(() => document.documentElement.scrollHeight / innerHeight) }));
       await b.close();
     });
   `], { encoding: 'utf8' });

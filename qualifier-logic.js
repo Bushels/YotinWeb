@@ -172,7 +172,7 @@
   var NOTES = {
     temp: "Bottomhole temperature is the one hard limit — WellFi is rated to 150 °C today, so that number is worth confirming before anything else.",
     // source: Yotin deployment practice — internal rule of thumb, not a published figure.
-    external: "Landed that deep, WellFi would be set below the intermediate shoe, in open hole, rather than on the tubing inside casing. It is a supported configuration and it reports just as well — but it changes the install, so it is worth confirming early.",
+    external: "Landed that deep, WellFi would be set below the intermediate shoe, in open hole, rather than on the tubing inside casing. It is a supported configuration — it changes the install, so it is worth confirming early.",
     landing: "Where the pump sits relative to the intermediate shoe decides whether WellFi runs on the tubing inside casing or is set below the shoe, in open hole. Worth pinning down before the changeout gets scoped.",
     timing: "WellFi can go in on a new completion, a planned changeout, or its own run. The economics are simply strongest when it rides along with work that is already scheduled.",
     lift: "Most deployments so far are on pumped wells. Other lift types are workable but worth walking through.",

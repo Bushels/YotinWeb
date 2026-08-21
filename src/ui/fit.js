@@ -15,8 +15,8 @@ const CAPTION = {
   fluid: { heavy: 'heavy-oil flow', light: 'light-oil flow', gas: 'gas flow', thermal: 'thermal — warm haze, near the temperature ceiling' },
   temp: { cool: 'runs cool downhole', warm: 'at spec temperature', over: 'above the rated temperature — collar dimmed', unsure: 'temperature unconfirmed' },
   landing: {
-    shallower: 'Pump answered shallower than the standoff line · WellFi proposed inside the intermediate · inside casing — reduced signal',
-    deeper: 'Pump answered deeper than the standoff line · Proposed outside-intermediate WellFi configuration — review required · open hole — strongest signal',
+    shallower: 'Pump answered shallower · WellFi proposed inside the intermediate · inside casing — reduced signal',
+    deeper: 'Pump answered deeper · Proposed outside-intermediate WellFi configuration — review required · open hole — strongest signal',
   },
   verdict: { strong: 'strong fit — WellFi lights at the proposed placement', review: 'likely fit — review required', future: 'high-temp version in development — tool dimmed' },
 };
@@ -112,10 +112,10 @@ export function drawSchematic(ctx, s, W = 1200, H = 630) {
   // pump marker at the answered band
   if (s.landing) {
     const deeper = s.landing === 'deeper';
-    const py = top + (shoeY - top) * (deeper ? 0.96 : 0.42);
+    const py = top + (shoeY - top) * (deeper ? 0.31 : 0.20); // wellPath.PUMP_U — the forwarded PNG and the 3D must agree
     ctx.fillStyle = '#eef4f8'; ctx.fillRect(cx - 18, py - 6, 36, 12);
     ctx.strokeStyle = SAND; ctx.lineWidth = 1; ctx.strokeRect(cx - 22.5, py - 10.5, 45, 21);
-    ctx.fillStyle = SAND; ctx.fillText(deeper ? 'pump — deeper than the standoff line' : 'pump — shallower than the standoff line', cx + 90, py - 2);
+    ctx.fillStyle = SAND; ctx.fillText(deeper ? 'pump — deeper landing' : 'pump — shallower landing', cx + 90, py - 2);
   }
   // tool position + signal label
   const toolInside = s.landing === 'shallower';
@@ -136,7 +136,7 @@ export function drawSchematic(ctx, s, W = 1200, H = 630) {
     ['Lift', s.lift ? CAPTION.lift[s.lift] : '—'],
     ['Fluid', s.fluid ? CAPTION.fluid[s.fluid] : '—'],
     ['Temperature', s.temp ? CAPTION.temp[s.temp] : '—'],
-    ['Pump landing', s.landing ? (s.landing === 'deeper' ? 'deeper than the standoff line' : 'shallower than the standoff line') : '—'],
+    ['Pump landing', s.landing ? (s.landing === 'deeper' ? 'deeper landing' : 'shallower landing') : '—'],
     ['WellFi', s.landing ? (toolInside ? 'inside casing, on the tubing' : 'below the intermediate shoe (open hole)') : 'per pump landing'],
     ['Verdict', VERDICT_LABEL[s.verdict] || '—'],
   ];

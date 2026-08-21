@@ -3,7 +3,7 @@
 // the rock (pointer/tap → local field reveal with decaying memory). Everything is qualitative: no distance
 // scale, no separation axis, no S/N bar, no numbers — and the wellhead end is never labelled a "reference".
 import { ROAD_RECT, SLAB, NOTCH, BENCH_Y } from './layout.js';
-import { buildWellheadCharts } from './charts.js';
+import { buildReceiverPanel } from './panel.js';
 // THREE is injected by the caller (the world chunk owns three; UI chunks must never import it — spec §6).
 
 export function createCircuit(island, THREE) {
@@ -113,15 +113,19 @@ export function createCircuit(island, THREE) {
   //   0 → 0.70 s   THE CLIMB — the field's own line-source term (field.js: the fourth plane carries the return
   //                up the casing) walked in time: a travelling window along the sheath, collar → wellhead. No
   //                second stroke set, no extra draw call.
-  //   0.60 → 1.22 s THE BLOOM — three chart glyphs unfold at the wellhead and hold (charts.js, one draw call).
+  //   0.60 → 1.22 s THE PANEL — the instrument face ON THE RECEIVER wakes: three empty numeric windows light in
+  //                sequence and a needle sweeps once and settles (panel.js, one draw call). Round 13 retired the
+  //                chart-glyph bloom, which billboarded over the tank battery attached to nothing and whose
+  //                shapes (a stepped bar set, a crested trace with a live end-dot) were the sparklines §0 bans.
   //   1.50 s        the caller's honest wait (ui/signal.js WAIT_MS) ends and the reading lands.
   const CLIMB_S = 0.70, BLOOM_AT = 0.60;
-  const charts = buildWellheadCharts(THREE, new THREE.Vector3(wellhead.x, 1.62, wellhead.z));
-  group.add(charts.mesh);
+  // Mounted ON the receiver (a child of the stake group), so the answer appears on the object the visitor just
+  // placed and moves with it — no floating panel over the lease, and one contact point instead of none.
+  const panel = buildReceiverPanel(THREE, stake);
   let acquire = -1;             // < 0: nothing is being acquired
   function startAcquire() { if (acquire >= 0) return; acquire = 0; island.field.setClimb(island.field.collarT, 0); }
-  function settleAcquire() { acquire = 99; island.field.setClimb(-1, 0); charts.settle(); }
-  function clearAcquire() { acquire = -1; island.field.setClimb(-1, 0); charts.clear(); }
+  function settleAcquire() { acquire = 99; island.field.setClimb(-1, 0); panel.settle(); }
+  function clearAcquire() { acquire = -1; island.field.setClimb(-1, 0); panel.clear(); }
   function stepAcquire(dt, camera) {
     if (acquire < 0) return false;
     let busy = false;
@@ -138,8 +142,8 @@ export function createCircuit(island, THREE) {
     } else if (acquire < 99) {
       acquire += dt;
     }
-    if (acquire >= BLOOM_AT) charts.start();
-    busy = charts.update(dt, camera) || busy;
+    if (acquire >= BLOOM_AT) panel.start();
+    busy = panel.update(dt, camera) || busy;
     return busy;
   }
 
@@ -149,7 +153,7 @@ export function createCircuit(island, THREE) {
   function set(next) {
     const wasClosed = state.closed, wasPlaced = state.placed;
     Object.assign(state, next);
-    // The receiver is lifted: the climb residue and the charts go AT ONCE — the same hard-reset discipline the
+    // The receiver is lifted: the climb residue and the panel go AT ONCE — the same hard-reset discipline the
     // loop already keeps, because the caption is about to say nothing is listening (round 5, round 12d).
     if (wasPlaced && !state.placed) clearAcquire();
     state.closed = state.placed;
@@ -199,5 +203,5 @@ export function createCircuit(island, THREE) {
     return null;
   }
 
-  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop, charts, startAcquire, settleAcquire, clearAcquire };
+  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop, panel, startAcquire, settleAcquire, clearAcquire };
 }

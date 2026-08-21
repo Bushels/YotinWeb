@@ -14,11 +14,15 @@ const SAND_FLOW = '#d9c39a';     // island.SAND_FLOW
 const R_CASED = 0.100;           // wellPath.RADII.cased
 export const FLUID_TINT = { heavy: SAND_FLOW, light: '#e9dcc0', gas: '#c9d4da', thermal: SAND_FLOW };
 export const FOG_WARM = '#140c07';
-// Cased-string parameter of the answered pump band. These must BRACKET the standoff line: "deeper" means the
-// pump is landed below it (the whole reason WellFi is proposed outside the intermediate) and "shallower" above.
-// Round 9: deeper was 0.9 — exactly ON the standoff line, so the one spatial relation chapter 6 exists to show
-// was unreadable, and the 3D disagreed with the PNG schematic (src/ui/fit.js:108 uses 0.96 / 0.42).
-export const PUMP_U = { shallower: 0.42, deeper: 0.96 };
+// Cased-string parameter of the answered pump band. RESTATED from src/world/wellPath.js `PUMP_U` — this module
+// deliberately imports nothing from the world chunk (budget note above), so the numbers are copied and the
+// world-geometry test pins the copy against the export.
+// Round 13: they used to bracket the STANDOFF LINE (0.42 / 0.96). Measured on the authored cased curve that is
+// 61.5° and 90.8° from vertical — a PCP in the middle of the build and a PCP in the landed lateral, neither
+// of which anyone runs. Both bands now sit in the vertical / low-angle tangent above the KOP and bracket the
+// chapter-4 pump datum (0.27) instead, so the pump does not move on the same well between chapters. The
+// standoff line stays where it is: it is the COLLAR's datum, and the copy no longer measures the pump against it.
+export const PUMP_U = { shallower: 0.20, deeper: 0.31 };
 export const STANDOFF_U = 0.9;                     // relative — "10 % of intermediate" above the shoe
 const WITNESS_COOL = '#d9e5ef', WITNESS_WARM = '#e6c9a6';
 const DEFAULT_VIEW = 'inside-intermediate';        // wellPath.DEFAULT_WELLFI_VIEW (restated: no world imports here)

@@ -107,7 +107,7 @@ export function mountSignal() {
     readout.classList.add('is-closed');
     if (foot) foot.dataset.arrived = 'true';
     stepState('03', 'done', 'reading');
-    say('The reading is on SCADA. The well is commissioned.');
+    say('Receiver on the pad. Reading at surface.');
     if (circuit) circuit.set({ landed: true });
     if (!landedOnce) {
       landedOnce = true;

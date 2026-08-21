@@ -22,14 +22,25 @@
 }
 .commission-num { font: 500 11px/1.7 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; color: var(--sand-mute, #b3aa9a); }
 .commission-tick {
+  position: relative;
   width: 12px; height: 12px; margin-top: 3px;
   border: 1px solid rgba(232, 220, 200, 0.34);
   background: transparent;
   transition: background 260ms ease, border-color 260ms ease;
 }
-.commission-step[data-state="done"] .commission-tick { background: var(--sand); border-color: var(--sand); }
-/* 03 is the signal arriving, so its tick is the one licensed cyan mark in the checklist. */
+/* Round 13: a done row draws a TICK, not a filled square — a beige rectangle read as a missing glyph (round-13
+   critique). The box gets out of the way and two borders make the check; 03 keeps its solid mark below. */
+.commission-step[data-state="done"] .commission-tick { background: transparent; border-color: transparent; }
+.commission-step[data-state="done"] .commission-tick::after {
+  content: "";
+  position: absolute; left: 2px; top: -2px; width: 5px; height: 11px;
+  border: solid var(--sand); border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+/* 03 is the signal arriving, so its mark is the one licensed cyan in the checklist — a solid square, the same
+   mark the readout's digits take, so the arrival reads as one event and not as another checkbox. */
 .commission-step[data-step="03"][data-state="done"] .commission-tick { background: #22D3EE; border-color: #22D3EE; }
+.commission-step[data-step="03"][data-state="done"] .commission-tick::after { content: none; }
 .commission-body h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 17px; color: var(--sand); }
 .commission-body p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; max-width: 46ch; }
 .commission-state {

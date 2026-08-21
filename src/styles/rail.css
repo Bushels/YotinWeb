@@ -114,3 +114,31 @@ html.stills-on .rail-tally, html.stills-on .rail-legend { opacity: 1; transform:
 }
 @media (max-height: 680px) { .rail-legend { display: none; } }
 @media (max-height: 560px) { .rail-tally { display: none; } }
+
+/* Phones (≤ 820 px): the one-tap path to the qualifier. Desktop keeps the header CTA (world.css .nav-fit) and
+   never renders this. Bottom-LEFT, because the ChatFi launcher owns bottom-right at this width. */
+.rail-fit { display: none; }
+@media (max-width: 820px) {
+  .rail-fit {
+    position: fixed;
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 95;
+    display: none;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 16px;
+    pointer-events: auto;
+    border: 1px solid var(--ember);
+    border-radius: 999px;
+    background: rgba(3, 7, 11, 0.92);
+    color: var(--ember);
+    font: 600 11px/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+  .rail.has-fit .rail-fit { display: inline-flex; }
+}

@@ -144,15 +144,47 @@ describe('well geometry', () => {
   });
 });
 
-// Chapter 6 truth (round 9): the qualifier's "deeper"/"shallower" answers are a spatial relation to the standoff
-// line, so the 3D marker must bracket it — and must agree with the client-side PNG schematic (src/ui/fit.js:108,
-// deeper ? 0.96 : 0.42), or the download and the world tell an operator two different stories about one answer.
-describe('chapter 6 pump marker vs the standoff line', () => {
+// Chapter 6 truth (round 13): the pump is ONE thing on ONE well. wellPath.PUMP_U is the single source of truth
+// (shallower / datum / deeper); chapter 4 imports it, chapter 6 restates it, and the forwarded PNG uses the same
+// two fractions — otherwise the download, the world and the Deployment chapter tell an operator three different
+// stories about one pump. Both chapter-6 bands must also be RUNNABLE: a PCP or rod string lands in the vertical
+// or a low-angle tangent above the KOP, never in the build and never in the lateral.
+describe('chapter 6 pump marker — one pump, and it is landable', () => {
   let builder;
   before(async () => { builder = await import('../src/world/wellBuilder.js'); });
-  test('PUMP_U.deeper > STANDOFF_U > PUMP_U.shallower', () => {
-    assert.ok(builder.PUMP_U.deeper > builder.STANDOFF_U, `deeper ${builder.PUMP_U.deeper} must be below the standoff line ${builder.STANDOFF_U}`);
-    assert.ok(builder.STANDOFF_U > builder.PUMP_U.shallower, `shallower ${builder.PUMP_U.shallower} must be above the standoff line ${builder.STANDOFF_U}`);
+  const inclination = (u) => {
+    const t = paths.cased.getTangentAt(u);
+    return Math.acos(Math.min(1, Math.abs(-t.y))) * 180 / Math.PI;
+  };
+  test('wellPath.PUMP_U is the source of truth and chapter 4 imports it rather than restating a number', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    assert.deepEqual(
+      { shallower: wellPath.PUMP_U.shallower, deeper: wellPath.PUMP_U.deeper },
+      { shallower: builder.PUMP_U.shallower, deeper: builder.PUMP_U.deeper },
+      'wellBuilder restates wellPath.PUMP_U exactly',
+    );
+    const toolViz = fs.readFileSync(path.join(__dirname, '..', 'src', 'world', 'toolViz.js'), 'utf8');
+    assert.match(toolViz, /const PUMP_U = PUMP_BANDS\.datum;/, 'chapter 4 reads the shared datum, it does not restate a fraction');
+    assert.ok(!/const PUMP_U = 0\./.test(toolViz), 'no local pump fraction survives in toolViz');
+  });
+  test('both answered bands bracket the chapter-4 datum, so the pump never moves on the same well', () => {
+    const { shallower, datum, deeper } = wellPath.PUMP_U;
+    assert.ok(shallower < datum && datum < deeper, `${shallower} < ${datum} < ${deeper}`);
+  });
+  test('every pump position is runnable: at or above a low-angle tangent, never in the build or the lateral', () => {
+    for (const [name, u] of Object.entries(wellPath.PUMP_U)) {
+      const inc = inclination(u);
+      assert.ok(inc <= 35, `${name} (u = ${u}) is ${inc.toFixed(1)}° from vertical — past the low-angle tangent nobody lands a pump beyond`);
+    }
+  });
+  test("the pump is not measured against the standoff line — that line is the collar datum", () => {
+    assert.ok(wellPath.PUMP_U.deeper < builder.STANDOFF_U, 'both bands sit above the standoff line, in the runnable part of the string');
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const fitJs = fs.readFileSync(path.join(__dirname, '..', 'src', 'ui', 'fit.js'), 'utf8');
+    assert.ok(!/pump\s—\sdeeper than the standoff line/.test(fitJs), 'the PNG label no longer couples the pump to the standoff line');
+    assert.ok(!/(deeper|shallower) than the standoff line/.test(fitJs), 'no caption measures the pump landing against the standoff line');
   });
   // wellBuilder.js may not import the world modules (one-chunk budget), so it RESTATES the authored default
   // placement. If the two drift, an unanswered qualifier silently re-proposes the open-hole configuration.

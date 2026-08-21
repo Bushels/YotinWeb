@@ -47,19 +47,42 @@ function returnTerm(p) {
   const n = returnNearest(p);
   // n.t: 0 at the heel, 1 at the wellhead. Weight along the string (see the note above on its direction).
   const climb = 0.35 + 0.65 * n.t;
-  return Math.pow(n.d + 0.22, -2.4) * 0.055 * climb; // a tight sheath ON the casing, not a wash across the face
+  // Round 13: the collar term is now a DIPOLE and falls off far faster than the monopole it replaced, so the
+  // sheath is the honest dominant at mid-radius for a collar shorted by casing — which is what the rail's
+  // "IN CASING" tally has been claiming while the picture showed an open-hole burst. 0.055 → 0.075.
+  return Math.pow(n.d + 0.22, -2.4) * 0.075 * climb; // a tight sheath ON the casing, not a wash across the face
 }
 
-// Anisotropic potential used on the CPU (for placement/orientation) — mirrored in the vertex shader.
-function potentialAt(p, collar) {
-  const dx = p.x - collar.x, dy = (p.y - collar.y) * 0.55, dz = (p.z - collar.z) * 1.15;
-  const r = Math.hypot(dx, dy, dz) + 0.3;
+// Anisotropic quasi-static kernel for ONE pole (spec §3, "dipole-ish falloff"). Used CPU-side only — the
+// vertex program reads a baked aPot attribute and has no potential of its own.
+//
+// The seal is where the section has to look like geophysics: the vertical reach that carries the field up the
+// casing is SPENT at the seal base, so above it the potential stops climbing and spreads sideways instead.
+// Raising the dy multiplier across the seal makes vertical distance count nearly 3x more there, which flattens
+// the iso-contours (the gradient turns toward horizontal on its own — no bolted-on rotation term) and pushes
+// the far seal strokes below the density and cull thresholds. Measured before: strokes INSIDE the grey seal
+// band were brighter than strokes below it at matched screen radius, the exact inverse of the art direction.
+function poleAt(p, c, aboveSeal) {
+  const dx = p.x - c.x, dy = (p.y - c.y) * (0.55 + 1.05 * aboveSeal), dz = (p.z - c.z) * 1.15;
+  return Math.pow(Math.hypot(dx, dy, dz) + 0.3, -1.6);
+}
+// The gap source is a DIPOLE: current leaves one section of the string and returns on the other, so the two
+// poles straddle the collar along the local string tangent. A single pole is a point source of current, which
+// cannot exist — and its gradient is radial everywhere, which is why the chapter read as a firework rather
+// than a section. SIGNED: the gradient must stay smooth through the null plane, so callers take the magnitude.
+let POLE_A = null, POLE_B = null;
+function potentialAt(p) {
   const aboveSeal = THREE.MathUtils.smoothstep(p.y, SEAL.bottomY, SEAL.topY);
-  return Math.pow(r, -1.6) * 1.15 * (1 - 0.65 * aboveSeal) + returnTerm(p) * (1 - 0.5 * aboveSeal);
+  const d = (poleAt(p, POLE_A, aboveSeal) - poleAt(p, POLE_B, aboveSeal)) * 1.30;
+  return d * (1 - 0.8 * aboveSeal) + returnTerm(p) * (1 - 0.5 * aboveSeal);
 }
 
-export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPath = null } = {}) {
+export function buildField({ collar, axis = null, tier = 'high', color = '#22D3EE', returnPath = null } = {}) {
   RETURN_PTS = returnPath && returnPath.length ? returnPath : null;
+  // The separation IS the tool, so it stays short next to the strata; the poles are seeded before any
+  // placement runs because placement, orientation, density rejection and aPot all read potentialAt().
+  const tAxis = (axis ? axis.clone() : new THREE.Vector3(1, 0, 0)).normalize().multiplyScalar(0.13);
+  POLE_A = collar.clone().add(tAxis); POLE_B = collar.clone().sub(tAxis);
   const dense = tier !== 'low';
   const spacing = dense ? 0.16 : 0.32;
   const strokeLen = dense ? 0.15 : 0.24;
@@ -74,14 +97,16 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
   function gradient(p) {
     const e = 0.02;
     g.set(
-      potentialAt(tmp.set(p.x + e, p.y, p.z), collar) - potentialAt(tmp.set(p.x - e, p.y, p.z), collar),
-      potentialAt(tmp.set(p.x, p.y + e, p.z), collar) - potentialAt(tmp.set(p.x, p.y - e, p.z), collar),
-      potentialAt(tmp.set(p.x, p.y, p.z + e), collar) - potentialAt(tmp.set(p.x, p.y, p.z - e), collar),
+      potentialAt(tmp.set(p.x + e, p.y, p.z)) - potentialAt(tmp.set(p.x - e, p.y, p.z)),
+      potentialAt(tmp.set(p.x, p.y + e, p.z)) - potentialAt(tmp.set(p.x, p.y - e, p.z)),
+      potentialAt(tmp.set(p.x, p.y, p.z + e)) - potentialAt(tmp.set(p.x, p.y, p.z - e)),
     );
     return g;
   }
   function place(p, normal) {
-    const pot = potentialAt(p, collar);
+    // MAGNITUDE here (the field is signed so gradient() stays smooth through the null): strokes near the null
+    // plane cull themselves, so the dipole's dark band perpendicular to the tool appears for free.
+    const pot = Math.abs(potentialAt(p));
     if (pot < 0.06) return; // magnitude floor — no dim grid
     // density falls with magnitude (spec §3): stochastic rejection — full near the collar, a few strokes on the
     // far wall; without it every lattice point survived and the far field read as an LED carpet (round 3)
@@ -180,8 +205,8 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nuniform vec3 uColor;\nvarying float vI;')
       .replace('#include <color_fragment>', `#include <color_fragment>
-        diffuseColor.rgb = uColor * (0.08 + 1.6 * vI); // low-intensity strokes carry no constant floor
-        diffuseColor.a = min(1.0, vI * 1.1);`);
+        diffuseColor.rgb = uColor * (0.06 + 1.15 * vI); // low-intensity strokes carry no constant floor
+        diffuseColor.a = min(0.40, vI * 0.46);           // spec §3: <= 40 % alpha at peak, additive fill capped`);
   };
 
   const mesh = new THREE.InstancedMesh(geom, mat, Math.max(1, count));

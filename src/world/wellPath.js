@@ -62,6 +62,18 @@ function bendPoint(a, b, f, side) {
 // sliced cylinder from any off-normal angle — including the chapter-2 close-up and its ±0.3 rad orbit. So a
 // tool anchored on the face run rides the PROUD half of the string it is inside: +0.045 in z puts its 0.05 OD
 // between the casing's centreline and its outer wall — whole, visible, still inside the pipe.
+// Where the PUMP lands on the cased string, as a curve parameter. ONE source of truth (round 13): chapter 4
+// (toolViz) and chapter 6 (wellBuilder + the forwarded PNG in ui/fit.js) each restated their own number, so the
+// same well showed the pump in the vertical at Deployment and at 61.5° / 90.8° at Fit.
+//   MEASURED on the authored `cased` curve (angle from vertical of the tangent):
+//     0.20 → 5.1°, y = -1.24   |   0.27 → 17.8°, y = -1.69   |   0.31 → 34.4°, y = -1.92
+// WCSB heavy-oil PCP and rod installs land the pump in the vertical or a low-angle tangent above the KOP, so
+// both chapter-6 bands sit there and BRACKET the chapter-4 datum — scrolling Deployment → Fit no longer moves
+// the pump on the same well. (The retired values 0.42 = 61.5° and 0.96 = 90.8° put a PCP in the build and in
+// the landed lateral respectively; nobody runs either.) The standoff line at 0.9 is the COLLAR's datum, not a
+// pump landing datum — the two are no longer coupled in copy.
+export const PUMP_U = { shallower: 0.20, datum: 0.27, deeper: 0.31 };
+
 export const TOOL_FACE_BIAS = 0.045;
 // The same argument on the bench: the open-hole bores are drawn as slots sunk past half, so a tool anchored on
 // a bore centreline would be half in the floor. It rides the proud half of its own bore.

@@ -7,7 +7,7 @@
 // run in a post-update hook wrapped around island.update so nothing fights the conductor's channels.
 import * as THREE from 'three';
 import { TOOL_LENGTH } from './wellfiTool.js';
-import { RADII } from './wellPath.js';
+import { RADII, PUMP_U as PUMP_BANDS } from './wellPath.js';
 import { mergeIndexed } from './forest.js';
 
 export const SAND = '#e8dcc8';
@@ -17,12 +17,13 @@ export const FLOW_STEP = '#f0e6d2'; // "one step" lighter than the sand default
 
 // Instrument on the part of the cased string that rides the FRONT FACE (z ≥ 5): below that the string is buried
 // in rock and the level marker leaves the casing (round 4). Pump-off is AT the pump.
-// Round 9 (engineering truth): the pump sat at u = 0.42, which on the authored cased curve is 74° from vertical —
-// three quarters of the way through the build. WCSB heavy-oil PCP and rod installs land the pump in the vertical
-// or a low-angle tangent above the KOP, so it moves up to u = 0.27 (≈ 27°, still on the front face at z = 5.0).
-// The instrument's travel shortens with it; the level captions gain by sitting closer together.
+// Round 9 (engineering truth): the pump sat at u = 0.42, which on the authored cased curve is past the KOP.
+// WCSB heavy-oil PCP and rod installs land the pump in the vertical or a low-angle tangent above it, so it
+// moves up to the datum (u = 0.27, measured 17.8° from vertical, still on the front face at z = 5.0).
+// Round 13: that datum now lives in wellPath.js and chapter 6's two bands bracket it, so the pump does not
+// move on the same well when the visitor scrolls from Deployment to Fit.
 const FLUID_U = { above: 0.14, pumpOff: 0.26 };
-const PUMP_U = 0.27;
+const PUMP_U = PUMP_BANDS.datum;
 
 export function createToolViz(world) {
   const { island, camera, rig, scene } = world;

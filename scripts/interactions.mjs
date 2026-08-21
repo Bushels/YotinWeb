@@ -4,7 +4,8 @@
 //
 //   node scripts/interactions.mjs [--url http://localhost:5174/?world=1] [--out scratch/frames] [--w 1366 --h 768]
 //
-// Frames: tool-orbit, signal-nodiff / signal-closed (Commission the well), deploy-xray, deploy-pumpoff (fluid at pump-off),
+// Frames: tool-orbit, signal-nodiff / signal-closed / acquire-settled (Commission the well), deploy-xray,
+// deploy-pumpoff (fluid at pump-off), ch5-facts (the operator row below the chapter-5 fold),
 // fit-strong (PCP · heavy · 100–150 °C · 1000 m · shallower · within 3 months), fit-review (rod pump · light ·
 // under 100 · 1000 m · deeper · 3–12 months), fit-future (above 150 °C).
 import { chromium } from 'playwright';
@@ -74,6 +75,11 @@ await page.waitForFunction(() => document.querySelector('[data-step="03"]').data
 await page.waitForTimeout(1400); // the digit settle finishes (1300 ms cubic-out)
 await centreCard();              // clickTwin centred the button; both signal frames belong on the same mark
 await shot('signal-closed', 'Commissioned: receiver planted on the footprint, loop drawn to the wellhead, 03 ticked itself, digits settled and MODBUS RS-485 / 4-20 mA revealed beneath');
+// The SETTLED acquisition, framed on the readout rather than the checklist: the chapter-3 values have to be
+// auditable against chapter 4's pump-off readout, and the signal-closed mark crops them below the fold.
+await page.evaluate(() => { const r = document.querySelector('[data-readout]'); if (r) r.scrollIntoView({ block: 'center', behavior: 'instant' }); window.__yotinWorld.conductor.jumpTo(); });
+await page.waitForTimeout(700);
+await shot('acquire-settled', 'Post-placement settled state, readout centred: three representative values, their chips, and the surface-output line');
 await clickTwin('[data-commission-reset]');
 await page.waitForTimeout(400);
 
@@ -84,6 +90,13 @@ await shot('deploy-xray', 'X-ray on: tubing ghosted, collar + sensor package rea
 await clickTwin('[data-hotspot="xray"]');
 await setRange('[data-hotspot="fluid-level"]', 96);
 await shot('deploy-pumpoff', 'Fluid level dragged to pump-off: pump warms, line + "earlier" ghost');
+
+// 3b) Chapter 5: the operator facts below the fold. The chapter anchor frames the thesis and the etymology;
+//     the ident, the location and the marks row sit under it and were never in the review envelope.
+await gotoChapter(5);
+await page.evaluate(() => { const m = document.querySelector('.company-marks') || document.querySelector('.company-copy'); if (m) m.scrollIntoView({ block: 'center', behavior: 'instant' }); window.__yotinWorld.conductor.jumpTo(); });
+await page.waitForTimeout(700);
+await shot('ch5-facts', 'Chapter 5 below the fold: ident, Pierceland location and the three operator marks');
 
 // 4) Fit: run the qualifier three ways (state is normalised — no free text reaches the world)
 async function runQualifier(answers, name, note) {
