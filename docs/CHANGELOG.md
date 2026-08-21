@@ -6,8 +6,7 @@ each era. Companion docs: the authoritative spec
 (`docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`), the effort study
 (`docs/effort-evaluator-2026-08-19.md`), and the dated handover notes in `docs/`.
 
-**Status:** all work is on local `master` — nothing pushed; production (yotin-energy.vercel.app)
-still serves the old static site. Launch blocker: the brand-architecture paragraph (Kyle, spec §14).
+**Status: LIVE.** Deployed to production 2026-08-21 (commit 42423f7, deployment READY on yotin-energy.vercel.app and yotinenergy.com) — the three.js world build replaced the old static site after 15 critique rounds. Remaining post-launch items: Cree language review of the yôtin passage (§14), real-device mobile audit, ChatFi broad-promotion gates (README).
 
 ---
 
