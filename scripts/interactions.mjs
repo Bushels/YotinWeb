@@ -88,7 +88,8 @@ await gotoChapter(4);
 await clickTwin('[data-hotspot="xray"]');
 await shot('deploy-xray', 'X-ray on: tubing ghosted, collar + sensor package read through, figure in its x-ray colour');
 await clickTwin('[data-hotspot="xray"]');
-await setRange('[data-hotspot="fluid-level"]', 96);
+await setRange('[data-hotspot="fluid-level"]', 100); // the END STOP — round 15: at 96 the settled readout printed 392 kPa (the exactly-correct interpolation) and the frame was mistaken for a wrong pump-off value; the demonstration endpoint is 300 kPa at 100
+await page.waitForTimeout(500); // outlast the 400 ms readout debounce so the frame carries the settled endpoint
 await shot('deploy-pumpoff', 'Fluid level dragged to pump-off: pump warms, line + "earlier" ghost');
 
 // 3b) Chapter 5: the operator facts below the fold. The chapter anchor frames the thesis and the etymology;

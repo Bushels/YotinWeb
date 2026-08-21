@@ -72,7 +72,7 @@ html.stills-on .contact-grid > div { position: relative; }
 html.stills-on .section-intro::before,
 html.stills-on .insight-head::before,
 html.stills-on .drill-fallback-head::before,
-html.stills-on .contact-grid > div:first-child::before {
+html.stills-on .contact-grid > div::before {
   content: "";
   position: absolute;
   inset: -24px -28px;
