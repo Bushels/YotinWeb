@@ -43,6 +43,23 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 7 — round 15: convergence (2026-08-21)
+
+The final confirmation round. **Truth voted STOP at 8.6** — "Fifteen rounds in, there is not a
+single figure on this page that contradicts another figure on this page. That is rarer than it
+sounds." **Grok voted STOP at 8.5 with zero findings.** Craft 8.3 found exactly one new P1 (a
+:first-child token on the stills path); Codex 8.4's three P1s all resolved as stale-spec or
+capture-harness items, not site defects — including its 392-kPa claim, which truth independently
+proved was the exactly-correct interpolation at the slider position the capture parked on.
+
+- **93e55d5** — the closure: one token deleted (stills ch6 lede ground, 3.4:1 → 7.9:1), the
+  pump-off capture drives to its end stop, and the spec caught up with its own site (§0 geology
+  lock → the round-11 corrected labels; §4 mobile sub-ledger → the round-11 CTA removal).
+- Score trajectory across the loop: 4.0/4.5/5.5 (round 1) → 7.5/6.5/7.8 (round 8) → 8.2–8.6
+  (round 9) → 6.5–7.8 (round 13, new surfaces) → 8.3–8.6 with two stop votes (round 15).
+- **The loop is converged.** Remaining before deploy is Kyle's, not the critics': the §14
+  decisions (Cree language review foremost), the real-device mobile audit, and the push.
+
 ## Era 6 — round 14: the confirmation panel and Grok's first stop vote (2026-08-21)
 
 Five critics re-verified rounds 13-fix + 14a. **Grok voted STOP at 8.2** — the first stop of the
