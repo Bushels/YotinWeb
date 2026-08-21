@@ -231,13 +231,18 @@
         var e = entries[i];
         if (!e.isIntersecting) continue;
         // Fire when the grid is genuinely BEING LOOKED AT, not when its top edge clips the bottom of the
-        // window: 60 % of it visible, or — for a grid taller than the window, where that ratio may never be
-        // reached — once its top has climbed above 68 % of the viewport. Measured before/after: the old gate
-        // fired with the grid's top at y = 810 of 900 (a 90-px sliver at the very bottom of the screen and the
-        // whole entrance over before it rose); this one fires with the top at ~610 and roughly 290 px of grid
-        // on screen. The thresholds are every 10 % so the callback is dense enough for the top-edge test to
-        // catch its crossing on any scroll speed.
-        if (e.intersectionRatio < 0.6 && e.boundingClientRect.top > window.innerHeight * 0.68) continue;
+        // window: 45 % of it visible, or — for a grid taller than the window, where that ratio may never be
+        // reached — once its top has climbed above 68 % of the viewport. Measured before/after: the original
+        // gate fired with the grid's top at y = 810 of 900 (a 90-px sliver at the very bottom of the screen and
+        // the whole entrance over before it rose); the ratio gate replaced it. Round 17 lowered the ratio from
+        // 0.6 to 0.45 because on a phone (440 × 956, where the grid is one column) 0.6 was still late: an empty
+        // bordered container stood on screen for a 188 px band of scroll before firing (measured, 4-px steps,
+        // settled). At 0.45 the fire point moves from grid-top 768 px to 800 px, capping the blank strip at
+        // 156 px — and 45 % of the grid
+        // is still a grid being looked at, not the 19-px sliver a top-edge gate would fire on (round-14a bug
+        // class). The thresholds are every 10 % so the callback is dense enough for the top-edge test to catch
+        // its crossing on any scroll speed.
+        if (e.intersectionRatio < 0.45 && e.boundingClientRect.top > window.innerHeight * 0.68) continue;
         io.disconnect();
         enter();
         return;

@@ -6,7 +6,7 @@ each era. Companion docs: the authoritative spec
 (`docs/superpowers/specs/2026-08-19-yotin-threejs-world-design.md`), the effort study
 (`docs/effort-evaluator-2026-08-19.md`), and the dated handover notes in `docs/`.
 
-**Status: LIVE.** Deployed to production 2026-08-21 (commit 42423f7, deployment READY on yotin-energy.vercel.app and yotinenergy.com) — the three.js world build replaced the old static site after 15 critique rounds. Remaining post-launch items: Cree language review of the yôtin passage (§14), real-device mobile audit, ChatFi broad-promotion gates (README).
+**Status: LIVE.** Deployed to production 2026-08-21 (commit 42423f7, deployment READY on yotin-energy.vercel.app and yotinenergy.com) — the three.js world build replaced the old static site after 15 critique rounds. Cree review closed (the passage stands). Remaining post-launch items: Kyle's on-device confirmation of rounds 16–17, ChatFi broad-promotion gates (README), GA4/Clarity scroll-map watch (~1 week).
 
 ---
 
@@ -41,6 +41,53 @@ preferences — each one exists because breaking it produced a measured defect.
     coordinates) and adversarially verified before anything is fixed.
 
 ---
+
+## Era 8 — round 17: the Gemini lane verified, the fixed-overlay class closed (2026-08-21, session 3)
+
+First different-model-family audit (Gemini 3.7 in Antigravity, Lane B of the mobile-audit
+protocol) went through the same law as every critic: adversarial verification before any fix.
+Two Opus verifiers — browser reproduction at 440×956 with the damped camera polled to a stop
+before every capture, and a source-analysis pass writing implementer-ready fixes. Of its 13
+findings: **3 refuted, 10 confirmed** (most re-severitied downward), one genuine P0.
+
+- **Refuted as harness bugs, again**: its P0 "ch2 tool desync / black void" died on a 1.7 px
+  measurement — tool at the Inspect station projects to 672.7 px after settle vs round-16's
+  authored 671. Instant-scroll captures of a damped camera, the exact round-15 class; its
+  header-clipping and Benefits-ghosting claims died the same way (no authored rest shows either).
+- **The P0 was real and worse than reported**: the pump-off `.surface-caption` clamped itself
+  over ~1,750 px of scroll — across Benefits and the FAQ, rendering the first question illegible
+  on production. Fixed by the round-14 rule it had never been given: a label over the wrong thing
+  hides rather than clamps (own `#benefits`/`#faq` rect in toolViz — deliberately NOT unioned
+  into sideRect, which would have hidden the level chips everywhere).
+- **Root cause the audit missed** (fit chip on live copy): the round-14 stand-down only ran on
+  scroll events and was never re-evaluated once entrances/camera settled — a synthetic scroll at
+  rest flipped it correctly, proving the predicate right and merely stale. Debounced re-check +
+  `world:progress` hook, and the union gains `.signal-step`, `.portal-note`, `.tool-inspect`,
+  `dt/dd`, spec tiles (containers, not text children — elementsFromPoint returns ancestors).
+- The rest of the batch, all measured: ChatFi launcher stands down while the verdict action row
+  is on screen (the implementer DISPROVED the verifier's one-shot observer by experiment — the
+  verdict re-renders per completion, so the observer re-arms per `qualifier:state`); the fit
+  chip's own tap now lands at the authored qualifier arrival (9605 vs 9355 — was 0 of 4 options
+  visible); coarse-pointer orbit hint ("tap Close to exit"); Inspect capsule hugs its button
+  (59 % of the row reclaimed); spec-tile entrance ratio 0.6 → 0.45 (blank approach band 188 →
+  156 px, measured A/B — the top-edge alternative was rejected as the round-14a sliver-fire
+  class); hero chips clear the 956 fold (953.5, was 963.5); fluid-slider end labels arrive above
+  the fold (946.1, was 970.1) with the ch4 composition byte-identical; header tagline crossfades
+  at 220 ms instead of popping.
+- Gates: 156/156 tests, budget, colour (pose-fingerprint), rm, scroll, runtime
+  (67 calls / 101,650 tris desktop · 53 / 39,926 phone) — all PASS, exit codes re-run by the
+  orchestrator before commit.
+- **Lesson (the class now has a name)**: persistent fixed-position overlays — projected captions,
+  launchers, CTA chips — had stand-down rules scoped to the surfaces that existed when they were
+  written, and nothing ever extended them to sections that later scroll underneath. When adding a
+  fixed transient: enumerate everything that can ever pass beneath it, and re-evaluate its
+  visibility AT REST, not only mid-gesture.
+- Flagged, not fixed: the conductor's cached anchors drift ~55 px from the live rule as the
+  document settles (CONTENTS/harness arrivals land high); at 390×844 the hero chips and the whole
+  ch4 control block sit below that fold (pre-existing, larger than the 440×956 items closed
+  here); the launcher's rest state at page top is opacity 0 with no state classes (do not read
+  that as stand-down evidence); the physics-sources gate reads a "440 × 956" viewport in a
+  src/ui comment as an unsourced figure product.
 
 ## Era 7 — round 15: convergence (2026-08-21)
 

@@ -159,6 +159,28 @@ export function mountRail() {
   fit.href = '#contact';
   fit.textContent = 'Check your well fit';
   rail.appendChild(fit);
+  // Round 17: a plain hash jump lands on #contact's own top, which on a phone is 205 px SHORT of the arrival the
+  // conductor authors for the last chapter (conductor.js:26-29 — docTop([data-anchor-focus]) − headerH, the
+  // arrival CONTENTS uses). Measured on a 440-wide phone: the hash jump rests at 9355 with Q1 on the fold and none of
+  // its four options visible; the authored anchor rests at 9560 with Q1 and two options above the fold.
+  // scroll-margin cannot push an arrival DOWN, so the activation is intercepted — the href stays for no-JS and
+  // for the keyboard/AT semantics of a real link, and reduced motion jumps instead of gliding.
+  const headerH = () => { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')); return Number.isFinite(v) ? v : 72; };
+  const authoredContactY = () => {
+    const focus = document.querySelector('#contact [data-anchor-focus]');
+    if (!focus || window.innerWidth >= 1100) return null;
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    return Math.min(max, focus.getBoundingClientRect().top + (window.scrollY || 0) - headerH());
+  };
+  fit.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    const y = authoredContactY();
+    if (y == null) return;
+    e.preventDefault();
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+    if (history.replaceState) history.replaceState(null, '', '#contact');
+  });
   let fitOn = null, atQualifier = false, fitShy = null;
   // Round 14: at 390 the chip is a fixed overlay and the chapters scroll under it — in chapters 3, 4 and 5 it
   // came to rest on live copy and on the interactive cards (commissioning step 03's body, the CH-03 card, the
@@ -166,7 +188,10 @@ export function mountRail() {
   // chip stands down while something readable is beneath it and comes back the moment it clears — the same
   // "a label over the wrong thing hides rather than clamps" rule the world captions use. Five hit tests per
   // scroll frame, no rect sweep over the document.
-  const SHY_UNDER = 'p, li, h1, h2, h3, h4, button, a, input, label, summary, .channel-card, .commission-step, .deploy-controls, .device-banner';
+  // Round 17: the union was missing the badge/portal/spec containers, so the chip came to rest ON the
+  // signal strip's "03" step and on the spec grid's first tile. Containers, not their text children —
+  // elementsFromPoint returns ancestors, so a container entry covers its icon rows and padding bands too.
+  const SHY_UNDER = 'p, li, h1, h2, h3, h4, button, a, input, label, summary, dt, dd, .channel-card, .commission-step, .deploy-controls, .device-banner, .signal-step, .portal-note, .tool-inspect, .spec-grid > div';
   const fitOccluded = () => {
     if (!fit.isConnected || getComputedStyle(fit).display === 'none') return false;
     const r = fit.getBoundingClientRect();
@@ -190,11 +215,19 @@ export function mountRail() {
     }
   };
   let fitTicking = false;
+  // Round 17: the per-rAF test alone is STALE by the time the page comes to rest — entrances land and the
+  // damped camera settles AFTER the last scroll frame, so a chip that cleared its ground mid-scroll could
+  // come to rest on live copy and never re-test. Two additions: a debounced re-check ~250 ms after the last
+  // scroll event, and the same sync from world:progress so a settling camera or an entrance re-tests it.
+  let fitSettle = 0;
+  const armFitRecheck = () => { clearTimeout(fitSettle); fitSettle = setTimeout(syncFit, 250); };
   window.addEventListener('scroll', () => {
+    armFitRecheck();
     if (fitTicking) return;
     fitTicking = true;
     requestAnimationFrame(() => { fitTicking = false; syncFit(); });
   }, { passive: true });
+  document.addEventListener('world:progress', armFitRecheck);
   const contact = document.querySelector('#contact');
   if (contact && typeof IntersectionObserver === 'function') {
     new IntersectionObserver((entries) => {

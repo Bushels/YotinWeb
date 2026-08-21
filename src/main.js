@@ -49,6 +49,32 @@ if (gate.world) {
   }
 }
 
+// Round 17: the launcher is fixed bottom-right at 60 px (styles.css:1827) and the verdict's action row is a
+// column of FULL-WIDTH buttons on a phone (styles.css:1329-1330), so one of Send / Copy summary / Download
+// schematic comes to rest under it and the corner tap opens ChatFi instead. Same rule the fit chip already
+// follows (src/ui/rail.js:198-205) — the persistent CTA stands down while the thing it would cover is on
+// screen — but narrowed to the action row, because ChatFi is still a live path at the qualifier itself.
+// Deliberately OUTSIDE the `if (gate.world)` block: the verdict row and the launcher both exist on the
+// stills path. The verdict block is re-created on every completion (main.js:1026, after a restart), so the
+// observer is re-armed per verdict rather than once — a node observed on the first pass is detached by the
+// second and would leave the launcher permanently standing down (or never standing down again).
+{
+  const launcher = document.querySelector('.chatfi-launcher');
+  if (launcher && typeof IntersectionObserver === 'function') {
+    let io = null;
+    document.addEventListener('qualifier:state', (e) => {
+      if (io) { io.disconnect(); io = null; launcher.classList.remove('is-standing-down'); }
+      if (!e.detail || e.detail.step !== 'verdict') return;
+      const actions = document.querySelector('.qualifier-verdict .qualifier-actions');
+      if (!actions) return;
+      io = new IntersectionObserver((entries) => {
+        launcher.classList.toggle('is-standing-down', entries.some((en) => en.isIntersecting));
+      }, { rootMargin: '0px 0px -8% 0px' });
+      io.observe(actions);
+    });
+  }
+}
+
 if (gate.world) {
   import('./boot.js').then(({ bootWorld }) => bootWorld()).catch((err) => {
     document.documentElement.classList.remove('world-on');

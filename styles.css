@@ -154,7 +154,9 @@ a { color: inherit; text-decoration: none; }
 }
 .brand-lockup { display: flex; flex: none; }
 .brand-mini img { height: 44px; width: auto; flex: none; }
-.brand-mini-copy { display: flex; flex-direction: column; align-items: flex-start; padding-left: 12px; border-left: 1px solid var(--line); }
+/* Round 17: the header shrinks over 220ms while the tagline's opacity flipped instantly at scrollY 44 — the
+   parent moved smoothly and the tagline popped. Same 220ms/--ease as the header's own transitions. */
+.brand-mini-copy { display: flex; flex-direction: column; align-items: flex-start; padding-left: 12px; border-left: 1px solid var(--line); transition: border-color 220ms var(--ease), padding-left 220ms var(--ease); }
 .brand-mini-copy small {
   margin: 0;
   color: var(--sand-mute);
@@ -162,6 +164,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 10px;
   line-height: 1;
   letter-spacing: 0.04em;
+  transition: opacity 220ms var(--ease);
 }
 /* First paint only (Kyle, round 11): the wind strokes wipe in left-to-right — the direction the mark reads —
    and the wordmark and tagline follow. Time-based, one shot, no idle loop, done in 900 ms. It is a pure CSS
@@ -1785,6 +1788,10 @@ html.stills-on .brand-mini-copy small { animation: none; }
   .hero-copy { width: 100%; max-width: 560px; }
   .hero-message h1 { font-size: clamp(46px, 12.5vw, 62px); }
   .hero-lede { max-width: 100%; font-size: 16px; }
+  /* Round 17: at 440 × 956 the last chip row's bottom measured 963.5 — a 7.5 px slice of the third proof
+     hanging below the fold at y = 0. Ten pixels off the gap above the chips (30 → 20) clears it with margin
+     without collapsing the breathing the row carries for the departed CTA pair. */
+  .proof-chips { margin-top: 20px; }
   .hero-scene { width: 1000px; right: -300px; }
   /* On narrow screens the copy sits over the middle of the art, so the scrim
      becomes a vertical wash instead of a side wash. Kept lighter through the
@@ -1827,6 +1834,8 @@ html.stills-on .brand-mini-copy small { animation: none; }
   .chatfi-launcher { width: 60px; min-width: 60px; height: 60px; padding: 0; right: 16px; bottom: 16px; }
   /* yields while reading downward so it never sits on the copy it would cover (round 3) */
   html[data-scroll-dir="down"] .chatfi-launcher:not([aria-expanded="true"]) { opacity: 0; pointer-events: none; transform: translateY(12px); }
+  /* stands down while the verdict's action row is on screen (round 17) */
+  .chatfi-launcher.is-standing-down { opacity: 0; pointer-events: none; transform: translateY(12px); }
   /* Use the real available height rather than a fixed cap — --chatfi-vh is
      kept in sync with visualViewport so the panel rides above the keyboard. */
   .chatfi-panel {

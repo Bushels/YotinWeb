@@ -2,9 +2,16 @@
 
 Received from Kyle; audited at iPhone 17 Pro Max geometry (440×956 @3x) with its own capture
 scripts (26 continuous-scroll frames + 12 interaction states). Overall score 7.4/10.
-STATUS: **unverified** — every finding goes through adversarial verification before any fix
-(see docs/handover-2026-08-21-post-launch.md §2 for the per-finding verification notes,
-including the suspicion that its P0#1 is its own capture-settle harness bug).
+STATUS: **verified 2026-08-21 (round 17)** — two adversarial verifiers (browser reproduction at
+440×956 with damped-camera settle + source analysis). **10 confirmed → fixed in round 17; 3
+refuted.** Verdicts per finding are inline below; the full story is CHANGELOG Era 8.
+
+Verdict key: P0#1 REFUTED (tool at 672.7 px after settle vs round-16's 671 — mid-flight
+capture, the round-15 harness class) · P0#2 CONFIRMED P0, worse than reported (~1,750 px of
+caption-over-copy; fixed) · P1#3 PARTIAL→P2 (scroll-up state only; fixed) · P1#4 CONFIRMED→P3
+(fresh-load approach band; fixed) · P1#5 REFUTED (no authored rest clips) · P1#6 CONFIRMED P1
+(+ a root cause the audit missed: the stand-down never re-evaluated at rest; fixed) · P2#7–#9
+CONFIRMED (fixed) · P2#10 REFUTED (entrance mid-flight) · P3#11–#13 CONFIRMED (fixed).
 
 ## Its ranked findings (condensed)
 

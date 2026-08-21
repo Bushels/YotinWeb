@@ -387,6 +387,19 @@ export function createToolViz(world) {
         ? { left: Math.min(sideRect.left, r.left), top: Math.min(sideRect.top, r.top), right: Math.max(sideRect.right, r.right), bottom: Math.max(sideRect.bottom, r.bottom) }
         : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
     }
+    // Round 17: the surface caption is position:fixed and lives on the WHOLE of chapter 4's progress span
+    // (deployment.js:12, [3.6, 4.998]) — which on a phone includes #benefits and the FAQ, both of which
+    // scroll under it. Same round-14 rule as the side chips: a label over the wrong thing hides rather
+    // than clamps. Own rect, because these are full-width surfaces and unioning them into sideRect would
+    // hide the level chips everywhere.
+    let copyRect = null;
+    for (const el of document.querySelectorAll('#benefits, #faq')) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom <= 0 || r.top >= window.innerHeight) continue;
+      copyRect = copyRect
+        ? { top: Math.min(copyRect.top, r.top), bottom: Math.max(copyRect.bottom, r.bottom) }
+        : { top: r.top, bottom: r.bottom };
+    }
     for (const cap of [surfaceCaption, standoffCaption, levelCaption, earlierCaption]) {
       if (!cap) continue;
       rig.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
@@ -425,6 +438,11 @@ export function createToolViz(world) {
         continue;
       }
       const cx = Math.min(maxX, Math.max(minX, x)), cy = Math.min(maxY, Math.max(minY, y));
+      if (cap === surfaceCaption) {
+        const overCopy = !!copyRect && cy > copyRect.top - 8 && cy < copyRect.bottom + 8;
+        el.style.visibility = overCopy ? 'hidden' : '';
+        if (overCopy) continue;
+      }
       el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px) translate(-50%, -100%)`;
       el.classList.toggle('is-clamped', cx !== x || cy !== y);
     }

@@ -135,6 +135,10 @@ export function mountTool() {
 
     // Inspect tool — the invited action: contained orbit; pose persists until Close / Esc.
     let orbitOn = false, armed = false, dragging = false, lastX = 0, lastY = 0;
+    // Round 17: "Esc closes" is an instruction a phone cannot follow. Evaluated per OPEN, not per load, so a
+    // paired keyboard / a device that changes pointer class mid-session gets the right line — and the Escape
+    // handler below stays unconditional either way.
+    const coarse = () => Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
     function openOrbit(source) {
       if (orbitOn) return;
@@ -145,7 +149,7 @@ export function mountTool() {
       inspectBtn.setAttribute('aria-pressed', 'true');
       if (foot) foot.hidden = false;
       if (closeBtn) closeBtn.hidden = false;
-      if (hint) hint.hidden = false;
+      if (hint) { hint.textContent = coarse() ? 'drag to rotate · tap Close to exit' : 'drag to rotate · Esc closes'; hint.hidden = false; }
       if (source === 'key') closeBtn && closeBtn.focus({ preventScroll: true });
     }
     function closeOrbit() {
