@@ -120,7 +120,6 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600;
   letter-spacing: 0.2em;
 }
-.eyebrow-ink { color: var(--ember-ink); }
 
 .section-head h2 span,
 .contact-section h2 span { color: var(--ember); }
@@ -956,59 +955,77 @@ html.stills-on .brand-mini-copy small { animation: none; }
   line-height: 1.7;
 }
 
-.company-section { padding: clamp(88px, 9vw, 150px) 0; background: var(--paper); color: var(--ink); }
-.company-grid { display: grid; grid-template-columns: 1fr 0.92fr; gap: clamp(50px, 8vw, 130px); align-items: start; }
+/* Chapter 5 — "Windbreak" (round 13b). The section carries no panel any more: on the world and stills paths it
+   is transparent and each block of copy is grounded by its own feathered wash (src/styles/world.css,
+   src/styles/stills.css), so the golden-hour pad, the wind and the swaying trees stay visible at full strength in
+   the right ~54 %. Only the no-JS path has nothing behind the copy, so there the section is simply dark like its
+   neighbours. Palette is sand/ember on the world, never ink on paper. */
+.company-section { padding: clamp(88px, 9vw, 150px) 0 clamp(40px, 5vw, 64px); background: var(--deep); color: var(--white); }
+.company-grid { display: block; }
+/* The ch. 0 hero measure, which is the column every review round has praised. */
+.company-col { width: min(620px, 52vw); }
 .company-section h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(44px, 5.6vw, 84px);
+  font-size: clamp(42px, 5.2vw, 76px);
   line-height: 0.98;
   letter-spacing: -0.06em;
+  color: var(--sand);
 }
-.company-section h2 em { color: var(--ember-ink); font-style: italic; }
+.company-section h2 em { color: var(--ember); font-style: italic; }
 
-/* Ownership badge sits directly under the name, where it carries most. */
+/* Identity first: the eyebrow and the ownership seal on one line, above the name. The seal is a hairline chip
+   with no fill — a filled pill over the world reads as a button, and this is a statement, not a control. */
+.company-ident { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin: 0 0 20px; }
+.company-ident .eyebrow { margin: 0; }
 .company-badge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin: 26px 0 0;
-  padding: 11px 20px;
-  border: 1px solid rgba(159, 71, 13, 0.3);
+  gap: 9px;
+  padding: 7px 15px;
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(242, 118, 34, 0.09);
-  color: var(--ember-ink);
+  background: none;
+  color: var(--sand);
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.company-badge i { font-size: 19px; }
+.company-badge i { color: var(--ember); font-size: 18px; }
 
-.company-copy { padding-top: 30px; }
-.company-copy > p { margin: 0 0 22px; color: #46545d; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.72; }
-/* The name's meaning is the lead thought now, so it carries more weight. */
+.company-copy { padding-top: 26px; }
+.company-copy > p { margin: 0 0 20px; color: var(--sand); font-size: clamp(17px, 1.4vw, 20px); line-height: 1.7; }
+/* The name's meaning is the lead thought, so it carries more weight — and at ≥ 24 px it is WCAG large text,
+   which is what lets its ground stay a light wash instead of a panel. */
 .company-copy > p.company-lede {
-  color: var(--ink);
+  color: var(--white);
   font-size: clamp(19px, 1.7vw, 24px);
   line-height: 1.6;
   letter-spacing: -0.01em;
 }
-.company-copy em { color: var(--ink); font-style: italic; }
-.company-copy .location { display: flex; align-items: center; gap: 10px; margin-top: 34px; color: var(--ember-ink); font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; }
-.company-copy .location i { font-size: 21px; }
+.company-copy em { color: var(--white); font-style: italic; }
+/* Sand, not ember: at body scale the location line is the one block that rides up into the lit treeline as
+   the chapter scrolls (measured 2.92:1 in ember there, 7.2:1 in sand), and §0's one-candle rule already wants
+   ember reserved for the eyebrow and the `yôtin` italic in this chapter. The pin keeps the ember. */
+.company-copy .location { display: flex; align-items: center; gap: 10px; margin: 26px 0 0; color: var(--sand); font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; }
+.company-copy .location i { color: var(--ember); font-size: 21px; }
 
-.company-marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 40px; }
+/* The three facts, de-carded: a bare row at the foot of the chapter, hairlines instead of boxes, sitting on the
+   darkened treeline under one long bottom-edge gradient (world.css / stills.css). */
+.company-marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: clamp(56px, 7vw, 96px); }
 .company-mark {
-  padding: 20px;
-  border: 1px solid rgba(23, 34, 44, 0.14);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.5);
+  padding: 22px clamp(18px, 2vw, 30px) 4px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
 }
-.company-mark i { color: var(--ember-ink); font-size: 26px; }
-.company-mark strong { display: block; margin: 12px 0 4px; font-family: var(--font-display); font-size: 15px; }
-.company-mark span { color: #5c6971; font-size: 13.5px; line-height: 1.5; }
+.company-mark:first-child { border-left: 0; padding-left: 0; }
+.company-mark i { color: var(--ember); font-size: 26px; }
+.company-mark strong { display: block; margin: 12px 0 5px; color: var(--sand); font-family: var(--font-display); font-size: 16px; }
+.company-mark span { color: var(--sand-mute); font-size: 14px; line-height: 1.5; }
 
 /* ==========================================================================
    Contact
@@ -1667,7 +1684,10 @@ html.stills-on .brand-mini-copy small { animation: none; }
 }
 
 @media (max-width: 900px) {
-  .company-marks { grid-template-columns: 1fr; }
+  .company-marks { grid-template-columns: 1fr; margin-top: clamp(40px, 8vw, 64px); }
+  /* Stacked, the hairline runs between the rows rather than between the columns. */
+  .company-mark { padding: 16px 0 4px; border-left: 0; border-top: 1px solid var(--line); }
+  .company-mark:first-child { border-top: 0; padding-top: 0; }
 }
 
 @media (max-width: 820px) {
@@ -1737,12 +1757,13 @@ html.stills-on .brand-mini-copy small { animation: none; }
   .signal-step:nth-child(3) .signal-icon { animation-range: cover 0% cover 30%; }
 
   .portal-note { grid-template-columns: 1fr; gap: 16px; padding: 22px; }
-  .section-intro, .company-grid, .contact-grid { grid-template-columns: 1fr; gap: 38px; }
+  .section-intro, .contact-grid { grid-template-columns: 1fr; gap: 38px; }
   .section-intro .eyebrow { grid-column: auto; }
   .channel-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .channel-grid { grid-template-columns: repeat(2, 1fr); }
   .spec-grid { grid-template-columns: repeat(2, 1fr); }
-  .company-copy { padding-top: 0; }
+  .company-col { width: 100%; }
+  .company-copy { padding-top: 4px; }
   .drill-fallback ul { grid-template-columns: 1fr; }
   .footer-inner { grid-template-columns: 1fr; }
   /* Footer links are the smallest targets on the page; give them a real

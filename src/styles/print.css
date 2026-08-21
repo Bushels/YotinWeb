@@ -27,8 +27,13 @@
   details.faq-item:not([open]) > p { display: block !important; }
   .channel-grid, .drill-fallback ul, .company-marks { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6mm; }
   .channel-card, .spec-grid > div, .drill-fallback li, .company-mark, .portal-note, .commission-card, .readout { background: none !important; border: 1px solid #bbb !important; color: #111 !important; }
-  .company-section { color: #111 !important; }
-  .company-section .company-grid { background: none !important; }
+  /* Chapter 5 prints as ink on paper. Since round 13b the section is sand/ember over the world, and those are
+     declarations on the elements themselves — `section { color: #111 !important }` above only covers what
+     INHERITS, so each recoloured element has to be named here or it prints sand on white. */
+  .company-section p, .company-section h2 em, .company-section i,
+  .company-badge, .company-copy .location, .company-mark strong, .company-mark span { color: #111 !important; }
+  .company-badge { border: 1px solid #bbb !important; }
+  .company-col { width: 100% !important; }
   .qualifier { background: none !important; border: 1px solid #bbb !important; }
   .qualifier-stage button, .qualifier-stage input { display: none !important; }
   .signal-stage { display: block !important; }
