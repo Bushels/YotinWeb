@@ -184,7 +184,7 @@ changed that the spec did not anticipate, and which is now binding:
 
 1. **Launch blocker:** brand architecture paragraph (Yotin ↔ WellFi ↔ MPS) → ChatFi persona + JSON-LD wording.
 2. **Art-direction change to approve:** bench topology (solid slice) for the website world — the classic cavity island stays untouched on mpsgroup.energy and is available as a dev-only comparison in the spike; golden-hour opening; forest darkened ⅓.
-3. Language review of the whole yôtin passage by a fluent Plains Cree (y-dialect) speaker.
+3. ~~Language review of the whole yôtin passage by a fluent Plains Cree (y-dialect) speaker.~~ **CLOSED — Kyle, 2026-08-21, post-launch: "Cree language is fine." The passage stands as shipped.**
 4. GA4 device split + Clarity scroll depth (tunes tiers; not a build blocker).
 5. Operator-route exposure and `s/`.
 6. Confirm the local-only schematic download.
