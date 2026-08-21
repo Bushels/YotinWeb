@@ -43,6 +43,45 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 4 — Kyle's live walkthrough, rounds 11–12 (2026-08-20)
+
+The owner walked the site chapter by chapter and drove two days of fixes. Pattern: Kyle's verbatim
+intent → parallel Opus implementer batches (world @ high, copy/UI @ medium) → orchestrator
+regenerates, spot-checks, commits. Mobbin research fed the Commission-the-Well concept choice.
+
+- **7670722 (12d)** — ch3 light is a chapter-local curve (0.03 candle reveal → 0.30 dusk lease for
+  commissioning); the acquire beat becomes the show: a data pulse climbs the string (0 extra draws,
+  riding the field's return plane) and three abstract chart glyphs bloom from the wellhead (+1 draw)
+  — "binary data becoming useful charts", no fake values (tested). ch3 still now encodes at q20.
+- **afa39e8 (12c)** — Commission the Well (Kyle's pick of three Mobbin-researched concepts)
+  replaces the slider: 01 tool in the string (ships ticked) · 02 receiver on the lease (pre-lit
+  footprint, one action) · 03 reading on SCADA (an arrival). One cyan moment = the signal landing.
+  Slider, V1/V2 reference cards and separation scale deleted; spatial truth kept (no receiver → no
+  loop → dashes).
+- **cb52ab2** — the "phone cyan leak" was LCD subpixel text antialiasing on sand glyphs, not the
+  world; the capture harness now runs --disable-lcd-text (gate measures the scene, not the host).
+- **1f395c9 (12b)** — the well tells the truth: shoe lands 0.13 into the top of the Lower Sand
+  (round-11's deeper-shoe fix had overshot into the mudstone — Kyle caught it), collar honest in
+  the intermediate at 28 % standoff, descent/tool/signal/fit poses re-authored by offline
+  projection, the glowing WellFi restored (ember presence that yields to the cyan), and the trees
+  answer the wind (travelling gust field, ~2° lean, zero added draws). Rail tally reads along-hole.
+- **bd51e1e (12a)** — IP-protection pass: isolation sub / antenna gap / skin-depth chip and all
+  mechanism language removed, journey copy recast as effect-language; real YOTIN ENERGY lockup in
+  the header (teal still arrives with the signal); Blender device render replaces the ch4 figure
+  (burned-in text incl. an unapproved figure cropped out); feather → seal glyph; spec-grid entrance
+  animation (glyph-assembly instead of count-up — the round-1 P0 forbids tweening through false
+  values); fluid-level readout with delta anchored to the ch3 figures.
+- **2c7c8da (11)** — hero CTAs removed, colour logomark + load animation, brighter fishbone,
+  WellFi into the intermediate (first attempt — the shoe-deeper trade round 12 corrected), and the
+  formation truth pass: Ellerslie → McMurray (Lower Mannville), Joli Fou named as the seal,
+  Clearwater Mudstone (completions-engineer verified; Kyle's strat column confirmed; Grand Rapids
+  deliberately omitted).
+
+New flags on record (spec §14 candidates): phone commissioning light ~0.12 (device judgment);
+the static return term is strongest at surface (inverse of round-8 intent, documented in field.js);
+scrolled header keeps a stray divider hairline. Collaborators: Grok 4.6 authorized (CLI),
+Gemini = Antigravity (3.7 Flash) — both queued for the round-13 critique panel.
+
 ## Era 3 — rounds 9–10: orchestration swap, Mobbin research, interaction redesigns (2026-08-19, session 2)
 
 ### 989718a — round-10 fixes (six confirmed P1s, all on the newest surfaces)
