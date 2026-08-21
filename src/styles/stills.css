@@ -62,7 +62,7 @@ html.world-optin .hero-scene { display: none; }
 html.stills-on .hero-copy,
 html.stills-on .section-intro,
 html.stills-on .channel-head,
-html.stills-on .journey-list > li,
+html.stills-on .commission-card,
 html.stills-on .insight-head,
 html.stills-on .portal-note,
 html.stills-on .drill-fallback,
@@ -81,7 +81,7 @@ html.stills-on .contact-grid > div:first-child::before {
 }
 html.stills-on .faq-section .shell { background: rgba(3, 7, 11, 0.92); border-radius: 8px; padding-top: 32px; padding-bottom: 32px; }
 html.stills-on .channel-card, html.stills-on .spec-grid > div { background: rgba(3, 7, 11, 0.82); }
-html.stills-on .journey-list > li { background: rgba(3, 7, 11, 0.6); border-radius: 6px; padding: 18px 20px; }
+html.stills-on .commission-card { background: rgba(3, 7, 11, 0.72); border-radius: 6px; }
 html.stills-on .drill-fallback ul li { background: rgba(3, 7, 11, 0.82); }
 html.stills-on .qualifier { background: rgba(3, 7, 11, 0.9); }
 

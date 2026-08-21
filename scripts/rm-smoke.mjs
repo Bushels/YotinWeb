@@ -45,6 +45,26 @@ async function pass(label, { launchArgs, contextOptions }) {
   await page.evaluate(() => { const el = document.querySelector('[data-chapter="descent"]'); if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.3); });
   await page.waitForTimeout(900);
   const after = await page.evaluate(() => Array.from(document.querySelectorAll('#rail .rail-chapters a[aria-current="true"]')).map((a) => a.dataset.railChapter));
+
+  // "Commission the well" works on this path too (spec §7: the reduced-motion page delivers the complete page,
+  // not a set of dead controls). Same state machine, no world, and the honest wait collapses to nothing.
+  const commission = await page.evaluate(async () => {
+    const read = () => ({
+      s2: document.querySelector('[data-step="02"]').dataset.state,
+      s3: document.querySelector('[data-step="03"]').dataset.state,
+      digits: Array.from(document.querySelectorAll('[data-readout-value]')).map((b) => b.textContent).join(' | '),
+      footArrived: document.querySelector('[data-readout-foot]').hasAttribute('data-arrived'),
+      resetHidden: document.querySelector('[data-commission-reset]').hidden,
+    });
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const before = read();
+    document.querySelector('[data-commission-place]').click();
+    await wait(1700); // the wait collapses on this path; the digit settle (1300 ms) still runs unless motion is reduced
+    const placed = read();
+    document.querySelector('[data-commission-reset]').click();
+    await wait(400);
+    return { before, placed, after: read() };
+  });
   await browser.close();
   const worldRequests = requests.filter((u) => WORLD_RE.test(u));
   const worldPreloads = dom.preloads.filter((h) => WORLD_RE.test(h));
@@ -57,6 +77,20 @@ async function pass(label, { launchArgs, contextOptions }) {
     if (dom.railAnchors !== 7) problems.push(`rail has ${dom.railAnchors} chapter anchors, expected 7`);
     if (dom.railCurrent.join() !== 'surface') problems.push(`rail aria-current at top = [${dom.railCurrent}] (expected surface)`);
     if (after.join() !== 'descent') problems.push(`rail aria-current after scrolling to descent = [${after}] (expected descent)`);
+  }
+  { // the commissioning list is functional, and its truth states hold: no receiver → no reading
+    const c = commission;
+    if (c.before.s2 !== 'todo' || c.before.s3 !== 'todo') problems.push(`at rest 02/03 = ${c.before.s2}/${c.before.s3} (expected todo/todo)`);
+    if (!/^— kPa/.test(c.before.digits)) problems.push(`at rest the readout is not dashes: "${c.before.digits}"`);
+    if (c.before.footArrived) problems.push('the surface-output line is revealed before any reading arrived');
+    if (!c.before.resetHidden) problems.push('the reset control is offered before there is anything to reset');
+    if (c.placed.s2 !== 'done' || c.placed.s3 !== 'done') problems.push(`after placing, 02/03 = ${c.placed.s2}/${c.placed.s3} (expected done/done)`);
+    if (!/158 kPa/.test(c.placed.digits)) problems.push(`after placing, the readout is "${c.placed.digits}" (expected the settled values)`);
+    if (!c.placed.footArrived) problems.push('the surface-output line did not arrive with the reading');
+    if (c.placed.resetHidden) problems.push('no way back after placing the receiver (spec §5: interactions are reversible)');
+    if (c.after.s2 !== 'todo' || c.after.s3 !== 'todo') problems.push(`after lifting the receiver, 02/03 = ${c.after.s2}/${c.after.s3} (expected todo/todo)`);
+    if (!/^— kPa/.test(c.after.digits)) problems.push(`after lifting the receiver the digits did not dissolve: "${c.after.digits}"`);
+    if (c.after.footArrived) problems.push('the surface-output line survived lifting the receiver');
   }
   { // units keep their casing on this path too (spec §0: the instrumentation strings are the truth surface)
     if (!dom.chipOut.includes('4-20 mA')) problems.push(`output chip reads "${dom.chipOut.trim()}" (expected "4-20 mA")`);

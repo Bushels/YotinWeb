@@ -578,55 +578,6 @@ html.stills-on .brand-mini-copy small { animation: none; }
 .channel-card h4 { margin: 22px 0 8px; font-family: var(--font-display); font-size: 16px; }
 .channel-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
 
-/* Journey ---------------------------------------------------------------- */
-
-.journey-list {
-  list-style: none;
-  margin: clamp(64px, 7vw, 104px) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border-top: 1px solid var(--line);
-}
-.journey-list li {
-  display: grid;
-  grid-template-columns: 54px 1fr;
-  gap: 22px;
-  padding: 34px 34px 34px 0;
-  border-bottom: 1px solid var(--line);
-}
-.journey-list li:nth-child(odd) { border-right: 1px solid var(--line); }
-.journey-list li:nth-child(even) { padding-left: 34px; }
-.journey-icon {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  background: rgba(232, 220, 200, 0.04);
-  color: var(--sand);
-  font-size: 26px;
-}
-.journey-icon span {
-  position: absolute;
-  top: -9px;
-  left: -9px;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--ember);
-  color: var(--void);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-}
-.journey-list h3 { margin: 4px 0 8px; font-family: var(--font-display); font-size: 22px; }
-.journey-list p { margin: 0; color: var(--muted); }
-
 /* Specs ------------------------------------------------------------------ */
 
 .spec-grid {
@@ -1676,12 +1627,9 @@ html.stills-on .brand-mini-copy small { animation: none; }
       .channel-card:nth-child(5) .channel-sweep { animation-range: cover 26% cover 54%; }
     }
 
-    /* Journey is a 2x2 grid above 820px: rows already differ vertically, so
-       only the second column in each row needs an offset. */
-    @media (min-width: 821px) {
-      .journey-list li:nth-child(2)[data-motion],
-      .journey-list li:nth-child(4)[data-motion] { animation-range: cover 7% cover 37%; }
-    }
+    /* The commissioning rows cascade in reading order. */
+    .commission-step:nth-child(2)[data-motion] { animation-range: cover 6% cover 36%; }
+    .commission-step:nth-child(3)[data-motion] { animation-range: cover 12% cover 42%; }
 
     /* Spec tiles are 3-across above 820px — cascade within each row. */
     @media (min-width: 821px) {
@@ -1793,8 +1741,6 @@ html.stills-on .brand-mini-copy small { animation: none; }
   .section-intro .eyebrow { grid-column: auto; }
   .channel-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .channel-grid { grid-template-columns: repeat(2, 1fr); }
-  .journey-list { grid-template-columns: 1fr; }
-  .journey-list li, .journey-list li:nth-child(even) { padding: 26px 0; border-right: 0; }
   .spec-grid { grid-template-columns: repeat(2, 1fr); }
   .company-copy { padding-top: 0; }
   .drill-fallback ul { grid-template-columns: 1fr; }

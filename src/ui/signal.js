@@ -1,128 +1,165 @@
-// Chapter 3 UI (spec §4 row 3, §12): journey steps as hotspot twins that replay their beat; Close the Circuit
-// with "no difference, no reading"; the surface readout whose digits appear for the first time when the loop
-// closes (tabular settle, no scramble); the conductive-bed chip on the seal; the probe on rock (click/tap or
-// 200 ms dwell — never a travelling pointer); and the logomark receiving the signal.
+// Chapter 3 UI (spec §4 row 3, §5, §12): "Commission the well" — a three-item commissioning list the visitor
+// finishes by doing ONE thing, the surface readout whose digits appear for the first time when the reading
+// lands (tabular settle, no scramble), the probe on rock (click/tap or 200 ms dwell — never a travelling
+// pointer), and the logomark receiving the signal.
+//
+//   01  already true when they arrive from chapter 2; renders ticked and settles once when ch. 3 is reached.
+//   02  the one invited action: a pre-lit footprint on the pad, clicked in the world or through its twin.
+//   03  not an action but an arrival: a short honest wait after 02, then the digits settle, 03 ticks itself
+//       and the surface-output line appears beneath as the closing beat.
+//
+// Reversible (§5): "Lift the receiver" returns the lease to the state before 02 — the receiver goes, the loop
+// goes, the digits dissolve to dashes and 03 unticks. 01 stays ticked; it was never ours to undo.
+//
+// One state machine drives every path. When the world is present it also drives the receiver, the footprint
+// and the loop; on the reduced-motion / no-WebGL page the same functions run with no world and the wait
+// collapses to nothing, so the lesson works from first paint either way.
 import '../styles/signal.css';
+
+const WAIT_MS = 900;          // the honest wait between the act and the reading (Shop's "Hold tight")
+const SETTLE_MS = 1300;       // the existing count-tween shape: cubic-out
 
 export function mountSignal() {
   const stage = document.querySelector('[data-signal-stage]');
-  if (!stage) return null;
+  const block = document.querySelector('[data-commission-block]');
+  if (!stage || !block) return null;
   const html = document.documentElement;
-  const refWell = stage.querySelector('[data-hotspot="ref-wellhead"]');
-  const refGround = stage.querySelector('[data-hotspot="ref-ground"]');
-  const stakeLabel = stage.querySelector('[data-hotspot="stake"]');
-  const stakeRange = stakeLabel && stakeLabel.querySelector('input');
-  const caption = stage.querySelector('[data-circuit-caption]');
+  const steps = new Map(Array.from(block.querySelectorAll('[data-step]')).map((li) => [li.dataset.step, li]));
+  const placeBtn = block.querySelector('[data-commission-place]');
+  const resetBtn = block.querySelector('[data-commission-reset]');
+  const caption = block.querySelector('[data-commission-caption]');
   const readout = stage.querySelector('[data-readout]');
-  const diff = stage.querySelector('[data-readout-diff]');
+  const foot = stage.querySelector('[data-readout-foot]');
   const values = Array.from(stage.querySelectorAll('[data-readout-value]'));
-  const steps = Array.from(document.querySelectorAll('.journey-list > li'));
 
-  let world = null, circuit = null, closedOnce = false, digitsShown = false;
+  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The honest wait is a response to an act the visitor can SEE — the receiver planting on the pad. On the
+  // stills path there is no pad to plant it on, so the wait would be a spinner for its own sake: it collapses.
+  const instant = () => reduced || html.classList.contains('stills-on');
+
+  const PLACE_LABEL = 'Place the receiver on the pad';
+  const PLACED_LABEL = 'Receiver on the pad';
+
+  let world = null, circuit = null, waitTimer = 0, landedOnce = false;
+  const S = { placed: false, landed: false };
 
   function say(text) { if (caption && caption.textContent !== text) caption.textContent = text; }
+  function stepState(id, state, label) {
+    const li = steps.get(id);
+    if (!li) return;
+    li.dataset.state = state;
+    const tag = li.querySelector('[data-step-state]');
+    if (tag && label !== undefined) tag.textContent = label;
+  }
 
-  // Tabular settle for the three representative values (the existing count tween shape: cubic-out, 1300 ms).
+  // Tabular settle for the three representative values. Under reduced motion the final value is rendered
+  // directly — the arrival is the point, the tween is not.
   function settleDigits() {
     values.forEach((el) => {
       const final = Number(el.dataset.final), dec = Number(el.dataset.decimals || 0), unit = el.dataset.unit;
+      if (reduced) { el.textContent = `${final.toFixed(dec)} ${unit}`; return; }
       const t0 = performance.now();
       const step = (now) => {
-        const p = Math.min(1, (now - t0) / 1300);
+        const p = Math.min(1, (now - t0) / SETTLE_MS);
         const e = 1 - Math.pow(1 - p, 3);
         el.textContent = `${(final * e).toFixed(dec)} ${unit}`;
         if (p < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
     });
-    digitsShown = true;
   }
   function dissolveDigits() {
     values.forEach((el) => { el.textContent = `— ${el.dataset.unit}`; });
-    digitsShown = false;
   }
 
-  // DOM-only fallback so the lesson works on the stills path too. The Close-the-Circuit beat is a state machine
-  // about voltage, not about three.js: on the reduced-motion / no-WebGL page the two references and the separation
-  // slider used to render as dead controls under an aria-live caption describing a state nobody could reach
-  // (round 7). This stands in for `circuit` when there is no world; the world path overwrites it in attach().
-  function makeDomCircuit() {
-    const st = { wellhead: false, ground: false, closed: false };
-    let sep = stakeRange ? Number(stakeRange.value) / 100 : 0.6;
-    return {
-      state: st,
-      get sep() { return sep; },
-      placeStake(t) { sep = Math.max(0, Math.min(1, t)); },
-      updateLoop() {},
-      set(next) { Object.assign(st, next); st.closed = st.wellhead && st.ground && sep > 0.06; },
-    };
+  // 02 — the one action. The receiver plants with a single settle beat; nothing is claimed yet.
+  function place() {
+    if (S.placed) return;
+    S.placed = true;
+    if (circuit) { circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true }); }
+    if (placeBtn) { placeBtn.setAttribute('aria-pressed', 'true'); placeBtn.setAttribute('aria-disabled', 'true'); placeBtn.textContent = PLACED_LABEL; }
+    if (resetBtn) resetBtn.hidden = false;
+    stepState('02', 'done', 'placed');
+    stepState('03', 'waiting', 'acquiring…');
+    say('Receiver on the pad — acquiring…');
+    world && world.requestRender();
+    world && world.track && world.track('hotspot_activate', { id: 'receiver-placed', input: 'state' });
+    clearTimeout(waitTimer);
+    if (instant()) land();
+    else waitTimer = setTimeout(land, WAIT_MS);
   }
 
-  function reflect() {
-    if (!circuit) return;
-    const s = circuit.state;
-    refWell.setAttribute('aria-pressed', String(s.wellhead));
-    refGround.setAttribute('aria-pressed', String(s.ground));
-    readout.classList.toggle('is-closed', s.closed);
-    if (s.closed) {
-      if (!digitsShown) settleDigits();
-      if (diff) diff.textContent = 'V₁ − V₂';
-      say('Both references placed — the loop closes and the reading resolves at surface.');
-      if (!closedOnce) { closedOnce = true; html.classList.add('signal-received'); world && world.island.field.swell(); world && world.track && world.track('hotspot_activate', { id: 'circuit-closed', input: 'state' }); }
-    } else if (s.wellhead && s.ground && circuit.sep <= 0.06) {
-      if (digitsShown) dissolveDigits();
-      say('Both references in the same place: no difference, no reading.');
-    } else if (s.wellhead || s.ground) {
-      if (digitsShown) dissolveDigits();
-      say('One point is not a measurement — voltage is a difference.');
-    } else {
-      if (digitsShown) dissolveDigits();
-      say(''); // the lede above already says "place both" — no duplicate line at rest (round 1)
+  // 03 — the arrival. The checklist finishes itself out from under them.
+  function land() {
+    if (!S.placed || S.landed) return;
+    S.landed = true;
+    settleDigits();
+    readout.classList.add('is-closed');
+    if (foot) foot.dataset.arrived = 'true';
+    stepState('03', 'done', 'reading');
+    say('The reading is on SCADA. The well is commissioned.');
+    if (circuit) circuit.set({ landed: true });
+    if (!landedOnce) {
+      landedOnce = true;
+      html.classList.add('signal-received');   // the logomark keeps its cyan for the session (spec §12)
+      world && world.island.field.swell();
+      world && world.track && world.track('hotspot_activate', { id: 'reading-landed', input: 'state' });
     }
     world && world.requestRender();
   }
 
-  // Wire the DOM controls at first paint on every path. If the world arrives, attach() aborts these listeners and
-  // re-registers the same controls as raycast twins, so the behaviour is identical and never doubled.
-  const domCtl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const domOpts = domCtl ? { signal: domCtl.signal } : undefined;
-  function wireDom() {
-    if (!circuit) circuit = makeDomCircuit();
-    refWell.addEventListener('click', () => { circuit.set({ wellhead: !circuit.state.wellhead }); reflect(); }, domOpts);
-    refGround.addEventListener('click', () => { circuit.set({ ground: !circuit.state.ground }); reflect(); }, domOpts);
-    if (stakeRange) stakeRange.addEventListener('input', () => { circuit.placeStake(Number(stakeRange.value) / 100); circuit.updateLoop(); circuit.set({}); reflect(); }, domOpts);
-    reflect();
+  // Reversible (§5): back to the state before 02. 01 stays ticked.
+  function reset() {
+    clearTimeout(waitTimer);
+    S.placed = false; S.landed = false;
+    if (circuit) circuit.set({ placed: false, landed: false });
+    dissolveDigits();
+    readout.classList.remove('is-closed');
+    if (foot) delete foot.dataset.arrived;
+    if (placeBtn) { placeBtn.setAttribute('aria-pressed', 'false'); placeBtn.removeAttribute('aria-disabled'); placeBtn.textContent = PLACE_LABEL; }
+    if (resetBtn) resetBtn.hidden = true;
+    stepState('02', 'todo', 'waiting');
+    stepState('03', 'todo', 'no reading');
+    say('Receiver lifted — nothing is listening on the lease.');
+    if (placeBtn) placeBtn.focus({ preventScroll: true });
+    world && world.requestRender();
+  }
+
+  if (placeBtn) placeBtn.addEventListener('click', () => { if (!S.placed) place(); });
+  if (resetBtn) resetBtn.addEventListener('click', reset);
+
+  // 01 settles once when the chapter is first reached — a response to arriving, not an idle animation, and it
+  // is already ticked in the markup so the no-JS page tells the truth too.
+  const first = steps.get('01');
+  if (first && typeof IntersectionObserver === 'function') {
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      first.dataset.arrived = 'true';
+      io.disconnect();
+    }, { rootMargin: '0px 0px -20% 0px' });
+    io.observe(block);
+  } else if (first) {
+    first.dataset.arrived = 'true';
   }
 
   async function attach(w) {
     world = w;
-    if (domCtl) domCtl.abort();   // hand the same controls over to the world's twins
-    circuit = null;
     // world module: dynamic import so the stills path never requests a world-chunk byte (spec §6)
     const { createCircuit } = await import('../world/circuit.js');
     circuit = createCircuit(w.island, w.THREE);
     const I = w.interactions;
     const gate = [[2.6, 4.2]];
-    I.register('ref-wellhead', { proxy: circuit.whProxy, twin: refWell, chapters: gate, apply3D() {}, onActivate() { circuit.set({ wellhead: !circuit.state.wellhead }); reflect(); } });
-    I.register('ref-ground', { proxy: circuit.stakeProxy, twin: refGround, chapters: gate, apply3D() {}, onActivate() { circuit.set({ ground: !circuit.state.ground }); reflect(); } });
-
-    // The 3D references toggle themselves; the interactions FSM's "active" state is not what we mean here, so
-    // reflect aria-pressed from circuit state instead of the FSM's active flag.
-    if (stakeRange) {
-      stakeRange.addEventListener('input', () => { circuit.placeStake(Number(stakeRange.value) / 100); circuit.updateLoop(); circuit.set({}); reflect(); });
-    }
-    // Journey steps: replay their beat on hover/focus/tap (twins only; the beats are visual, not claims).
-    const beats = [
-      () => { w.island.field.swell(); },                                              // 01 the tool speaks
-      () => { w.island.field.swell(); },                                              // 02 the formation carries it
-      () => { refWell.focus({ preventScroll: true }); },                              // 03 surface hears it → look at the references
-      () => { if (circuit.state.closed) settleDigits(); else say('Close the circuit first — then the reading lands on RS-485 / 4-20 mA.'); }, // 04 it lands in your RTU
-    ];
-    steps.forEach((li, i) => {
-      li.setAttribute('tabindex', '0');
-      li.dataset.hotspot = `journey-0${i + 1}`;
-      I.register(`journey-0${i + 1}`, { proxy: null, twin: li, chapters: gate, apply3D() {}, onActivate: () => beats[i] && beats[i]() });
+    // The footprint and its twin are the same hotspot: clicking either plants the receiver.
+    I.register('receiver', {
+      proxy: circuit.receiverProxy,
+      twin: placeBtn,
+      chapters: gate,
+      apply3D(next) { circuit.highlightFootprint(next === 'hover' || next === 'focus'); w.requestRender(); },
+      onActivate() { place(); },
     });
+    // Carry any state the visitor already reached on the DOM-only path into the world.
+    if (S.placed) { circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true, landed: S.landed }); }
+
     // Probe on rock: click/tap, or a 200 ms dwell — never a merely travelling pointer.
     let dwellTimer = 0, lastX = 0, lastY = 0, moved = true;
     const canvas = w.renderer.domElement;
@@ -131,40 +168,27 @@ export function mountSignal() {
       if (!inChapter(w) || overUI(e) || e.pointerType === 'touch') return;
       if (Math.abs(e.clientX - lastX) > 3 || Math.abs(e.clientY - lastY) > 3) { moved = true; lastX = e.clientX; lastY = e.clientY; clearTimeout(dwellTimer); dwellTimer = setTimeout(() => { if (moved) { circuit.probe(w.camera, canvas, lastX, lastY); w.requestRender(); moved = false; } }, 200); }
     }, { passive: true });
-    // Per-frame loop draw
-    // Real elapsed time, not an assumed 1/60: on a software renderer or a slow phone the loop had drawn only ~40 %
-    // of its length by the time the caption already claimed the circuit was closed (round 6).
-    let lastTick = 0;
+
+    // Per-frame: draw the loop, and light the footprint only while chapter 3 is on screen — a sand reticle on
+    // the pad in the golden-hour chapters would be a control with nothing to control.
+    // Real elapsed time, not an assumed 1/60: on a software renderer or a slow phone the loop had drawn only
+    // ~40 % of its length by the time the caption already claimed the reading had landed (round 6).
+    let lastTick = 0, footOn = null;
     const tick = (now) => {
       const dt = lastTick ? Math.min(0.25, (now - lastTick) / 1000) : 1 / 60;
       lastTick = now;
+      const want = inChapter(w) && !S.placed;
+      if (want !== footOn) { footOn = want; circuit.showFootprint(want); w.requestRender(); }
       circuit.update(dt);
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-    reflect();
   }
 
   function inChapter(w) { const p = w.state.exact; return p >= 2.6 && p < 4.2; }
-  function overUI(e) { const t = e.target; return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .signal-stage, .qualifier')); }
+  function overUI(e) { const t = e.target; return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .signal-stage, .commission-block, .qualifier')); }
 
-  // Detent (round 9, Mobbin #3): the track's one marked position is separation 0 — the stake back on the
-  // wellhead, no difference to read (spec §12). Arrowing down from just above it lands ON it instead of skating
-  // past in ones, so the reversible state is reachable from the DOM twin and not only by dragging in 3D. The
-  // input event is re-dispatched, so both the world path and the reduced-motion DOM twin see the same change.
-  if (stakeRange) {
-    stakeRange.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowDown') return;
-      const v = Number(stakeRange.value);
-      if (!(v > 0 && v <= 7)) return;
-      e.preventDefault();
-      stakeRange.value = '0';
-      stakeRange.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-  }
-
-  wireDom(); // the lesson works from first paint, world or not
   if (window.__yotinWorld) attach(window.__yotinWorld);
   else document.addEventListener('world:first-frame', () => attach(window.__yotinWorld), { once: true });
-  return { reflect };
+  return { place, reset, state: S };
 }

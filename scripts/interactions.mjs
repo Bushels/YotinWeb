@@ -4,7 +4,7 @@
 //
 //   node scripts/interactions.mjs [--url http://localhost:5174/?world=1] [--out scratch/frames] [--w 1366 --h 768]
 //
-// Frames: tool-orbit, signal-closed (both references + stake), deploy-xray, deploy-pumpoff (fluid at pump-off),
+// Frames: tool-orbit, signal-nodiff / signal-closed (Commission the well), deploy-xray, deploy-pumpoff (fluid at pump-off),
 // fit-strong (PCP · heavy · 100–150 °C · 1000 m · shallower · within 3 months), fit-review (rod pump · light ·
 // under 100 · 1000 m · deeper · 3–12 months), fit-future (above 150 °C).
 import { chromium } from 'playwright';
@@ -44,6 +44,13 @@ async function clickTwin(selector) {
   await page.waitForTimeout(200);
   await page.click(selector);
 }
+// Both signal frames are taken on the same mark: the commissioning card centred, which is where the
+// signal-b pose (the lease from above — wellhead, pad, road) has fully arrived. The chapter ANCHOR still
+// belongs to the collar pose and is captured by frames.mjs as ch3.
+async function centreCard() {
+  await page.evaluate(() => { document.querySelector('.commission-card').scrollIntoView({ block: 'center', behavior: 'instant' }); window.__yotinWorld.conductor.jumpTo(); });
+  await page.waitForTimeout(700);
+}
 async function setRange(selector, value) {
   await page.evaluate(([sel, v]) => { const el = document.querySelector(sel); if (!el) throw new Error('twin missing: ' + sel); el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, [selector, value]);
 }
@@ -53,15 +60,22 @@ await gotoChapter(2);
 await clickTwin('[data-hotspot="inspect"]');
 await shot('tool-orbit', 'Inspect tool pressed: contained orbit, inspection sleeve + rings, chips as twins');
 await page.keyboard.press('Escape');
+await page.waitForTimeout(600); // the orbit's footer row collapses, which moves every anchor below it
 
-// 2) Signal: both references placed, stake moved → loop draws, digits settle
+// 2) Signal — Commission the well. nodiff = the truth state BEFORE 02: no receiver on the lease, no loop,
+//    dashes in the readout. closed = after 03 arrives: receiver planted on its footprint, loop drawn, digits
+//    settled, 03 ticked and the surface-output line revealed. Same frame names as the slider era so the
+//    critique loop stays comparable.
 await gotoChapter(3);
-await clickTwin('[data-hotspot="ref-wellhead"]');
-await clickTwin('[data-hotspot="ref-ground"]');
-await setRange('[data-hotspot="stake"] input[type="range"]', 72);
-await shot('signal-closed', 'Close the Circuit: V₁ + V₂ placed, stake at 72 % — loop drawn, readout digits settled, logomark received');
-await setRange('[data-hotspot="stake"] input[type="range"]', 2);
-await shot('signal-nodiff', 'Stake back on the wellhead: "no difference, no reading" — digits dissolve');
+await centreCard();
+await shot('signal-nodiff', 'Before 02: the receiver footprint is pre-lit on the pad, nothing stands on it, no loop is drawn and the readout holds dashes — no receiver, no reading');
+await clickTwin('[data-hotspot="receiver"]');
+await page.waitForFunction(() => document.querySelector('[data-step="03"]').dataset.state === 'done', null, { timeout: 15000 });
+await page.waitForTimeout(1400); // the digit settle finishes (1300 ms cubic-out)
+await centreCard();              // clickTwin centred the button; both signal frames belong on the same mark
+await shot('signal-closed', 'Commissioned: receiver planted on the footprint, loop drawn to the wellhead, 03 ticked itself, digits settled and MODBUS RS-485 / 4-20 mA revealed beneath');
+await clickTwin('[data-commission-reset]');
+await page.waitForTimeout(400);
 
 // 3) Deployment: X-ray on; fluid at pump-off
 await gotoChapter(4);

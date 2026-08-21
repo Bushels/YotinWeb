@@ -6,7 +6,7 @@
   @page { margin: 16mm; }
   html, body { background: #fff !important; color: #111 !important; }
   #world, .rail, .fixed-layer, .stills, .chatfi-launcher, .chatfi-panel, .scroll-rail, .nav-toggle, .nav-cta, .mobile-nav,
-  .hero-scrim, .scroll-cue, .rise-band, .signal-stage .circuit-stake, .motion-toggle, [data-stills], video, iframe { display: none !important; }
+  .hero-scrim, .scroll-cue, .rise-band, .commission-action, .commission-reset, .motion-toggle, [data-stills], video, iframe { display: none !important; }
   .site-header { position: static !important; background: none !important; border-bottom: 1px solid #999; }
   main { padding-left: 0 !important; }
   section { background: none !important; color: #111 !important; padding: 10mm 0 !important; break-inside: avoid-page; }
@@ -26,12 +26,14 @@
   details.faq-item summary i { display: none; }
   details.faq-item:not([open]) > p { display: block !important; }
   .channel-grid, .drill-fallback ul, .company-marks { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6mm; }
-  .channel-card, .spec-grid > div, .drill-fallback li, .company-mark, .portal-note, .journey-list li, .readout, .circuit { background: none !important; border: 1px solid #bbb !important; color: #111 !important; }
+  .channel-card, .spec-grid > div, .drill-fallback li, .company-mark, .portal-note, .commission-card, .readout { background: none !important; border: 1px solid #bbb !important; color: #111 !important; }
   .company-section { color: #111 !important; }
   .company-section .company-grid { background: none !important; }
   .qualifier { background: none !important; border: 1px solid #bbb !important; }
   .qualifier-stage button, .qualifier-stage input { display: none !important; }
   .signal-stage { display: block !important; }
+  .commission-block { min-height: 0 !important; padding-top: 0 !important; }
+  .readout-foot { opacity: 1 !important; }
   .readout-list b { color: #111 !important; }
   .site-footer { border-top: 1px solid #999; }
   .site-footer::after { content: "yotinenergy.com — printed from the Yotin Energy website. Representative values; schematic, not to scale."; display: block; margin-top: 6mm; font-size: 10px; color: #555; }

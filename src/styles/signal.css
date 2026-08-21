@@ -1,82 +1,88 @@
-/* Chapter 3 stage: circuit controls + surface readout (spec §4 row 3). Sand/ember chrome; cyan only on the
-   readout digits once the loop has closed (earned). */
-.signal-stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 24px;
-  margin-top: 40px;
+/* Chapter 3 — "Commission the well" (spec §4 row 3, §5). An instrument checklist, not a card deck: numbered
+   mono rows on hairline rules, a tick that is a small filled sand square, ember only on the row that is still
+   the visitor's to do, and cyan exactly once — on the 03 tick, at the instant the reading arrives, which is
+   the one thing cyan is allowed to mean (§0 one-candle rule; the readout digits take it in the same beat). */
+.commission-block { margin-top: clamp(64px, 7vw, 104px); }
+.commission-card {
   padding: 26px 28px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(3, 7, 11, 0.6);
 }
-@media (max-width: 900px) { .signal-stage { grid-template-columns: 1fr; } }
-.circuit-title { margin: 0 0 8px; color: var(--ember); }
-.circuit-lede { margin: 0 0 14px; color: var(--muted); }
-.circuit-refs { display: flex; flex-wrap: wrap; gap: 10px; }
-.circuit-ref {
-  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px;
-  border: 1px solid var(--line-strong); border-radius: 6px; color: var(--sand);
+.commission-title { margin: 0 0 8px; color: var(--ember); }
+.commission-lede { margin: 0 0 18px; color: var(--muted); max-width: 54ch; }
+.commission { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.commission-step {
+  display: grid;
+  grid-template-columns: 30px 18px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.commission-num { font: 500 11px/1.7 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; color: var(--sand-mute, #b3aa9a); }
+.commission-tick {
+  width: 12px; height: 12px; margin-top: 3px;
+  border: 1px solid rgba(232, 220, 200, 0.34);
+  background: transparent;
+  transition: background 260ms ease, border-color 260ms ease;
+}
+.commission-step[data-state="done"] .commission-tick { background: var(--sand); border-color: var(--sand); }
+/* 03 is the signal arriving, so its tick is the one licensed cyan mark in the checklist. */
+.commission-step[data-step="03"][data-state="done"] .commission-tick { background: #22D3EE; border-color: #22D3EE; }
+.commission-body h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 17px; color: var(--sand); }
+.commission-body p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; max-width: 46ch; }
+.commission-state {
+  justify-self: end; margin-top: 2px;
+  font: 500 10px/1.7 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--sand-mute, #b3aa9a); white-space: nowrap;
+}
+.commission-step[data-state="done"] .commission-state { color: var(--sand); }
+.commission-step[data-step="03"][data-state="done"] .commission-state { color: #22D3EE; }
+/* The one actionable row wears the chapter's only ember until it is done. */
+.commission-step.is-action[data-state="todo"] .commission-num,
+.commission-step.is-action[data-state="todo"] .commission-state { color: var(--ember); }
+.commission-step.is-action[data-state="todo"] .commission-tick { border-color: rgba(242, 118, 34, 0.7); }
+.commission-action {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; box-sizing: border-box;
+  min-height: 44px; margin-top: 12px; padding: 8px 16px;
+  border: 1px solid var(--ember); border-radius: 6px; color: var(--ember);
   font: 500 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase;
-  transition: border-color 200ms ease, background 200ms ease, color 200ms ease;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
 }
-.circuit-ref:hover, .circuit-ref.is-hover { border-color: var(--sand); }
-.circuit-ref:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
-.circuit-ref[aria-pressed="true"] { background: rgba(232, 220, 200, 0.12); border-color: var(--sand); }
-.circuit-ref-tag { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line-strong); font-size: 11px; }
-.circuit-ref[aria-pressed="true"] .circuit-ref-tag { border-color: var(--ember); color: var(--ember); }
-.circuit-stake { display: block; margin-top: 16px; font: 500 11px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.circuit-stake small { text-transform: none; letter-spacing: 0; opacity: 0.8; }
-/* Round 9 (Mobbin #3): a measurement track, not a settings control. The full-width ember fill was the loudest
-   ember run in the chapter §6 wants darkest, and it read as a form widget. Now: a 1 px sand rule at 28 % alpha,
-   ticks every 10 %, a 2 × 14 px sand bar for a thumb, and a taller detent tick at 0 — the position where the
-   stake stands back on the wellhead and there is no difference to read. Ember appears only on focus / press. */
-.circuit-stake input[type="range"] {
-  -webkit-appearance: none; appearance: none;
-  display: block; width: 100%; margin-top: 10px; min-height: 44px; padding: 0;
-  background: transparent; cursor: pointer;
+.commission-action:hover, .commission-action.is-hover { background: rgba(242, 118, 34, 0.12); }
+.commission-action:focus-visible { outline: 1px solid var(--ember); outline-offset: 3px; }
+.commission-action:active { transform: translateY(1px); }
+.commission-action[aria-disabled="true"] { cursor: default; border-color: var(--line-strong); color: var(--sand); background: rgba(232, 220, 200, 0.06); }
+.commission-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 0; min-height: 44px; }
+.commission-caption { color: var(--sand); font: 500 12px/1.5 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.04em; }
+.commission-reset {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; box-sizing: border-box;
+  min-height: 44px; padding: 6px 14px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--sand-mute, #b3aa9a);
+  font: 500 11px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase;
+  transition: border-color 200ms ease, color 200ms ease;
 }
-.circuit-stake input[type="range"]:focus { outline: none; }
-.circuit-stake input[type="range"]:focus-visible { outline: 1px solid var(--ember); outline-offset: 4px; }
-/* one shared track paint: hairline rule · 10 % ticks · the taller "no difference" detent at 0 */
-.circuit-stake input[type="range"]::-webkit-slider-runnable-track {
-  height: 18px; border: 0; border-radius: 0;
-  background:
-    linear-gradient(rgba(232, 220, 200, 0.28), rgba(232, 220, 200, 0.28)) 0 6px / 100% 1px no-repeat,
-    linear-gradient(rgba(232, 220, 200, 0.5), rgba(232, 220, 200, 0.5)) 0 6px / 2px 11px no-repeat,
-    repeating-linear-gradient(90deg, rgba(232, 220, 200, 0.28) 0 1px, transparent 1px 10%) 0 7px / calc(100% + 1px) 6px no-repeat;
+.commission-reset:hover { border-color: var(--sand); color: var(--sand); }
+.commission-reset:focus-visible { outline: 1px solid var(--ember); outline-offset: 3px; }
+.commission-reset[hidden] { display: none; }
+/* Phones: the number, the tick and the body stack in one column and the state tag sits under the row's own
+   text instead of being flung to the far edge of a 390 px screen. */
+@media (max-width: 820px) {
+  .commission-card { padding: 20px 18px; }
+  .commission-step { grid-template-columns: 26px 16px minmax(0, 1fr); row-gap: 4px; }
+  .commission-state { grid-column: 3; justify-self: start; margin-top: 6px; }
+  .commission-body p { max-width: none; }
 }
-.circuit-stake input[type="range"]::-moz-range-track {
-  height: 14px; border: 0; border-radius: 0;
-  background:
-    linear-gradient(rgba(232, 220, 200, 0.28), rgba(232, 220, 200, 0.28)) 0 6px / 100% 1px no-repeat,
-    linear-gradient(rgba(232, 220, 200, 0.5), rgba(232, 220, 200, 0.5)) 0 2px / 2px 11px no-repeat,
-    repeating-linear-gradient(90deg, rgba(232, 220, 200, 0.28) 0 1px, transparent 1px 10%) 0 7px / calc(100% + 1px) 6px no-repeat;
+/* 01 is true before they touch anything; it settles once when the chapter is reached (an entrance, never a
+   loop — §5 "no idle animation"). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes commission-tick-settle { from { transform: scale(0.4); opacity: 0.2; } to { transform: none; opacity: 1; } }
+  .commission-step[data-arrived] .commission-tick { animation: commission-tick-settle 380ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 }
-.circuit-stake input[type="range"]::-moz-range-progress { height: 1px; background: transparent; }
-.circuit-stake input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 2px; height: 14px; margin-top: -0.5px; border: 0; border-radius: 0;
-  background: var(--sand); transition: background 160ms ease, box-shadow 160ms ease;
-}
-.circuit-stake input[type="range"]::-moz-range-thumb {
-  width: 2px; height: 14px; border: 0; border-radius: 0;
-  background: var(--sand); transition: background 160ms ease, box-shadow 160ms ease;
-}
-.circuit-stake input[type="range"]:focus-visible::-webkit-slider-thumb,
-.circuit-stake input[type="range"]:active::-webkit-slider-thumb { background: var(--ember); box-shadow: 0 0 0 1px rgba(242, 118, 34, 0.45); }
-.circuit-stake input[type="range"]:focus-visible::-moz-range-thumb,
-.circuit-stake input[type="range"]:active::-moz-range-thumb { background: var(--ember); box-shadow: 0 0 0 1px rgba(242, 118, 34, 0.45); }
-.circuit-stake-ends { display: flex; justify-content: space-between; gap: 12px; margin-top: 2px; font-size: 10px; letter-spacing: 0.06em; color: var(--sand-mute, #b3aa9a); }
-.circuit-caption { margin: 14px 0 0; color: var(--sand); font-size: 15px; line-height: 1.5; min-height: 1.5em; }
-.circuit-caption:empty { margin: 0; min-height: 0; }
 
 .readout { padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: rgba(3, 7, 11, 0.7); align-self: start; }
 .readout-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font: 600 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; }
-.readout-diff { color: var(--sand); }
-.readout .chip, .readout .chip-out, .circuit-head .chip { display: inline-block; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 10px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
-/* the reading rides above its own track, inside the circuit card (Mobbin #3) */
-.readout-head.circuit-head { margin: 18px 0 0; }
+.readout .chip, .readout .chip-out { display: inline-block; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 10px/1.6 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand-mute, #b3aa9a); }
 .readout-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .readout-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font: 500 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .readout-list b { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--sand); transition: color 400ms ease; }
@@ -86,11 +92,10 @@
    "4-20 MA" (megaamps) and "KPA" (round 9). No !important needed — order and specificity resolve. */
 .readout-list b, .readout .chip-out, .tool-chip .unit, [data-unit] { text-transform: none; }
 .readout.is-closed .readout-list b { color: #22D3EE; }
-.readout-foot { margin: 12px 0 0; }
-
-/* Journey steps as twins */
-.journey-list > li[data-hotspot] { cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
-.journey-list > li.is-hover, .journey-list > li:focus-visible { outline: none; border-color: var(--sand); background: rgba(232, 220, 200, 0.06); }
+/* The closing beat: the surface-output line arrives WITH the reading, not before it. It stays in the DOM at
+   all times (print, screen readers and the reduced-motion smoke read a spec fact, not a state). */
+.readout-foot { margin: 12px 0 0; opacity: 0; transition: opacity 420ms ease; }
+.readout-foot[data-arrived] { opacity: 1; }
 
 /* The lockup receives the signal (spec §12/§13b): the mark's WARM stroke carries its own brand ember from
    first paint (Kyle, round 11: "the Yotin logo on the header isn't in color") while its COOL stroke waits in

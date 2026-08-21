@@ -503,58 +503,66 @@
         </dl>
         </div>
 
-        <ol class="journey-list" data-chapter="signal" aria-label="How WellFi works">
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-broadcast" aria-hidden="true"></i><span>01</span></span>
-            <div><h3>The tool speaks</h3><p>A reading leaves the well, deep downhole.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-wifi-high" aria-hidden="true"></i><span>02</span></span>
-            <div><h3>The formation carries it</h3><p>The rock itself brings it up. No cable.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-cpu" aria-hidden="true"></i><span>03</span></span>
-            <div><h3>Surface hears it</h3><p>The receiver on the lease picks the reading up.</p></div>
-          </li>
-          <li data-motion="rise">
-            <span class="journey-icon"><i class="ph ph-plugs-connected" aria-hidden="true"></i><span>04</span></span>
-            <div><h3>It lands in your RTU</h3><p>MODBUS RS-485 or 4-20 mA. The system you already run.</p></div>
-          </li>
-        </ol>
-
         <!--
-          Chapter 3 — the signal stage (spec §4 row 3, §12). Close the Circuit is a state machine, not a model:
-          one reference placed → "one point is not a measurement — voltage is a difference"; both → the loop
-          draws and the surface readout resolves; drag the stake back onto the wellhead → "no difference, no
-          reading". Digits appear for the first time here. Every value is representative. Nothing here is a
-          WellFi figure and no timing is implied.
+          Chapter 3 — Commission the well (spec §4 row 3, §5, §12). Not a control panel: a three-item
+          commissioning list the visitor finishes by doing ONE thing. 01 is already true by the time they
+          arrive from chapter 2 and renders ticked (it settles once when the chapter is first reached — an
+          entrance, not a loop). 02 is the chapter's one invited action: a pre-lit footprint on the pad,
+          clicked in the world or through this button. 03 is not an action but an arrival — after 02 lands
+          there is a short honest wait, then the digits settle, 03 ticks itself and the surface-output line
+          appears beneath as the closing beat. Before 02 there is no receiver on the lease, no loop is drawn
+          and the readout holds dashes: no receiver, no reading. "Lift the receiver" puts all of that back.
         -->
-        <div class="signal-stage" data-signal-stage data-chapter-ui="signal">
-          <div class="circuit" role="group" aria-label="Close the circuit — the receiver reads the difference between two points on the lease">
-            <p class="eyebrow circuit-title">Close the circuit</p>
-            <p class="circuit-lede">Place both references — the receiver reads the difference between two points on the lease.</p>
-            <div class="circuit-refs">
-              <button type="button" class="circuit-ref" data-hotspot="ref-wellhead" aria-pressed="false"><span class="circuit-ref-tag">V₁</span> Wellhead reference</button>
-              <button type="button" class="circuit-ref" data-hotspot="ref-ground" aria-pressed="false"><span class="circuit-ref-tag">V₂</span> Remote ground reference</button>
-            </div>
-            <!-- Round 9 (Mobbin #3): the reading the track drives lives in the SAME card as the track, directly
-                 above it, so dragging changes something inside the visitor's fixation. The pressure / temperature
-                 rows stay in the readout card below. -->
-            <p class="readout-head circuit-head"><span class="readout-diff" data-readout-diff>V₁ − V₂</span><span class="chip">representative values</span><span class="chip">visual timing not representative</span></p>
-            <label class="circuit-stake" data-hotspot="stake">
-              <span>Reference separation <small>(qualitative — no distance is shown)</small></span>
-              <input type="range" min="0" max="100" value="60" step="1" aria-label="Reference separation along the lease road">
-              <span class="circuit-stake-ends" aria-hidden="true"><span>on the wellhead — no difference</span><span>down the lease road</span></span>
-            </label>
-            <p class="circuit-caption" data-circuit-caption aria-live="polite">One point is not a measurement — voltage is a difference.</p>
+        <div class="commission-block" data-chapter="signal" data-anchor="top" data-commission-block>
+          <div class="commission-card">
+            <p class="eyebrow commission-title">Commission the well</p>
+            <p class="commission-lede" data-motion="rise">The tool is already in the string. Put the receiver on the pad — the rest arrives on its own.</p>
+            <ol class="commission" aria-label="Commissioning steps">
+              <li class="commission-step" data-motion="rise" data-step="01" data-state="done">
+                <span class="commission-num" aria-hidden="true">01</span>
+                <span class="commission-tick" aria-hidden="true"></span>
+                <div class="commission-body">
+                  <h3>Tool in the string</h3>
+                  <p>The tool speaks: a reading leaves the well, deep downhole.</p>
+                </div>
+                <span class="commission-state" data-step-state>in the string</span>
+              </li>
+              <li class="commission-step is-action" data-motion="rise" data-step="02" data-state="todo">
+                <span class="commission-num" aria-hidden="true">02</span>
+                <span class="commission-tick" aria-hidden="true"></span>
+                <div class="commission-body">
+                  <h3>Receiver on the lease</h3>
+                  <p>The formation carries it up — the rock itself, no cable. Set the receiver where the surface hears it.</p>
+                  <button type="button" class="commission-action" data-hotspot="receiver" data-commission-place aria-pressed="false">Place the receiver on the pad</button>
+                </div>
+                <span class="commission-state" data-step-state>waiting</span>
+              </li>
+              <li class="commission-step" data-motion="rise" data-step="03" data-state="todo">
+                <span class="commission-num" aria-hidden="true">03</span>
+                <span class="commission-tick" aria-hidden="true"></span>
+                <div class="commission-body">
+                  <h3>Reading on SCADA</h3>
+                  <p>Surface hears it and it lands in your RTU — the system you already run.</p>
+                </div>
+                <span class="commission-state" data-step-state>no reading</span>
+              </li>
+            </ol>
+            <p class="commission-foot">
+              <span class="commission-caption" data-commission-caption aria-live="polite"></span>
+              <button type="button" class="commission-reset" data-commission-reset hidden>Lift the receiver</button>
+            </p>
           </div>
+        </div>
+
+        <div class="signal-stage" data-signal-stage data-chapter-ui="signal">
           <div class="readout" data-readout aria-label="Surface readout — representative values, visual timing not representative">
+            <p class="readout-head"><span class="chip">representative values</span><span class="chip">visual timing not representative</span></p>
             <ul class="readout-list">
               <li><span>Pressure</span><b data-readout-value data-final="158" data-unit="kPa" data-decimals="0">— kPa</b></li>
               <li><span>Temperature</span><b data-readout-value data-final="26" data-unit="°C" data-decimals="0">— °C</b></li>
               <li><span>Vibration</span><b data-readout-value data-final="4.2" data-unit="mm/s RMS" data-decimals="1">— mm/s RMS</b></li>
             </ul>
-            <p class="readout-foot"><span class="chip chip-out">MODBUS RS-485 / 4-20 mA</span></p>
+            <p class="readout-foot" data-readout-foot><span class="chip chip-out">MODBUS RS-485 / 4-20 mA</span></p>
           </div>
         </div>
       </div>

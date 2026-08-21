@@ -1,7 +1,7 @@
-// Chapter 3 world pieces (spec §4 row 3, §12): the two surface references (wellhead V₁, remote ground stake
-// V₂), the hairline measurement loop that only draws when both are placed, the stake that slides along the
-// lease road, and probing the rock (pointer/tap → local field reveal with decaying memory). Everything is
-// qualitative: no distance scale, no S/N bar, no numbers.
+// Chapter 3 world pieces (spec §4 row 3, §12): the pre-lit receiver footprint on the pad, the receiver that
+// plants on it, the hairline loop back to the wellhead that only draws once the receiver is down, and probing
+// the rock (pointer/tap → local field reveal with decaying memory). Everything is qualitative: no distance
+// scale, no separation axis, no S/N bar, no numbers — and the wellhead end is never labelled a "reference".
 import { ROAD_RECT, SLAB, NOTCH, BENCH_Y } from './layout.js';
 // THREE is injected by the caller (the world chunk owns three; UI chunks must never import it — spec §6).
 
@@ -12,9 +12,10 @@ export function createCircuit(island, THREE) {
   const wellhead = island.paths.wellhead.clone();
   const sand = new THREE.Color('#e8dcc8');
 
-  // Stake: a slim steel rod with a small cyan-capable cap; slides along the road (z from 2.4 down to -4.4).
+  // The receiver: a slim steel mast with a small cyan-capable cap. It stands wherever it is planted; the
+  // pre-lit footprint on the pad is the one spot the commissioning list invites (round 13).
   const stake = new THREE.Group();
-  stake.name = 'ground-stake';
+  stake.name = 'lease-receiver';
   const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.52, 8), new THREE.MeshStandardMaterial({ color: '#b9c2c9', roughness: 0.45, metalness: 0.6 }));
   rod.position.y = 0.24;
   const capMat = new THREE.MeshBasicMaterial({ color: '#e8dcc8', toneMapped: false });
@@ -33,13 +34,38 @@ export function createCircuit(island, THREE) {
   const ROAD_HEAD = new THREE.Vector3(roadX, 0.05, ROAD_RECT.maxZ);
   const ROAD_TOE = new THREE.Vector3(roadX, 0.05, ROAD_RECT.minZ);
   const AT_WELLHEAD = new THREE.Vector3(wellhead.x, 0.05, wellhead.z);
-  let sep = 0.6; // 0..1 from "on the wellhead" to the far end of the road
+  // The receiver's footprint: firm ground on the lease pad, clear of the tank battery, the separator and the
+  // flare, and a good stride off the wellhead — near it, plainly not it.
+  const RECEIVER = new THREE.Vector3(-4.3, 0.05, 4.3);
+  let sep = 0.6; // kept for the road walk (0 = on the wellhead, 1 = the far end of the road)
   function placeStake(t) {
     sep = THREE.MathUtils.clamp(t, 0, 1);
     if (sep < 0.15) stake.position.lerpVectors(AT_WELLHEAD, ROAD_HEAD, sep / 0.15);
     else stake.position.lerpVectors(ROAD_HEAD, ROAD_TOE, (sep - 0.15) / 0.85);
     updateLoop();
   }
+  function placeStakeAt(p) { stake.position.copy(p); updateLoop(); }
+
+  // The footprint reticle: two hairline sand rings lying on the pad, lit before anything is placed so the spot
+  // reads as a real place to put something (Target / Google Arts). It is not a target to shoot at — it is the
+  // outline of the thing that goes there, and it goes out the moment the receiver stands on it.
+  const footMat = new THREE.MeshBasicMaterial({ color: '#e8dcc8', transparent: true, opacity: 0.42, side: THREE.DoubleSide, depthWrite: false, toneMapped: false });
+  const footprint = new THREE.Group();
+  footprint.name = 'receiver-footprint';
+  [[0.14, 0.158], [0.26, 0.272]].forEach(([a, b]) => {
+    const r = new THREE.Mesh(new THREE.RingGeometry(a, b, 40), footMat);
+    r.rotation.x = -Math.PI / 2;
+    footprint.add(r);
+  });
+  footprint.position.set(RECEIVER.x, 0.075, RECEIVER.z);
+  footprint.visible = false;
+  group.add(footprint);
+  const receiverProxy = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.7, 8), new THREE.MeshBasicMaterial({ visible: false }));
+  receiverProxy.position.set(RECEIVER.x, 0.3, RECEIVER.z);
+  group.add(receiverProxy);
+  function showFootprint(on) { footprint.visible = Boolean(on) && !state.placed; }
+  function highlightFootprint(on) { footMat.opacity = on ? 0.85 : 0.42; }
+
   stake.visible = false;
   group.add(stake);
 
@@ -71,23 +97,26 @@ export function createCircuit(island, THREE) {
       p.y += Math.sin(t * Math.PI) * 0.12; // slight arc so it reads as a hairline in air, not a road stripe
       pts.push(p);
     }
-    if (a.distanceTo(b) < 0.05) { loop.visible = false; return; } // the two references coincide: there is no loop to draw
+    if (a.distanceTo(b) < 0.05) { loop.visible = false; return; } // receiver standing on the wellhead: there is no loop to draw
     const next = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5), LOOP_SEGS, 0.018, 5, false);
     loop.geometry = next; loopGeom.dispose(); loopGeom = next;
     loopGeom.setDrawRange(0, Math.round(loopDraw * loopGeom.index.count));
   }
   let loopDraw = 0; // 0..1 draw progress
-  placeStake(sep); // now that updateLoop exists: seats the stake and builds the loop geometry
+  placeStakeAt(RECEIVER); // now that updateLoop exists: seats the receiver on its footprint and builds the loop
 
-  const state = { wellhead: false, ground: false, closed: false, dashes: false };
+  // One truth, one flag: `placed` is whether a receiver stands on the lease. `landed` is whether a reading has
+  // arrived — the only thing licensed to take cyan.
+  const state = { placed: false, closed: false, landed: false };
   function set(next) {
     const wasClosed = state.closed;
     Object.assign(state, next);
-    state.closed = state.wellhead && state.ground && sep > 0.06;
-    stake.visible = state.ground;
-    whRing.material.opacity = state.wellhead ? 0.9 : 0;
-    whRing.visible = state.wellhead;
-    capMat.color.set(state.closed ? '#22D3EE' : '#e8dcc8');
+    state.closed = state.placed;
+    stake.visible = state.placed;
+    footprint.visible = footprint.visible && !state.placed;
+    whRing.material.opacity = state.placed ? 0.9 : 0;
+    whRing.visible = state.placed;
+    capMat.color.set(state.landed ? '#22D3EE' : '#e8dcc8');
     // Opening the loop is instant — the world must never show a drawn loop while the caption says there is no
     // reading (round 5). Closing it still eases in (update()).
     if (wasClosed && !state.closed) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); }
@@ -126,5 +155,5 @@ export function createCircuit(island, THREE) {
     return null;
   }
 
-  return { group, stake, stakeProxy, whProxy, state, set, update, placeStake, get sep() { return sep; }, probe, updateLoop };
+  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop };
 }
