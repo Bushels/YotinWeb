@@ -13,7 +13,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const pub = path.join(root, 'public');
 
-const ALLOWED_TOP = ['assets', 'baytex', 'obsidian', 'tamarack', 'robots.txt', 'sitemap.xml'];
+const ALLOWED_TOP = ['assets', 'baytex', 'obsidian', 'tamarack', 'llms.txt', 'robots.txt', 'sitemap.xml'];
 const ALLOWED_ASSET_DIRS = ['fonts', 'stills'];
 const OPERATOR_ROUTES = ['baytex', 'obsidian', 'tamarack'];
 
@@ -42,7 +42,7 @@ describe('public/ allow-list', () => {
     assert.equal(fs.existsSync(path.join(pub, 's')), false, 'public/s must not exist');
   });
 
-  test('robots.txt and sitemap.xml are non-empty', () => {
-    for (const f of ['robots.txt', 'sitemap.xml']) assert.ok(fs.statSync(path.join(pub, f)).size > 0, f + ' is empty');
+  test('llms.txt, robots.txt and sitemap.xml are non-empty', () => {
+    for (const f of ['llms.txt', 'robots.txt', 'sitemap.xml']) assert.ok(fs.statSync(path.join(pub, f)).size > 0, f + ' is empty');
   });
 });
