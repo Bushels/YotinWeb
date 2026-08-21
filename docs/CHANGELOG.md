@@ -43,6 +43,31 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 6 — round 14: the confirmation panel and Grok's first stop vote (2026-08-21)
+
+Five critics re-verified rounds 13-fix + 14a. **Grok voted STOP at 8.2** — the first stop of the
+expanded panel — and cleared the restored charts against §0. Craft 8.0/7.5, Codex 7.7, truth 7.0:
+not yet convergence. 8 P1s confirmed, and both of Codex's P1s failed verification (the firework
+re-raise landed as P2; the fit-future "clip" refuted by pixel comparison — its second misread of
+the same authored wedge). The panel confirmed the fishbone as "the best geometry work in the
+project" and the return current as "the first version where the circuit is closed in the picture."
+
+- **0b098ed** — the fixes: the ch1 half-erased headline was the hero scrim's 170px bleed (the
+  implementer DISPROVED the verifier's compositor theory by experiment before finding it); sand
+  headlines on every path incl. stills; fluid chip occlusion against the real panels (the
+  verifier's whole-world rect was measured and replaced); ch4 figure regraded from source (tool
+  mean L 52.9 → 88.8); phone tagline collision; legend 4.63:1 in bright chapters; TRUTH — the
+  fluid demo now spans 2600→300 kPa (~250 m of column) and the canonical reading is the
+  PRODUCING well, not the pumped-off state.
+- **7597f7d (14a)** — Kyle's pass: true fishbone both sides (tris went DOWN), chips bottom-aligned
+  (specificity bug), the spec-grid entrance made visible (it had fired as a 90px sliver while
+  another animation fought it), charts restored under the recorded marketing doctrine ("no blatant
+  lies; valueless glyphs are licensed iconography"), benefits cards translucent (the hover ground
+  had never rendered — second specificity bug), (403) 679-5330 live.
+- Panel lessons: implementers disproving verifier diagnoses by experiment is now an established
+  move (twice this round); Codex repeats composition misreads on the fit wedge — verifiers stay
+  mandatory; Grok's stop vote + cleared-glyphs note shows the lead-decision clauses work.
+
 ## Era 5 — round 13: the five-critic panel (2026-08-20–21)
 
 First round with the expanded bench: 2× Opus craft @ medium, Opus truth @ high, Codex, and **Grok
