@@ -37,6 +37,13 @@ You are auditing the MOBILE experience of https://yotinenergy.com (a scroll-driv
 narrative site for WellFi wireless downhole telemetry) from the attached iPhone 17 Pro Max
 screenshots, plus your own browsing of the live site if your tools allow.
 
+CAPTURE DISCIPLINE (non-negotiable — added after round 17, where instant-scroll captures
+produced two refuted P0s): this site's camera and entrances GLIDE to rest. If you browse the
+site yourself, scroll in steps and WAIT ~3 seconds at every stop before screenshotting or
+judging anything — a frame taken mid-glide shows a transitional state no reader ever rests in,
+and it will be discarded in verification. Judge only settled frames. A fixed header covering
+content at an arbitrary mid-scroll stop is normal web behaviour, not a finding.
+
 YOUR LENS: a meticulous mobile-UX inspector with strong OCR. For every screenshot: (1) transcribe
 the visible text exactly (OCR) and flag any truncated, overlapped, or clipped words; (2) judge
 whether the 3D world content and the copy belong together at that scroll moment — the site's
@@ -52,6 +59,12 @@ works (no mechanism talk — judge credibility, not completeness); the chart gly
 wellhead are licensed abstract iconography; cyan appears only in the signal chapter and verdict;
 the About section deliberately shows the 3D world through the text; formation names are correct
 for the Clearwater fairway; the phone number (403) 679-5330 is real.
+
+ALSO DO NOT RAISE (verified or deferred in round 17, post-affe629): the ch2 tool position — it
+was re-measured after settle and holds (~671 px at 440×956; earlier "desync" reports were
+mid-glide captures); the brief empty band where the spec tiles assemble on approach (~150 px,
+an authored entrance); at 390×844 the hero chips and the chapter-4 control block sit below that
+fold (known, deferred by the owner — report only if it WORSENED).
 
 OUTPUT: a Markdown report. For each finding: [P0 broken / P1 major / P2 / P3 polish] — which
 screenshot (number them in order) — the element — what is wrong (with the OCR'd text where
