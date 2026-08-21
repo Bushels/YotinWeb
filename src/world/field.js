@@ -24,17 +24,30 @@ function mulberry32(seed) {
 // the wellhead (round 8). `returnPts` is the cased string sampled from heel to surface; the return term is a line
 // source around it that thins as it climbs, because the formation takes its cut on the way up.
 let RETURN_PTS = null;
-function returnTerm(p) {
-  if (!RETURN_PTS) return 0;
-  let best = Infinity, bestT = 0;
+// Nearest point on the cased string: `d` is the distance to the sheath, `t` is the position along it. MEASURED
+// (round 12d, against paths.cased at runtime): `returnPath` is handed in reversed, so RETURN_PTS[0] is the HEEL
+// and the last point is the WELLHEAD — t runs 0 at the heel to 1 at surface. (The round-8 comment here claimed
+// the opposite; the code was never changed, so the shipped return term is strongest at SURFACE, not at the
+// collar. That is an authored look Kyle has signed off, so it is left alone and described honestly instead.)
+// The static return term reads this; so does the acquire climb, which is the same line source walked in time
+// instead of held — one geometry, two uses, no second set of strokes.
+const _near = { d: Infinity, t: 0 };
+function returnNearest(p) {
+  _near.d = Infinity; _near.t = 0;
+  if (!RETURN_PTS) return _near;
   for (let i = 0; i < RETURN_PTS.length; i++) {
     const q = RETURN_PTS[i];
     const d = Math.hypot(p.x - q.x, (p.y - q.y) * 0.8, (p.z - q.z) * 1.4);
-    if (d < best) { best = d; bestT = i / (RETURN_PTS.length - 1); }
+    if (d < _near.d) { _near.d = d; _near.t = i / (RETURN_PTS.length - 1); }
   }
-  // bestT: 0 at the wellhead, 1 at the heel. Strongest where the current enters the casing, thinning to surface.
-  const climb = 0.35 + 0.65 * bestT;
-  return Math.pow(best + 0.22, -2.4) * 0.055 * climb; // a tight sheath ON the casing, not a wash across the face
+  return _near;
+}
+function returnTerm(p) {
+  if (!RETURN_PTS) return 0;
+  const n = returnNearest(p);
+  // n.t: 0 at the heel, 1 at the wellhead. Weight along the string (see the note above on its direction).
+  const climb = 0.35 + 0.65 * n.t;
+  return Math.pow(n.d + 0.22, -2.4) * 0.055 * climb; // a tight sheath ON the casing, not a wash across the face
 }
 
 // Anisotropic potential used on the CPU (for placement/orientation) — mirrored in the vertex shader.
@@ -55,7 +68,7 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
 
   // Placement: walk each plane on a jittered lattice; keep instances above a potential floor; store the
   // in-plane gradient direction so the stroke aligns with the field.
-  const positions = [], quats = [], pots = [];
+  const positions = [], quats = [], pots = [], climbTs = [], climbDs = [];
   const q = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1);
   const tmp = new THREE.Vector3(), g = new THREE.Vector3();
   function gradient(p) {
@@ -84,6 +97,9 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
     positions.push(p.clone().addScaledVector(normal, 0.012));
     quats.push(q.clone());
     pots.push(pot);
+    // Where this stroke sits on the cased string — the travelling acquire window reads these two numbers.
+    const n = returnNearest(p);
+    climbTs.push(n.t); climbDs.push(Math.min(9, n.d));
   }
   const jit = () => (rand() - 0.5) * spacing * 0.9;
   // Plane A: bench (y = BENCH_Y), normal +y
@@ -115,16 +131,19 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
     uTime: { value: 0 },
     uSealTop: { value: SEAL.topY }, uSealBottom: { value: SEAL.bottomY }, uShadow: { value: 0.65 },
     uCull: { value: 0.11 },
+    uClimbAt: { value: -1 },    // window centre along the cased string (0 = heel, 1 = wellhead); < 0 = off
+    uClimbAmp: { value: 0 },    // 0 while nothing is being acquired — this is a response, never an idle
   };
   const mat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, side: THREE.DoubleSide });
-  mat.customProgramCacheKey = () => 'candle-field-v2';
+  mat.customProgramCacheKey = () => 'candle-field-v3';
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>
         uniform vec3 uCollar; uniform float uBreath; uniform float uReveal; uniform sampler2D uProbe; uniform float uTime;
         uniform float uSealTop; uniform float uSealBottom; uniform float uShadow; uniform float uCull;
-        attribute float aPot;
+        uniform float uClimbAt; uniform float uClimbAmp;
+        attribute float aPot; attribute float aClimbT; attribute float aClimbD;
         varying float vI;
         const int SLOTS = ${PROBE_SLOTS};
         // cheap value noise, non-propagating (no r-dependent phase)
@@ -144,7 +163,15 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
             probe += smoothstep(0.9, 0.0, pd) * clamp(1.0 - p.w / 1.5, 0.0, 1.0);
           }
           probe = min(probe, 1.0);
-          float intensity = clamp(uReveal * field + probe * 0.7 * clamp(aPot * 4.0, 0.15, 1.0), 0.0, 1.0);
+          // The acquire climb: a window travelling ALONG the cased string, tight to its sheath. It is the
+          // reading leaving the collar for surface — driven only while a receiver has just been placed.
+          float climb = 0.0;
+          if (uClimbAmp > 0.0) {
+            float along = exp(-pow((aClimbT - uClimbAt) / 0.085, 2.0));
+            float sheath = exp(-pow(aClimbD / 0.42, 2.0));
+            climb = uClimbAmp * along * sheath;
+          }
+          float intensity = clamp(uReveal * field + probe * 0.7 * clamp(aPot * 4.0, 0.15, 1.0) + climb, 0.0, 1.0);
           // cull below threshold by collapsing the stroke
           float on = step(uCull, intensity);
           vI = intensity * on;
@@ -162,15 +189,20 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
   mesh.frustumCulled = false;
   const dummy = new THREE.Object3D();
   const potAttr = new Float32Array(Math.max(1, count));
+  const climbTAttr = new Float32Array(Math.max(1, count));
+  const climbDAttr = new Float32Array(Math.max(1, count));
   for (let i = 0; i < count; i++) {
     dummy.position.copy(positions[i]); dummy.quaternion.copy(quats[i]); dummy.scale.set(0.6 + rand() * 0.7, 1, 1); // stroke-length jitter: not equal dashes
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
     potAttr[i] = pots[i];
+    climbTAttr[i] = climbTs[i]; climbDAttr[i] = climbDs[i];
   }
   mesh.count = count;
   mesh.instanceMatrix.needsUpdate = true;
   geom.setAttribute('aPot', new THREE.InstancedBufferAttribute(potAttr, 1));
+  geom.setAttribute('aClimbT', new THREE.InstancedBufferAttribute(climbTAttr, 1));
+  geom.setAttribute('aClimbD', new THREE.InstancedBufferAttribute(climbDAttr, 1));
 
   // Probe ring buffer
   const probes = probeTex.image.data;
@@ -200,8 +232,12 @@ export function buildField({ collar, tier = 'high', color = '#22D3EE', returnPat
     }
     if (any) probeTex.needsUpdate = true;
   }
+  // Where on the string the reading is born: the acquire climb starts at the collar, not at the toe.
+  const collarT = returnNearest(collar).t;
   return {
-    mesh, uniforms, count, probeAt, swell, update,
+    mesh, uniforms, count, probeAt, swell, update, collarT,
+    // The travelling acquire window. amp = 0 puts it away entirely (the shader branch costs nothing then).
+    setClimb(at, amp) { uniforms.uClimbAt.value = at; uniforms.uClimbAmp.value = Math.max(0, amp || 0); },
     setReveal(v) { uniforms.uReveal.value = v; },
     setColor(c) { uniforms.uColor.value.set(c); },
     setCollar(p) { uniforms.uCollar.value.copy(p); },

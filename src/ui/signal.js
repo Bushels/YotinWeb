@@ -16,7 +16,11 @@
 // collapses to nothing, so the lesson works from first paint either way.
 import '../styles/signal.css';
 
-const WAIT_MS = 900;          // the honest wait between the act and the reading (Shop's "Hold tight")
+// The honest wait between the act and the reading (Shop's "Hold tight"). Round 12d: the wait became the show —
+// the world answers the placement with the acquire sequence (world/circuit.js: the reading climbs the cased
+// string, ~700 ms, then chart glyphs bloom at the wellhead, ~620 ms, settling at ~1.22 s). The reading lands as
+// the bloom settles, so the caption's "acquiring…" is describing something the visitor can actually watch.
+const WAIT_MS = 1500;
 const SETTLE_MS = 1300;       // the existing count-tween shape: cubic-out
 
 export function mountSignal() {
@@ -76,7 +80,13 @@ export function mountSignal() {
   function place() {
     if (S.placed) return;
     S.placed = true;
-    if (circuit) { circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true }); }
+    if (circuit) {
+      circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true });
+      // The world's answer to the act. Under reduced motion the sequence has no rise to watch, so the charts
+      // arrive already settled at the wellhead rather than being skipped — the payoff is the picture, not the
+      // animation (spec §7).
+      if (instant()) circuit.settleAcquire(); else circuit.startAcquire();
+    }
     if (placeBtn) { placeBtn.setAttribute('aria-pressed', 'true'); placeBtn.setAttribute('aria-disabled', 'true'); placeBtn.textContent = PLACED_LABEL; }
     if (resetBtn) resetBtn.hidden = false;
     stepState('02', 'done', 'placed');
@@ -158,7 +168,7 @@ export function mountSignal() {
       onActivate() { place(); },
     });
     // Carry any state the visitor already reached on the DOM-only path into the world.
-    if (S.placed) { circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true, landed: S.landed }); }
+    if (S.placed) { circuit.placeStakeAt(circuit.RECEIVER); circuit.set({ placed: true, landed: S.landed }); circuit.settleAcquire(); }
 
     // Probe on rock: click/tap, or a 200 ms dwell — never a merely travelling pointer.
     let dwellTimer = 0, lastX = 0, lastY = 0, moved = true;
@@ -179,7 +189,7 @@ export function mountSignal() {
       lastTick = now;
       const want = inChapter(w) && !S.placed;
       if (want !== footOn) { footOn = want; circuit.showFootprint(want); w.requestRender(); }
-      circuit.update(dt);
+      if (circuit.update(dt, w.camera)) w.requestRender(); // the acquire sequence keeps the on-demand renderer awake
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);

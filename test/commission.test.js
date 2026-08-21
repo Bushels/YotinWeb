@@ -16,6 +16,8 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const signalJs = fs.readFileSync(path.join(root, 'src', 'ui', 'signal.js'), 'utf8');
 const signalCss = fs.readFileSync(path.join(root, 'src', 'styles', 'signal.css'), 'utf8');
 const circuitJs = fs.readFileSync(path.join(root, 'src', 'world', 'circuit.js'), 'utf8');
+const chartsJs = fs.readFileSync(path.join(root, 'src', 'world', 'charts.js'), 'utf8');
+const chaptersJs = fs.readFileSync(path.join(root, 'src', 'chapters.js'), 'utf8');
 const interactionsMjs = fs.readFileSync(path.join(root, 'scripts', 'interactions.mjs'), 'utf8');
 
 const step = (id) => {
@@ -63,7 +65,7 @@ describe('commission the well', () => {
   });
 
   test('03 is an arrival, not an action: a short honest wait, then the digits settle and it ticks itself', () => {
-    assert.match(signalJs, /const WAIT_MS = 900;/);
+    assert.match(signalJs, /const WAIT_MS = 1500;/);
     assert.match(signalJs, /waitTimer = setTimeout\(land, WAIT_MS\)/);
     // the wait collapses where there is no world to watch (spec §7)
     assert.match(signalJs, /const instant = \(\) => reduced \|\| html\.classList\.contains\('stills-on'\)/);
@@ -121,6 +123,44 @@ describe('commission the well', () => {
       assert.ok(html.includes(beat), `"${beat}" survives`);
     }
     assert.ok(!html.includes('class="journey-list"'), 'the journey cards are gone');
+  });
+
+  // Round 12d — the acquire beat. Placing the receiver is answered by a climb up the cased string and a bloom of
+  // chart glyphs at the wellhead; the honest wait now covers that sequence instead of running out under it.
+  test('the wait covers the acquire sequence: the reading lands as the bloom settles', () => {
+    const wait = Number(signalJs.match(/const WAIT_MS = (\d+);/)[1]);
+    const climb = Number(circuitJs.match(/const CLIMB_S = ([\d.]+), BLOOM_AT = ([\d.]+);/)[1]);
+    const bloomAt = Number(circuitJs.match(/const CLIMB_S = [\d.]+, BLOOM_AT = ([\d.]+);/)[1]);
+    const delays = JSON.parse(chartsJs.match(/const DELAY = (\[[^\]]*\]);/)[1]);
+    const rise = Number(chartsJs.match(/const RISE = ([\d.]+);/)[1]);
+    const settled = (bloomAt + Math.max(...delays) + rise) * 1000;
+    assert.ok(climb > 0.5 && climb < 1, `the climb is a beat, not a wait: ${climb}s`);
+    assert.ok(wait >= settled, `the wait (${wait} ms) outlasts the bloom settling (${settled.toFixed(0)} ms)`);
+    assert.ok(wait <= 1600, 'and it is still a wait, not a loading screen');
+  });
+
+  test('no receiver, no charts: the bloom is a response to the act and it is reversible at once', () => {
+    assert.match(chartsJs, /mesh\.visible = false;/, 'the charts ship invisible — nothing is drawn until something is placed');
+    assert.match(circuitJs, /if \(wasPlaced && !state\.placed\) clearAcquire\(\);/);
+    const clear = chartsJs.slice(chartsJs.indexOf('clear()'), chartsJs.indexOf('get busy'));
+    assert.match(clear, /mesh\.visible = false/, 'lifting the receiver takes the charts away at once — no eased fade past the claim');
+    // and they are glyphs, not charts claiming data: nothing here draws text
+    assert.ok(!/fillText|strokeText|font\s*=/.test(chartsJs), 'no numbers, no axis labels — the glyphs claim nothing (§13b)');
+    // the climb reuses the field's own line source rather than inventing a second stroke set
+    assert.match(circuitJs, /island\.field\.setClimb\(/);
+  });
+
+  test('the commissioning hold is lit: chapter 3 ramps up as the pose moves to surface', () => {
+    const table = JSON.parse(chaptersJs.match(/const CH3_LIGHT = (\[\[[^;]*\]\]);/)[1]);
+    const first = table[0], last = table[table.length - 1];
+    assert.equal(first[0], 0);
+    assert.ok(first[1] <= 0.03, 'the collar reveal keeps its authored darkness — the darkest-frame contract lives there');
+    // the pose reaches signal-b at local 0.25 (chapters.js poseProgress); by the hold the lease must be lit
+    const hold = table.filter(([l]) => l >= 0.3 && l <= 0.8).map(([, v]) => v);
+    assert.ok(hold.length && Math.min(...hold) >= 0.25, `the signal-b hold reads as a dusk lease, not a void: ${hold}`);
+    assert.equal(last[0], 1);
+    assert.equal(last[1], 0.32, 'and it hands to chapter 4 at chapter 4 own ledger value, so the blend stays continuous');
+    assert.match(chaptersJs, /if \(i === 3\) out\.light = chapter3Light\(t\);/);
   });
 
   test('the interaction capture drives the new flow under the old frame names', () => {

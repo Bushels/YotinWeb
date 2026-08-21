@@ -3,6 +3,7 @@
 // the rock (pointer/tap → local field reveal with decaying memory). Everything is qualitative: no distance
 // scale, no separation axis, no S/N bar, no numbers — and the wellhead end is never labelled a "reference".
 import { ROAD_RECT, SLAB, NOTCH, BENCH_Y } from './layout.js';
+import { buildWellheadCharts } from './charts.js';
 // THREE is injected by the caller (the world chunk owns three; UI chunks must never import it — spec §6).
 
 export function createCircuit(island, THREE) {
@@ -105,12 +106,52 @@ export function createCircuit(island, THREE) {
   let loopDraw = 0; // 0..1 draw progress
   placeStakeAt(RECEIVER); // now that updateLoop exists: seats the receiver on its footprint and builds the loop
 
+  // The acquire beat (round 12d, Kyle): placing the receiver is answered by ONE sequence — the reading climbs
+  // the cased string from the collar to the wellhead, and chart glyphs unfold there. It runs once per
+  // placement, it settles, and it never idles (spec §0).
+  //
+  //   0 → 0.70 s   THE CLIMB — the field's own line-source term (field.js: the fourth plane carries the return
+  //                up the casing) walked in time: a travelling window along the sheath, collar → wellhead. No
+  //                second stroke set, no extra draw call.
+  //   0.60 → 1.22 s THE BLOOM — three chart glyphs unfold at the wellhead and hold (charts.js, one draw call).
+  //   1.50 s        the caller's honest wait (ui/signal.js WAIT_MS) ends and the reading lands.
+  const CLIMB_S = 0.70, BLOOM_AT = 0.60;
+  const charts = buildWellheadCharts(THREE, new THREE.Vector3(wellhead.x, 1.62, wellhead.z));
+  group.add(charts.mesh);
+  let acquire = -1;             // < 0: nothing is being acquired
+  function startAcquire() { if (acquire >= 0) return; acquire = 0; island.field.setClimb(island.field.collarT, 0); }
+  function settleAcquire() { acquire = 99; island.field.setClimb(-1, 0); charts.settle(); }
+  function clearAcquire() { acquire = -1; island.field.setClimb(-1, 0); charts.clear(); }
+  function stepAcquire(dt, camera) {
+    if (acquire < 0) return false;
+    let busy = false;
+    if (acquire < CLIMB_S) {
+      acquire += dt;
+      const u = Math.min(1, acquire / CLIMB_S);
+      const e = u * u * (3 - 2 * u);                                   // smoothstep: leaves the collar, arrives at surface
+      // collarT → 1: the field's string parameter runs 0 at the heel to 1 at the wellhead (measured, see
+      // field.js), so the window climbs UP from the collar to surface. Sweeping it the other way sent the
+      // reading down the hole (round 12d, caught in the frames).
+      island.field.setClimb(island.field.collarT + (1 - island.field.collarT) * e, 0.95 * Math.sin(Math.PI * Math.min(1, u * 1.08)));
+      if (acquire >= CLIMB_S) island.field.setClimb(-1, 0);             // the window is gone the moment it reaches the wellhead
+      busy = true;
+    } else if (acquire < 99) {
+      acquire += dt;
+    }
+    if (acquire >= BLOOM_AT) charts.start();
+    busy = charts.update(dt, camera) || busy;
+    return busy;
+  }
+
   // One truth, one flag: `placed` is whether a receiver stands on the lease. `landed` is whether a reading has
   // arrived — the only thing licensed to take cyan.
   const state = { placed: false, closed: false, landed: false };
   function set(next) {
-    const wasClosed = state.closed;
+    const wasClosed = state.closed, wasPlaced = state.placed;
     Object.assign(state, next);
+    // The receiver is lifted: the climb residue and the charts go AT ONCE — the same hard-reset discipline the
+    // loop already keeps, because the caption is about to say nothing is listening (round 5, round 12d).
+    if (wasPlaced && !state.placed) clearAcquire();
     state.closed = state.placed;
     stake.visible = state.placed;
     footprint.visible = footprint.visible && !state.placed;
@@ -121,12 +162,15 @@ export function createCircuit(island, THREE) {
     // reading (round 5). Closing it still eases in (update()).
     if (wasClosed && !state.closed) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); }
   }
-  function update(dt) {
-    if (!state.closed) { if (loop.visible) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); } return; }
+  // Returns true while something is still moving, so the caller can keep the on-demand renderer awake.
+  function update(dt, camera) {
+    const busy = stepAcquire(dt, camera);
+    if (!state.closed) { if (loop.visible) { loopDraw = 0; loopMat.opacity = 0; loop.visible = false; loopGeom.setDrawRange(0, 0); } return busy; }
     loopDraw += (1 - loopDraw) * (1 - Math.exp(-4 * dt));
     loopGeom.setDrawRange(0, Math.max(0, Math.round(loopDraw * loopGeom.index.count)));
     loopMat.opacity = 0.75 * Math.min(1, loopDraw * 1.4);
     loop.visible = loopDraw > 0.02;
+    return busy || loopDraw < 0.99;
   }
 
   // Probe: pointer/tap on rock → local field reveal. Cast against the four section planes.
@@ -155,5 +199,5 @@ export function createCircuit(island, THREE) {
     return null;
   }
 
-  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop };
+  return { group, stake, stakeProxy, whProxy, receiverProxy, RECEIVER, state, set, update, placeStake, placeStakeAt, showFootprint, highlightFootprint, get sep() { return sep; }, probe, updateLoop, charts, startAcquire, settleAcquire, clearAcquire };
 }

@@ -11,7 +11,7 @@ export const CHAPTERS = [
   { id: 'surface',    section: '.hero',              dwell: 1.0, world: { light: 1.0,  cutaway: 0.0, candle: 0.1,  field: 0.0, wind: 0.6, flow: 0.25, fog: 0.0 } },
   { id: 'descent',    section: '[data-chapter="descent"]',    dwell: 1.5, world: { light: 0.38, cutaway: 0.6, candle: 0.12, field: 0.0, wind: 0.2, flow: 0.3, fog: 0.02 } },
   { id: 'tool',       section: '[data-chapter="tool"]',       dwell: 1.4, world: { light: 0.24, cutaway: 0.85, candle: 0.12, field: 0.0, wind: 0.05, flow: 0.2, fog: 0.03 } },
-  { id: 'signal',     section: '[data-chapter="signal"]',     dwell: 1.6, world: { light: 0.03, cutaway: 0.9, candle: 1.0,  field: 1.0, wind: 0.0, flow: 0.0, fog: 0.05 } },
+  { id: 'signal',     section: '[data-chapter="signal"]',     dwell: 1.6, world: { light: 0.03, cutaway: 0.9, candle: 1.0,  field: 1.0, wind: 0.0, flow: 0.0, fog: 0.05 } }, // light 0.03 is this chapter's FIRST beat only — see CH3_LIGHT below, which ramps it to dusk for the surface hold
   { id: 'deployment', section: '#insight',           dwell: 1.5, world: { light: 0.32, cutaway: 0.95, candle: 0.15, field: 0.05, wind: 0.05, flow: 0.25, fog: 0.03 } },
   { id: 'yotin',      section: '#company',           dwell: 1.0, world: { light: 0.75, cutaway: 0.2, candle: 0.1,  field: 0.0, wind: 1.0, flow: 0.5, fog: 0.0 } },
   { id: 'fit',        section: '#contact',           dwell: 1.3, world: { light: 0.42, cutaway: 0.8, candle: 0.12, field: 0.2, wind: 0.15, flow: 0.25, fog: 0.02 } },
@@ -64,6 +64,33 @@ export function poseProgress(p) {
   return 7 + Math.min(1, (p - 5.8) / 0.2);     // ease into fit
 }
 
+// The chapter-3 light rises WITH THE POSE (round 12d). One channel value cannot serve both halves of this
+// chapter: the first beat is the collar close-up, authored as the darkest frame on the site so the candle is
+// unambiguously the brightest thing in it; but by the commissioning hold (poseProgress has moved to signal-b,
+// the camera at surface) the visitor is being asked to SEE a footprint on the pad and put a receiver on it, and
+// 0.03 renders that lease as a void. The curve below is keyed to chapter-LOCAL progress, and its endpoints are
+// the ledger's own values (0.03 at l = 0, chapter 4's 0.32 at l = 1), so the blend either side stays continuous.
+//
+// The knots are measured, not guessed: the chapter ANCHOR (which frames.mjs captures as ch3, and which the
+// candle gate reads) sits at l = 0, and the commissioning card centres at l = 0.215 — so the ramp has to be
+// finished by 0.20, not merely started.
+//
+//   l ≤ 0.05   0.03  the collar reveal — untouched; the darkest-frame contract lives here
+//   l = 0.18   0.30  signal-b has arrived (the pose completes at l = 0.25): pad, tanks, road, footprint read as dusk
+//                    (phones centre the card at l = 0.095, where the pose is still mid-move and only a ~55 px
+//                     strip of world shows above the card — it reads at ~0.12 there, dusk-ward but not full)
+//   l ≤ 0.80   0.30  held through the commissioning act and the acquire beat
+//   l = 1.00   0.32  hands to chapter 4 at chapter 4's own value
+const CH3_LIGHT = [[0, 0.03], [0.05, 0.03], [0.18, 0.30], [0.8, 0.30], [1, 0.32]];
+function curveAt(table, l) {
+  for (let i = 1; i < table.length; i++) {
+    const [x1, y1] = table[i], [x0, y0] = table[i - 1];
+    if (l <= x1) { const u = x1 === x0 ? 1 : (l - x0) / (x1 - x0); return y0 + (y1 - y0) * u * u * (3 - 2 * u); }
+  }
+  return table[table.length - 1][1];
+}
+export function chapter3Light(local) { return curveAt(CH3_LIGHT, Math.min(1, Math.max(0, local))); }
+
 // Interpolate adjacent chapter channel values.
 const lerp = (a, b, t) => a + (b - a) * t;
 export function worldAt(p) {
@@ -72,6 +99,7 @@ export function worldAt(p) {
   const a = CHAPTERS[i].world, b = CHAPTERS[Math.min(CHAPTERS.length - 1, i + 1)].world;
   const out = {};
   for (const k of Object.keys(a)) out[k] = lerp(a[k], b[k] ?? a[k], t);
+  if (i === 3) out.light = chapter3Light(t);
   return out;
 }
 
