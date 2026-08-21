@@ -43,6 +43,28 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 5 — round 13: the five-critic panel (2026-08-20–21)
+
+First round with the expanded bench: 2× Opus craft @ medium, Opus truth @ high, Codex, and **Grok
+(CLI, debut)** as the brutal-skeptic lens; Gemini/Antigravity sat out (headless auth still pending).
+Scores 6.5–7.8, no stop. 8 confirmed / 2 refuted by verification. First four-of-five convergence:
+the 12d chart glyphs (sparkline shapes are banned by §0 regardless of printed values — the brief's
+"abstract glyphs" reading was wrong). Grok's debut earned its seat: "commissioned is an ops word —
+this is a demo click", the step-01/03 contradiction, and "a vendor imagining SCADA".
+
+- **233bca2** — the fixes: charts → an instrument panel face standing on the receiver (Kyle's
+  pick of four options); the ch3 field became a dipole with a measured null plane (sector
+  min/max 329, firework px 10,572 → 619) with the casing sheath as honest dominant; one
+  source of truth for pump positions (all runnable, angles measured on the authored curve);
+  ch4 figure regraded + captioned; ch1 scrim feathered; commissioning copy passes the foreman
+  test ("Receiver on the pad. Reading at surface."); phone one-tap fit chip restored;
+  evidence gaps closed (acquire-settled, ch5-facts, rm walks all seven chapters).
+- Refuted by verification: the wash-seam claim (edge-response measured clean) and the at-spec
+  framing (overstated). Wabiskaw omission ruled defensible against Kyle's own strat chart.
+- Panel lessons: two identical-effort craft critics again found different P1 sets (diversity >
+  effort, third confirmation); external critics' P1s verified in-place by the implementer
+  worked well; Grok CLI = grok --single, foreground to a file, same discipline as Codex.
+
 ## Era 4 — Kyle's live walkthrough, rounds 11–12 (2026-08-20)
 
 The owner walked the site chapter by chapter and drove two days of fixes. Pattern: Kyle's verbatim
