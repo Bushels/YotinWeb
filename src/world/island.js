@@ -6,7 +6,7 @@
 // chapter's `flow` channel says so.
 import * as THREE from 'three';
 import { COLORS } from './layout.js';
-import { cycleState } from './cycle.js';
+import { cycleState, smooth } from './cycle.js';
 import { DEFAULT_WELLFI_VIEW, buildWellPaths, getWellFiPlacement } from './wellPath.js';
 import { createPulseMaterial } from './pulseMaterial.js';
 import { buildTerrain } from './terrain.js';
@@ -95,8 +95,17 @@ export function buildIsland({ tier = 'high', view = DEFAULT_WELLFI_VIEW } = {}) 
     // Golden hour is an authored light, not a lottery: the 12 s ambient cycle used to swing the key by 45 %, so the
     // hero could be seen (and captured) at a dim phase — measured darker than the deliberately darkest chapter
     // (round 6). The cycle now shapes the light; it no longer decides it.
-    sun.intensity = 0.1 + 3.6 * L * (0.82 + 0.18 * s.sun);
-    hemi.intensity = 0.16 + 0.95 * L * (0.78 + 0.22 * s.sky) + 0.05;
+    // Hero lift (Kyle, round 13a: "it is still pretty dark to see when the page first loads"). The first
+    // impression needed to be lighter without relighting the site, so the lift is gated to the TOP of the light
+    // channel — smooth(0.80, 1.0, L) is 1 only at chapter 0's L = 1.0 and is already 0 by L = 0.80, which is
+    // above every other chapter's value (ch5 yôtin is 0.75, ch6 fit 0.42, ch1 0.38, ch2 0.24, ch3 0.03). The
+    // authored darkness of chapters 1–3 and the round-12d ch3 curve landing 0.03 at the anchor are untouched,
+    // and the ramp is continuous into chapter 1 (it closes inside the first third of the 1.0 → 0.38 blend).
+    // Both lamps are lifted together and the low raking sun keeps the key, so this is golden hour turned up,
+    // not noon.
+    const heroLift = smooth(0.80, 1.0, L);
+    sun.intensity = 0.1 + 3.6 * L * (0.82 + 0.18 * s.sun) + 1.45 * heroLift;
+    hemi.intensity = 0.16 + 0.95 * L * (0.78 + 0.22 * s.sky) + 0.05 + 0.72 * heroLift;
     rim.intensity = 0.12 + 0.26 * (1 - L); // the rim separates silhouettes; it must not become the key light as L → 0 (round 5)
     const flow = channels.flow ?? L;
     const flowTime = elapsed % 20;

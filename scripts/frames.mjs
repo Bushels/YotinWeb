@@ -68,7 +68,7 @@ if (worldOn) {
   // present and lit) and every other chapter's frame carries none outside the rail column (the collar is sand)
   try {
     const sharp = (await import('sharp')).default;
-    const cyanCount = async (file, x0, y0 = 90) => { // y0: skip the header band (the logomark earns cyan after the circuit closes)
+    const cyanCount = async (file, x0, y0 = 90) => { // y0: skip the header band (the brand logomark is true-colour brand identity, exempt from the budget — round 13a)
       const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
       let n = 0, peak = 0;
       for (let y = y0; y < info.height; y++) for (let x = x0; x < info.width; x++) {

@@ -232,22 +232,6 @@
 
 <body id="top" data-chatfi-api="https://chatfi-server-851855129205.us-central1.run.app">
   <a class="skip-link" href="#main">Skip to content</a>
-  <!-- Pre-signal Yotin lockup filter (spec §13b, one-candle rule). The horizontal lockup is two wind strokes —
-       a warm one (#EB6B24, the brand's own ember) and a cool one (#3CB4C4 teal, which the ENERGY word now
-       shares) — beside a sand wordmark. Teal in the mark is reserved for AFTER the circuit closes, so before
-       the signal arrives the warm stroke renders in full brand colour and the cool stroke waits in sand. This
-       is a single linear colour map (no offsets, sRGB) refitted to THIS asset, exact on three constraints:
-       ember #EB6B24 → itself, teal #3CB4C4 → sand #D5C9B3, wordmark sand #E8DCC8 → itself. Black maps to
-       black with no offset, so the shadow keyline stays dark. When html.signal-received is set the filter is
-       dropped and the teal arrives. -->
-  <svg class="brand-filter" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
-    <filter id="yotin-presignal" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix" values="-1.34330  6.71838 -4.67199 0 0
-                                           -0.32163  1.92213 -0.64125 0 0
-                                            0.26037 -0.74649  1.51911 0 0
-                                            0        0        0       1 0"/>
-    </filter>
-  </svg>
   <div class="scroll-rail" aria-hidden="true"></div>
   <!-- The persistent world: one fixed canvas behind the semantic DOM (spec §2). Decorative — every word,
        control and claim lives in the DOM below. Hidden unless the capability gate stamps html.world-on. -->
@@ -263,9 +247,9 @@
     <div class="shell header-inner">
       <a class="brand-mini" href="#top" aria-label="Yotin Energy — home">
         <!-- The real horizontal lockup (Kyle, 2026-08-20). It carries the wordmark, so the typed YOTIN is
-             gone; the tagline stays because the lockup does not carry it. The navy wordmark is baked to sand
-             for the near-black header and the cool strokes are one brand teal, which is what #yotin-presignal
-             maps to sand until the circuit closes (src/styles/signal.css). -->
+             gone; the tagline stays because the lockup does not carry it. It renders in the source asset's
+             TRUE brand colours — ember stroke and teal stroke — from first paint (Kyle, round 13a); the one
+             bake is the navy wordmark to sand, because navy is unreadable on the near-black header. -->
         <picture class="brand-lockup">
           <source srcset="/assets/yotin-logo.webp" type="image/webp">
           <img src="/assets/yotin-logo.png" alt="" width="329" height="96" fetchpriority="high" decoding="async">

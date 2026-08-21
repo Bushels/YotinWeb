@@ -87,7 +87,7 @@ describe('commission the well', () => {
     assert.match(reset, /stepState\('02', 'todo'/);
     assert.match(reset, /stepState\('03', 'todo'/);
     assert.ok(!/stepState\('01'/.test(reset), '01 stays ticked — it was never ours to undo');
-    assert.ok(!/signal-received/.test(reset), 'the logomark keeps its cyan for the session (spec §12)');
+    assert.ok(!/signal-received/.test(reset), 'the session remembers the arrival — signal-received is never taken back');
   });
 
   test('one-candle: cyan appears in chapter 3 only at the arrival — the 03 tick and the digits', () => {

@@ -97,10 +97,9 @@
 .readout-foot { margin: 12px 0 0; opacity: 0; transition: opacity 420ms ease; }
 .readout-foot[data-arrived] { opacity: 1; }
 
-/* The lockup receives the signal (spec §12/§13b): the mark's WARM stroke carries its own brand ember from
-   first paint (Kyle, round 11: "the Yotin logo on the header isn't in color") while its COOL stroke waits in
-   sand — the one-candle rule reserves teal/cyan for after the circuit closes. #yotin-presignal (index.html)
-   is the linear colour map that does exactly that; dropping it lets the teal arrive. */
-html.world-on .brand-mini img, html.world-on .footer-brand img { filter: url(#yotin-presignal); transition: filter 400ms ease; }
-html.signal-received .brand-mini img, html.signal-received .footer-brand img { filter: none; }
-html.stills-on .brand-mini img, html.stills-on .footer-brand img { filter: none; }
+/* The brand logomark is brand identity, not scene colour (Kyle, round 13a — second flag): the Yotin lockup
+   renders in its TRUE brand colours from first paint, warm ember stroke AND teal stroke, exactly as the
+   source asset has them. It is exempt from the one-candle cyan budget (spec §6/§13b). The round-12a
+   #yotin-presignal colour map that held the teal back until the circuit closed has been retired; the only
+   bake that survives lives in the asset itself — the navy wordmark is sand, because navy is unreadable on
+   the near-black header. */

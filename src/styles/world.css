@@ -28,8 +28,23 @@ html.world-on .contact-section,
 html.world-on .site-footer { background: transparent; }
 
 /* The legacy hero scene (poster + iframe slot) fades out once the world is live; the poster stays as LCP
-   and as the fallback for a lost context. */
-html.world-on .hero-scene { transition: opacity 800ms ease; }
+   and as the fallback for a lost context.
+   Round 13a — the boot "reposition": the legacy hero box is an art-directed crop (top -20px, right -190px,
+   114vw wide, 16/9) that suited the old flat hero. On the world path the same ch0 frame is then replaced by a
+   FULL-VIEWPORT render, so the 800 ms crossfade slid and rescaled the island — Kyle read that as the world
+   loading in one place and repositioning when it started to animate. On this path the poster therefore takes
+   the canvas's own box (fixed, inset 0, cover — exactly what .stills-img does), so the handover is a pure
+   fade with no geometry change. The stills / no-WebGL page keeps the legacy crop. */
+html.world-on .hero-scene {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  transition: opacity 800ms ease;
+}
 html.world-live .hero-scene { opacity: 0; pointer-events: none; }
 html.world-lost .hero-scene { opacity: 1; }
 html.world-on .hero { background: transparent; }

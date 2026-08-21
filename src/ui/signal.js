@@ -1,7 +1,7 @@
 // Chapter 3 UI (spec §4 row 3, §5, §12): "Commission the well" — a three-item commissioning list the visitor
 // finishes by doing ONE thing, the surface readout whose digits appear for the first time when the reading
 // lands (tabular settle, no scramble), the probe on rock (click/tap or 200 ms dwell — never a travelling
-// pointer), and the logomark receiving the signal.
+// pointer), and the session remembering that a reading arrived.
 //
 //   01  already true when they arrive from chapter 2; renders ticked and settles once when ch. 3 is reached.
 //   02  the one invited action: a pre-lit footprint on the pad, clicked in the world or through its twin.
@@ -111,7 +111,8 @@ export function mountSignal() {
     if (circuit) circuit.set({ landed: true });
     if (!landedOnce) {
       landedOnce = true;
-      html.classList.add('signal-received');   // the logomark keeps its cyan for the session (spec §12)
+      html.classList.add('signal-received');   // the session remembers the arrival (the ChatFi launcher warms; the
+                                               // brand logomark is true-colour from first paint, round 13a)
       world && world.island.field.swell();
       world && world.track && world.track('hotspot_activate', { id: 'reading-landed', input: 'state' });
     }

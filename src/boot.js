@@ -132,7 +132,10 @@ export function bootWorld() {
     timer.update();
     const dt = Math.min(timer.getDelta(), 1 / 30);
     const elapsed = timer.getElapsed();
-    if (arriving > 0) { arriving--; conductor.jumpTo(); lastState = conductor.getState(); }
+    // Boot has no fly-in (round 13a): until the first frame has painted, smooth is pinned to exact, so the
+    // FIRST visible frame is already the authored pose for wherever the page actually is — including a reload
+    // that restores a mid-page scroll, and including the anchor re-measure that fonts/images trigger.
+    if (arriving > 0 || !firstFrame) { if (arriving > 0) arriving--; conductor.jumpTo(); lastState = conductor.getState(); }
     const st = lastState || conductor.getState();
     const p = st.smooth;
     const w = worldAt(p);
@@ -152,7 +155,6 @@ export function bootWorld() {
     }
     dirty = false;
   }
-  renderer.setAnimationLoop(frame);
   document.addEventListener('visibilitychange', () => {
     running = !document.hidden;
     if (running) { timer.reset?.(); renderer.setAnimationLoop(frame); } else { renderer.setAnimationLoop(null); }
@@ -173,7 +175,21 @@ export function bootWorld() {
   }, true);
   window.addEventListener('hashchange', hardCut);
   if (location.hash && location.hash.length > 1) hardCut();
+  // Order matters (round 13a): the conductor measures the anchors and reads the scroll position BEFORE the
+  // render loop is armed, so the first frame() call already has a real state to pose from instead of the
+  // zero-state default. Previously this depended on rAF callback ordering.
   conductor.start();
+  // Scroll restoration and the load event can land AFTER boot on a reload. Re-measure and hard-set (no damped
+  // glide) if that happens before the world has settled — otherwise the world flies from chapter 0 to wherever
+  // the browser put the page.
+  const bootAt = performance.now();
+  const restore = () => {
+    if (firstFrame && performance.now() - bootAt > 700) return;
+    conductor.measure(); conductor.jumpTo(); lastState = conductor.getState(); dirty = true;
+  };
+  addEventListener('load', restore);
+  addEventListener('pageshow', restore);
+  renderer.setAnimationLoop(frame);
 
   const api = {
     renderer, scene, camera, rig, island, conductor, interactions, track, THREE,
