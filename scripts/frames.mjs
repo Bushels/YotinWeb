@@ -11,7 +11,17 @@ const out = args.out || 'scratch/frames';
 const W = Number(args.w || 1440), H = Number(args.h || 900);
 fs.mkdirSync(out, { recursive: true });
 
-const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+// --disable-lcd-text: the candle gate below reads screenshot pixels, and this is the only harness that shoots
+// the DOM chrome as well as the canvas (stills.mjs clips to the canvas box, so colour-gate.mjs never saw this).
+// Chromium on Windows rasterises text with LCD SUBPIXEL antialiasing — the page asks for grayscale via
+// -webkit-font-smoothing, which only macOS honours — so each sand glyph edge is built from a red-fringed and a
+// CYAN-fringed pixel, e.g. rgb(3,125,163) at sat 0.98 / L 0.40, which clears the cyan predicate outright. The
+// mobile chapter eyebrow's baseline lands at y = 90-92, one pixel inside the gate's header skip, so the phone
+// run scored stray "cyan" at EVERY chapter (ch0/1 13 px, ch4/5 31, ch6 29, and ch2 55 — the longest eyebrow
+// string, "TOOL | INTERMEDIATE SHOE" — which tripped the 40 px threshold). None of it is the world: grayscale
+// AA drops all six non-signal chapters to exactly 0 and moves ch. 3 by 0.6 % (6851 -> 6808). The gate now
+// measures the world's colour instead of the capture host's font renderer.
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--disable-lcd-text'] });
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: args.reduced ? 'reduce' : 'no-preference' });
 const page = await ctx.newPage();
 const logs = [];
