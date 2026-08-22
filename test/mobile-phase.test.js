@@ -66,9 +66,14 @@ test('DESKTOP IS UNTOUCHED — the mobile fix is invisible to every desktop fram
     const a = worldAt(q), b = worldAt(q, false);
     for (const k of Object.keys(a)) assert.equal(a[k], b[k], `worldAt.${k} diverged at p = ${q.toFixed(3)}`);
   }
-  // chapters 0,1 and 3..6 must be identical on BOTH paths — only chapter 2 is allowed to differ on a phone
+  // chapters 0, 1, 3, 5 and 6 must be identical on BOTH paths. Chapter 2 is allowed to differ (this round's
+  // fix) and, from round 19, so is chapter 4 — the same mobile phase rule applied to the fluid-level
+  // instrument, pinned in its own right by test/mobile-window.test.js. The WORLD CHANNELS are still asserted
+  // identical at p = 4.5: chapter 4 gets a pose hold and no light hold, so nothing but the camera may move.
+  for (const p of [0.5, 1.5, 3.5, 5.5, 6]) {
+    assert.equal(poseProgress(p), poseProgress(p, true), `only chapters 2 and 4 may differ on mobile (p = ${p})`);
+  }
   for (const p of [0.5, 1.5, 3.5, 4.5, 5.5, 6]) {
-    assert.equal(poseProgress(p), poseProgress(p, true), `only chapter 2 may differ on mobile (p = ${p})`);
-    assert.deepEqual(worldAt(p), worldAt(p, true), `only chapter 2 may differ on mobile (p = ${p})`);
+    assert.deepEqual(worldAt(p), worldAt(p, true), `no world channel may differ on mobile outside chapter 2 (p = ${p})`);
   }
 });

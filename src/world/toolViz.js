@@ -440,8 +440,22 @@ export function createToolViz(world) {
       const cx = Math.min(maxX, Math.max(minX, x)), cy = Math.min(maxY, Math.max(minY, y));
       if (cap === surfaceCaption) {
         const overCopy = !!copyRect && cy > copyRect.top - 8 && cy < copyRect.bottom + 8;
-        el.style.visibility = overCopy ? 'hidden' : '';
-        if (overCopy) continue;
+        // Round 19: the same round-17 rule, extended to the surfaces that now pass beneath this caption.
+        // The phone chapter-4 pose was re-composed so the fluid level is in frame, which brings the wellhead
+        // this caption is anchored to down from fy −0.24 (off the top, so it used to clamp to y 124 and point
+        // at nothing) to fy 0.50 — i.e. behind the chapter's own control card, where it landed ON the fluid
+        // slider (measured at 440×956, pump-off: caption top 399, track top 386). A label over the wrong thing
+        // hides rather than clamps. Full rect containment, not the side chips' half-test: on desktop the
+        // caption sits at x 844.9 against panels that end at x≈772, so round 17's verified desktop case is
+        // outside the rect either way. Gated to ≤ 820 px all the same: at other desktop scroll positions the
+        // caption clamps to (300, 124), which IS inside the desktop panels' rect, and hiding it there would be
+        // a desktop behaviour change this round has no licence to make. Flagged, not fixed: by the round-14
+        // rule that clamped desktop label is pointing at nothing and probably should hide too.
+        // The level chips keep their own `sideRect` test untouched; unioning in the other direction is what
+        // round 17 warned against.
+        const overPanel = W <= 820 && !!sideRect && cx > sideRect.left - 8 && cx < sideRect.right + 8 && cy > sideRect.top - 8 && cy < sideRect.bottom + 8;
+        el.style.visibility = (overCopy || overPanel) ? 'hidden' : '';
+        if (overCopy || overPanel) continue;
       }
       el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px) translate(-50%, -100%)`;
       el.classList.toggle('is-clamped', cx !== x || cy !== y);

@@ -111,6 +111,28 @@ html.tool-orbit.tool-orbit-drag main { cursor: grabbing; }
    fold. The horizontal padding, the range's 44 px minimum and everything above the block are untouched (the
    device banner and the heading stack sit exactly where they did: 586.6-779.5 and 121-558.6). */
 @media (max-width: 820px) { .deploy-controls { grid-template-columns: 1fr; margin-top: 12px; padding: 10px 20px; gap: 8px 32px; } .fluid-level input[type="range"] { margin-top: 2px; } }
+/* Round 19, Kyle's on-device walkthrough: "Same with the fluid level slider, I can't see the fluid level on
+   mobile." Measured, settled, at the station where the slider is centred: the level rule projects to x −139
+   (440×956), −92 (440×758), −139 (390×844) — OFF THE LEFT EDGE by 90–170 px at every phone geometry, through
+   the whole span in which the slider can be reached, while the viewport itself is painted DOM edge to edge
+   (device figure, this block, the portal note). It is not an occlusion: the visitor drags a level that is not
+   in the picture.
+   The band goes BELOW this block, not above it: everything above `.deploy-controls` is exactly where round 17
+   left it, so the round-17 arrival guarantee (track and both end labels inside the fold at the chapter-4
+   anchor: 930.1 / 946.1 at 440×956) is untouched — verified after this change. `.portal-note`'s own 20 px top
+   margin simply collapses into it. Desktop keeps the beside-the-figure composition it was authored with. */
+@media (max-width: 820px) {
+  html.world-on .deploy-controls { margin-bottom: 30svh; }
+  /* …and the block that sits above that band must not GROW into it. Measured: the moment the slider is first
+     released, the trend ghost row (22 px) and the settled readout (70 px at 440, 87.6 px at 390 where the
+     figures line wraps) appear, so `.fluid-level-wrap` goes 95.6 → 195.6 / 213.2 px and everything below it —
+     the world band included — drops 100–118 px on screen while the visitor is still dragging. That put the
+     level's above-pump end back behind the card's own lower edge (measured 100 % covered at 440×956), and it
+     is a 118 px reflow under a finger mid-gesture in its own right. The space is reserved instead, sized on the
+     worst of the three gated geometries, so the instrument's geometry is the same before and after it is used
+     and the band underneath never moves. Nothing above the track moves, so round 17's arrival numbers hold. */
+  html.world-on .fluid-level-wrap { min-height: 214px; }
+}
 .deploy-xray { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
 .fluid-level { display: block; font: 500 11px/1.6 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .fluid-level > span { display: block; }

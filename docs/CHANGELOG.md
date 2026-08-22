@@ -42,6 +42,63 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 10 — round 19: Kyle's walkthrough — see what you just did (2026-08-21, session 3)
+
+Kyle walked the live site on his iPhone 17 Pro Max (approving the round-18 ripple on the way:
+"It works! Well done and I love it") and found three things, his words verbatim in the batch
+brief: the placed receiver — "I can't visually see it, would need a gap"; "same with the fluid
+level slider"; and "'Why Operators Run it' covers overtop of 'Benefits of WellFi'". One
+diagnose-and-author batch at high effort. Owner walkthroughs outrank rounds — verification went
+into mechanism and fix, not existence.
+
+- **Receiver visibility (P1)**: pure geometry — the commissioning card is 560 px of a ≤956 px
+  screen with 264 px below its button; desktop has a free right COLUMN, a phone has a free
+  BAND, and the mobile signal-b endpoint aimed the receiver dead centre behind the card. Fix in
+  Kyle's stated direction: a 30svh gap under `.commission-block` (zero DOM — stills/no-JS
+  byte-identical) + `POSES[4].mobile` re-composed OFFLINE by landmark projection (projector
+  validated ≤3 px against browser measurements). After: receiver, footprint and chart bloom
+  0 % covered at 440×956, Safari-bar-out AND 390×844; the place→line→2600 kPa beat intact.
+  Free win: the footprint's world-side tap now places the receiver on phones for the first time.
+- **Fluid level visibility (P1)**: not occlusion — OFF-FRAME (level rule at x −139/−92/−139)
+  and drifting ~250 px vertically because ch4's pose interpolates under a 3.4-viewport phone
+  chapter. Fix: **CH4_HOLD 0.38** (round-16's CH2_HOLD pattern applied to its sister chapter),
+  `POSES[5].mobile` re-composed offline, a 30svh gap BELOW `.deploy-controls` (round-17 arrival
+  preserved to 0.2 px), reserved min-height for the trend/readout rows (measured: the block
+  grew 100–118 px UNDER THE FINGER on first release), and the pump-off caption hides over ch4's
+  own panels (mobile-gated). After: level tick 0 % covered across the whole travel, all three
+  geometries.
+- **Eyebrow over Benefits (P2)**: REPRODUCED in emulation after all — round 17 measured
+  boxes; measured in PIXELS, the H2's cap-half sat at 0.526 of its base-half luminance.
+  Mechanism, two faults compounding: `display:inline` silently voids the eyebrow's 18 px
+  bottom margin (1.6 px text gap), and `isolation: isolate` trapped the z-index:-1 wash
+  ::before inside the eyebrow's own stacking context — its 28 px bottom bleed painted OVER the
+  H2's caps at Benefits, #insight and the qualifier. Fix: **one deleted declaration** — the
+  wash returns to the ancestor's negative-z level and paints as ground (after == wash-deleted
+  control, 0.997 vs 0.996). The implementer's own first fix (34 px of flow spacing) was
+  disproven by its own measurement — it pushed round-17's end labels 34 px below the fold —
+  reverted and flagged.
+- Riding in the same push: **the overUI consolidation** (`22f796c`, Kyle-initiated via the
+  background-task chip, its own session) — five drifted over-UI selector lists became one
+  discipline (`src/ui/overUI.js`). Round-19 gates ran on the combined tree.
+- Gates: 167/167 (7 new: the CH4 hold, both mobile endpoints as literals, continuity, and two
+  DESKTOP-IS-UNTOUCHED guards), budget, colour with pose fingerprint UNCHANGED (desktop
+  bit-identical — no stills regeneration), rm, scroll (390×844 grew 13.44 → 14.14 of the 14.7
+  cap — inside it, cap not re-pinned), runtime identical. mobile-phase.test's poseProgress
+  list now reads "chapters 2 and 4"; its worldAt half unchanged and still asserted.
+- **Lessons**: measure PIXELS, not boxes, when the claim is "covers overtop" — round 17's
+  box-measure refutation of this exact spot was wrong in substance; a phone chapter several
+  viewports tall needs the pose-hold pattern wherever a control drives a world target (ch2
+  round 16, ch4 now — check ch3's beats if one ever gains a slider); reserve space for
+  state-dependent readouts so a control never grows under the finger.
+- Flagged, not fixed: the authored 18 px eyebrow margin is still void (1.6 px text gap;
+  restoring costs 18–34 px per head and undoes round-17's ch4 arrival — owner call); the
+  DESKTOP pump-off caption clamps into the desktop panels' rect (round-14-rule candidate,
+  needs its own licence); usable-station latitude at the two new beats is 90–150 px (bounded
+  by band minus stack height — widening costs scroll budget); the phone ch4 frame has never
+  contained the tool (pre-existing — the x-ray "two legs" beat has nothing on screen there);
+  `.commission-block`'s new band is probe-list UI, so a tap there places the receiver but
+  never probes rock (the round-18 transparent-container tension, now with a second instance).
+
 ## Era 9 — round 18: the world answers the thumb (2026-08-21, session 3)
 
 Kyle asked why the desktop easter eggs — the pointer parting the spruce, the micro-parallax,

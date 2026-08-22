@@ -287,7 +287,20 @@ html.world-on .signal-stage { margin-top: 16px; padding: 20px 22px; }
 /* Short laptops: the checklist takes less of the viewport so the candle keeps its clearance above it (round 5). */
 @media (max-height: 820px) { html.world-on .commission-block { min-height: calc(140svh - var(--header-h, 72px) - 44px); } }
 @media (max-width: 820px) {
-  html.world-on .commission-block { min-height: 0; padding-top: 30svh; align-content: start; }
+  /* Round 19, Kyle's on-device walkthrough: "The commission the well section where you place the receiver on
+     the pad, I can't visually see it, would need a gap to actually see it on mobile."
+     Measured, settled, at 440x956: the receiver plants at (373, 350) — inside the commissioning card, whose
+     phone ground is rgba(3,7,11,0.72), under step 02's own body copy. Same at 440x758 (374, 341) and at
+     390x844 (361, 370). The card is 560 px of a 758–956 px screen and it extends 264 px BELOW the button, so
+     no scroll position exists at which the act and its consequence share open screen: the two open bands at
+     the act are 35 px above the card and 32 px below it.
+     Desktop has never had this problem because its commission block is `max-width: min(720px, 60%)` and the
+     pose puts the circuit in the free RIGHT column (measured: receiver x 1084 of 1440). A phone has no free
+     column — it has a free BAND. So the block gets one, below the card, the mirror of the 30svh band it
+     already opens above; and the mobile signal-b endpoint is re-composed offline to aim the circuit into it
+     (src/chapters.js). The band is a hole in the copy stack, not a new element: nothing is added to the DOM,
+     so the stills path and the no-JS page read exactly as before. */
+  html.world-on .commission-block { min-height: 0; padding-top: 30svh; padding-bottom: 30svh; align-content: start; }
   /* Chapter 2: the tool shows before the cards (S1 world band). 38 vh put "Explore your data" 190 px below the
      last scanline the tool renders on a 390 × 844 phone — a thin strip of world and then a void, which is what
      read as letterboxing (round 9). 26 vh brings the copy up to ~40 px under the tool, the same relationship
@@ -536,7 +549,7 @@ html.world-on .commission-state { white-space: nowrap; }
   html.world-on .contact-grid .eyebrow,
   html.world-on .drill-fallback-head .eyebrow {
     position: relative;
-    isolation: isolate;
+    /* NO `isolation: isolate` here — see the round-19 note below. It is the whole defect. */
     display: inline;
     padding: 3px 9px;          /* unchanged from round 7: the ground moved out of the box, the box did not move */
     background: none;
@@ -552,4 +565,35 @@ html.world-on .commission-state { white-space: nowrap; }
     -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, #000 34px, #000 calc(100% - 34px), rgba(0, 0, 0, 0) 100%);
     mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, #000 34px, #000 calc(100% - 34px), rgba(0, 0, 0, 0) 100%);
   }
+  /* Round 19 — the collision Kyle found at Benefits ("The 'Why Operators Run it' covers overtop of 'Benefits
+     of WellFi'"), and why one deleted declaration is the whole fix.
+
+     The wash is authored to bleed 28 px BELOW the eyebrow's line box so its feather can reach zero (§13b rule 3:
+     grounds are washes, never panes). Where that 28 px lands is the following H2's cap line — measured, settled,
+     identical at 440x956 / 440x758 / 390x844: the wash's bottom edge sits 29.4 px past the Benefits H2's first
+     glyph row, 28.4 px past the #insight H2's and 20.4 px past the qualifier H2's. (`.section-intro`'s eyebrow
+     is a grid item, so it is blockified, keeps its 18 px block margin and clears by 26 px.)
+
+     A ground UNDER the title is exactly what a copy ground is for. The defect was that it was not under it:
+     `isolation: isolate` made the eyebrow a stacking context, which trapped its `z-index: -1` ::before inside
+     that context — and the eyebrow is `position: relative`, so the whole packet then painted in the
+     positioned-descendant step, ABOVE the H2's in-flow inline text. Near-black at 0.92 alpha, over the caps of a
+     32 px title. Without `isolation`, `position: relative; z-index: auto` establishes no stacking context, the
+     ::before goes into the negative-z level of the nearest ancestor context, and it paints as a ground: after
+     the canvas, before every glyph.
+
+     Measured in PIXELS at 440x956, brightest-per-row across the H2's own x span, cap half vs base half of the
+     glyph rows (scratch/r19/iso-test.mjs):
+
+       before (isolation: isolate)   cap 99.7 · base 189.4 · ratio 0.526   ← the top half of the title, halved
+       after  (no isolation)         cap 239.7 · base 240.4 · ratio 0.997
+       control (wash deleted)        cap 239.7 · base 240.5 · ratio 0.996  ← after == control, exactly
+
+     Zero layout change: no margin, no padding, no reflow, nothing moves by a pixel on any path or any viewport,
+     so chapter 4's round-17 arrival guarantee and the scroll-length gate are untouched. Desktop never had the
+     defect — the whole wash mechanism lives inside this <= 820 px block. Flagged, not fixed: the eyebrow's own
+     `margin-bottom: 18px` is still silently void (vertical margins do not apply to a non-replaced inline box),
+     so eyebrow text to H2 text is 1.6 px at Benefits where 18 px is authored. Restoring it means pushing the
+     next block down 18-34 px, which moves chapter 4's controls below the fold at the anchor and undoes a
+     measured round-17 fix — a trade for the orchestrator and Kyle, not for this batch. */
 }

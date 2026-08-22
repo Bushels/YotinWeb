@@ -32,8 +32,29 @@ export const POSES = [
   { id: 'signal',       position: [4.1, 1.3, 13.2],   target: [-4.08, -2.0, 6.07], fov: 28, mobile: { position: [2.0, -0.4, 21.0], target: [-2.46, -5.2, 5.42], fov: 36 } }, // same eye as round 2 — re-aimed only, so the candle stays right of centre (1010,560) above the journey cards now that it lives on the face, with the wellhead (731,94) and the front-face return in frame; mobile: collar (196,214) in the 42 vh band
   // signal-b: while the Close-the-Circuit panel (left ≤ 60 %) is in view, the wellhead reference, the road and the
   // stake sit in the free right column; the camera looks across the pad from the front-left (round 4)
-  { id: 'signal-b',     position: [1.0, 11.0, 16.0],  target: [-8.0, 0.0, 5.0],   fov: 28, mobile: { position: [1.4, 12.0, 19.5], target: [-7.4, -0.6, 5.0], fov: 38 } }, // the reading returns to surface: the camera lifts to the lease so the wellhead (V₁), the road and the ground stake (V₂) all read in the free right column — a road is only legible from above (pose search, round 5)
-  { id: 'deployment-a', position: [-0.8, -0.4, 12.3], target: [-6.0, -2.1, 5.4],  fov: 26, mobile: { position: [-1.6, -1.2, 12.5], target: [-4.4, -3.4, 5.2], fov: 34 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
+  // Round 19 (Kyle's second real-device walkthrough: "where you place the receiver on the pad, I can't visually
+  // see it, would need a gap"). The DESKTOP endpoint is untouched — there the commission card is 60 % wide and
+  // the circuit reads in the free right column (receiver measured at x 1084 of 1440). A phone has no free
+  // column, only a free band, and the mobile endpoint had the receiver at fy 0.49 — dead centre, behind the
+  // card. The MOBILE endpoint below is re-composed offline (scratch/r19/search-signalb.mjs, the projector in
+  // scratch/r19/pose-lab.mjs validated against measured browser projections to ≤ 3 px) to put the whole circuit
+  // in the lower band that world.css now opens under the card: the camera barely moves (1.4,12.0,19.5 →
+  // 1.57,11.73,18.68), the aim lifts, and the fov closes 38 → 36. At poseProgress 4 — pinned for the whole
+  // commissioning hold, exact 3.25–3.75 — the landmarks land at the same viewport FRACTIONS at every phone
+  // geometry (440×956, 440×758, 390×844), because a fraction is what a pose controls:
+  //     receiver fx 0.503 fy 0.778 · wellhead fx 0.304 fy 0.809 · chart bloom top fy 0.712
+  // so the receiver stands centre-band, the loop runs down-left to the wellhead, and the bloom has air above it.
+  { id: 'signal-b',     position: [1.0, 11.0, 16.0],  target: [-8.0, 0.0, 5.0],   fov: 28, mobile: { position: [1.57, 11.73, 18.68], target: [-5.16, 2.99, 2.18], fov: 36 } }, // the reading returns to surface: the camera lifts to the lease so the wellhead (V₁), the road and the ground stake (V₂) all read in the free right column — a road is only legible from above (pose search, round 5)
+  // Round 19, item 2. DESKTOP untouched. The MOBILE endpoint is re-composed offline (scratch/r19/search-deploya.mjs)
+  // so the fluid-level instrument is IN the picture on a phone: with CH4_HOLD pinning poseProgress at 5 for the
+  // whole span the slider can be reached, this endpoint alone decides where the level rule sits, and it used to
+  // sit off the left edge (level above-pump at fx 0.17 fy −0.03 — outside the frame on both axes at once).
+  // After: the level's whole travel, the pump it is measured against and the wellhead above it read together in
+  // the lower band world.css/tool.css now open under the controls, at the same viewport fractions everywhere:
+  //     above-pump fy 0.638 · pump-off fy 0.762 (travel 94–119 px) · pump fy 0.773 · wellhead fy 0.500, fx ≈ 0.47
+  // Nothing is lost: the collar/tool and the shoe were ALREADY outside the mobile chapter-4 frame (fx 1.36 and
+  // 2.17 before, 1.40 and 1.89 after) — the phone's chapter-4 shot has always been the surface end of the string.
+  { id: 'deployment-a', position: [-0.8, -0.4, 12.3], target: [-6.0, -2.1, 5.4],  fov: 26, mobile: { position: [-4.26, -1.83, 14.27], target: [-4.97, -0.15, 5.98], fov: 38 } }, // the instrument: cased string u 0.3–0.55 on the front face, landing right of centre (round 2)
   { id: 'deployment-b', position: [4.6, 1.2, 15.8],   target: [0.6, -2.5, 2.4],   fov: 28, mobile: { position: [4.0, 2.0, 21.0], target: [0.4, -2.8, 2.4], fov: 38 } },
   { id: 'yotin',        position: [-6.5, 8.0, 15.0],  target: [-4.6, -0.3, 3.6],  fov: 34, mobile: { position: [-6.0, 5.8, 19.5], target: [-4.6, -1.2, 3.6], fov: 44 } }, // the pad + wind in the upper 60 vh band, paper below (round 2) // lower, flatter: the island low in the rise band, strokes read as wind over the pad (round 2)
   { id: 'fit',          position: [-3.0, 1.5, 17.0],  target: [-4.95, -2.56, 5.0],  fov: 26, mobile: { position: [-2.6, 1.9, 20.5], target: [-3.23, -2.94, 5.16], fov: 36 } }, // the same eye as round 6, re-aimed for the round-12 anchors: all three proposed placements sit in the free right column — the authored default inside the intermediate (1090,470), below-pump further up the string, and the below-shoe/open-hole anchor past the shoe (1333,438) — so the verdict's candle never lands behind the qualifier column; mobile: collar (250,390)
@@ -72,6 +93,29 @@ export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);
 // arriving) — so the hold has to outlast 0.60 and hand over at the spec grid, not before it.
 const CH2_HOLD = 0.72;
 
+// Chapter 4 on a phone (round 19, Kyle's second real-device walkthrough: "Same with the fluid level slider, I
+// can't see the fluid level on mobile"). Exactly the same knot as chapter 2, one chapter later and worse:
+// chapter 4 carries #insight + benefits + FAQ, which is 3.4–4.3 viewports on a phone against ~1.6 on a laptop,
+// and its pose interpolation (deployment-a → deployment-b, a close section → a wide slice 21 units back) is
+// spread across that whole span. Measured at 440×956 with the level held at above-pump, the level rule drifts
+// 250 px down-screen across the span in which the slider can be reached — a moving target under a moving
+// camera — on top of being off-frame to the left (that part is the endpoint's own composition, re-authored in
+// POSES below). The stations, measured across 440×956 / 440×758 / 390×844 (scratch/r19/station2.mjs):
+//
+//   station                     440×956     440×758     390×844
+//   fluid slider centred        local 0.141  0.174       0.158
+//   world band leaves the fold  local 0.394  0.383       0.383
+//   benefits grid peeks in      local 0.229  0.276       0.260
+//   FAQ peeks in                local 0.599  0.653       0.635
+//
+// So the hold has to outlast 0.394 and hand over before the FAQ — the same shape as CH2_HOLD, and it keeps the
+// spec §4 promise that chapter 4's interpolation completes before the FAQ with the world at rest under it.
+// 0.58 and not 0.60: the earliest FAQ arrival measured is 0.599, and "before" has to mean before at every
+// geometry, not to four decimal places at one of them.
+// Desktop keeps its authored 0 → 0.55 move exactly (guarded by test/mobile-window.test.js).
+const CH4_HOLD = 0.38;
+const CH4_MOVE_END = 0.58;
+
 // `mobile` is the viewport predicate boot.js already owns (innerWidth ≤ 820). Desktop is untouched: called with
 // one argument this function is exactly what it was for fifteen rounds.
 export function poseProgress(p, mobile = false) {
@@ -88,7 +132,15 @@ export function poseProgress(p, mobile = false) {
     if (l < 0.75) return 4;              // hold on the surface references while the instrument is used
     return 4 + (l - 0.75) / 0.25;        // signal-b → deployment-a: continuous into chapter 4
   }
-  if (p < 4.8) { const l = p - 4; return 5 + Math.min(1, l / 0.55); } // deployment-a → -b, held through benefits + FAQ
+  if (p < 4.8) {
+    const l = p - 4;
+    if (mobile) {                                                   // the phone holds the instrument while the instrument is used (round 19)
+      if (l <= CH4_HOLD) return 5;
+      const u = Math.min(1, (l - CH4_HOLD) / (CH4_MOVE_END - CH4_HOLD));
+      return 5 + u * u * (3 - 2 * u);                                // smoothstep out, so the departure is a swing and not a snap
+    }
+    return 5 + Math.min(1, l / 0.55);                                // deployment-a → -b, held through benefits + FAQ
+  }
   if (p < 5.3) return 6 + (p - 4.8) / 0.5;   // the rise begins under the FAQ's smoked scrim and completes a third of the way down the band
   if (p < 5.8) return 7;                       // hold the pad + wind while the paper is read
   return 7 + Math.min(1, (p - 5.8) / 0.2);     // ease into fit
