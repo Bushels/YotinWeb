@@ -3,6 +3,7 @@
 // blur/hidden and after any frame over ~40 ms. The native cursor is never hidden. "Probe earns cyan": a short
 // inner arc turns cyan only where the pointer intersects the field above threshold (chapter 3, near the collar).
 import '../styles/probe.css';
+import { createOverUI, TEXT, SECTIONS } from './overUI.js';
 
 export function mountProbe() {
   if (!window.matchMedia('(pointer: fine)').matches || window.innerWidth < 1100) return null;
@@ -16,7 +17,7 @@ export function mountProbe() {
   document.body.appendChild(el);
   let x = -100, y = -100, tx = -100, ty = -100, visible = false, scrolling = 0, disabled = false, slow = 0, last = performance.now();
   const show = (v) => { if (visible !== v) { visible = v; el.classList.toggle('is-on', v); } };
-  function overUI(t) { return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, h1, h2, h3, h4, p, li, dl, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .site-header, .signal-stage, .qualifier, .channel-card, .spec-grid, .faq-item, .company-grid')); }
+  const overUI = createOverUI(TEXT, SECTIONS);
   window.addEventListener('pointermove', (e) => {
     if (disabled || !html.classList.contains('world-live')) { show(false); return; }
     tx = e.clientX; ty = e.clientY;

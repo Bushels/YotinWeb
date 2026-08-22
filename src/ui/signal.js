@@ -15,6 +15,7 @@
 // and the loop; on the reduced-motion / no-WebGL page the same functions run with no world and the wait
 // collapses to nothing, so the lesson works from first paint either way.
 import '../styles/signal.css';
+import { createOverUI } from './overUI.js';
 
 // The honest wait between the act and the reading (Shop's "Hold tight"). Round 12d: the wait became the show —
 // the world answers the placement with the acquire sequence (world/circuit.js: the reading climbs the cased
@@ -174,9 +175,9 @@ export function mountSignal() {
     // Probe on rock: click/tap, or a 200 ms dwell — never a merely travelling pointer.
     let dwellTimer = 0, lastX = 0, lastY = 0, moved = true;
     const canvas = w.renderer.domElement;
-    window.addEventListener('pointerdown', (e) => { if (!inChapter(w)) return; if (overUI(e)) return; circuit.probe(w.camera, canvas, e.clientX, e.clientY); w.requestRender(); }, { passive: true });
+    window.addEventListener('pointerdown', (e) => { if (!inChapter(w)) return; if (overUI(e.target)) return; circuit.probe(w.camera, canvas, e.clientX, e.clientY); w.requestRender(); }, { passive: true });
     window.addEventListener('pointermove', (e) => {
-      if (!inChapter(w) || overUI(e) || e.pointerType === 'touch') return;
+      if (!inChapter(w) || overUI(e.target) || e.pointerType === 'touch') return;
       if (Math.abs(e.clientX - lastX) > 3 || Math.abs(e.clientY - lastY) > 3) { moved = true; lastX = e.clientX; lastY = e.clientY; clearTimeout(dwellTimer); dwellTimer = setTimeout(() => { if (moved) { circuit.probe(w.camera, canvas, lastX, lastY); w.requestRender(); moved = false; } }, 200); }
     }, { passive: true });
 
@@ -197,7 +198,7 @@ export function mountSignal() {
   }
 
   function inChapter(w) { const p = w.state.exact; return p >= 2.6 && p < 4.2; }
-  function overUI(e) { const t = e.target; return t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .signal-stage, .commission-block, .qualifier')); }
+  const overUI = createOverUI('.signal-stage', '.commission-block', '.qualifier');
 
   if (window.__yotinWorld) attach(window.__yotinWorld);
   else document.addEventListener('world:first-frame', () => attach(window.__yotinWorld), { once: true });

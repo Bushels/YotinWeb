@@ -4,6 +4,7 @@
 // state setter so there is never a second visual code path. Raycasts run at most once per frame and only
 // while a hotspot is available. Analytics: hotspot_activate on activate/keyboard only (never hover).
 import * as THREE from 'three';
+import { createOverUI, DIALOG } from './ui/overUI.js';
 
 export const HOTSPOT_LAYER = 3;
 
@@ -77,11 +78,8 @@ export function createInteractions({ camera, canvas, world, getExact, requestRen
   const proxies = [];
   function refreshProxies() { proxies.length = 0; registry.forEach((it) => { if (it.proxy && available(it)) proxies.push(it.proxy); }); }
 
-  function overInteractiveDOM(e) {
-    const t = e.target;
-    if (!t || !t.closest) return false;
-    return Boolean(t.closest('a, button, input, select, textarea, label, summary, [role="dialog"], .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel'));
-  }
+  const overUI = createOverUI(DIALOG);
+  const overInteractiveDOM = (e) => overUI(e.target);
 
   function resolve() {
     if (!pointerDirty || !lastEvent) return;

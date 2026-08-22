@@ -8,6 +8,7 @@
 // §13b binding lessons honoured here: the envelope is computed from REAL ELAPSED TIME (a per-frame `* k` decay
 // runs ~20× slow under SwiftShader), and it is a RESPONSE, never ambient — when it reaches zero it releases the
 // uniform and stops marking frames dirty.
+import { createOverUI, TEXT, SECTIONS, DIALOG } from './ui/overUI.js';
 
 export const TAP_MAX_MS = 350;   // longer than this is a press, not a tap
 export const TAP_MAX_PX = 12;    // further than this is a scroll drag, not a tap
@@ -31,10 +32,9 @@ export function rippleStrength(t) {
   return 1 - v * v * (3 - 2 * v);
 }
 
-// "Is this tap on copy or controls?" — the probe.js overUI discipline (src/ui/probe.js:19) plus interactions.js's
-// [role="dialog"]. The canvas and the bare document are open world; everything listed here is not.
-const UI = 'a, button, input, select, textarea, label, summary, h1, h2, h3, h4, p, li, dl, [role="dialog"], .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel, .site-header, .signal-stage, .qualifier, .channel-card, .spec-grid, .faq-item, .company-grid';
-export function overUI(t) { return Boolean(t && t.closest && t.closest(UI)); }
+// "Is this tap on copy or controls?" — the shared over-UI discipline (src/ui/overUI.js) at its widest:
+// text, sections and dialogs all stand the gust down. The canvas and the bare document are open world.
+export const overUI = createOverUI(TEXT, SECTIONS, DIALOG);
 
 /**
  * @param coarse       gate.coarse — fine pointers never get here (desktop behaviour is untouched)

@@ -4,6 +4,7 @@
 // does, never how it is built), and the chapter's one invited action — "Inspect tool": a contained orbit around the tool whose pose
 // persists until Close or Esc (no hold-to-orbit, no spring-back; two-stage tap on touch only here).
 import '../styles/tool.css';
+import { createOverUI } from './overUI.js';
 
 export const TOOL_GATE = [[1.6, 3.4]];
 const CAPTIONS = {
@@ -198,7 +199,7 @@ export function mountTool() {
       else if (e.key === 'ArrowUp') { viz.rotateOrbit(0, -step); e.preventDefault(); }
       else if (e.key === 'ArrowDown') { viz.rotateOrbit(0, step); e.preventDefault(); }
     });
-    const overUI = (t) => t && t.closest && Boolean(t.closest('a, button, input, select, textarea, label, summary, .rail, .fixed-layer, .chatfi-launcher, .chatfi-panel'));
+    const overUI = createOverUI(); // base only: an orbit drag may start over copy — the column overlays the world it aims at
     window.addEventListener('pointerdown', (e) => {
       if (!orbitOn || overUI(e.target)) return;
       dragging = true; lastX = e.clientX; lastY = e.clientY;
