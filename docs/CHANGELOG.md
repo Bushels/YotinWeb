@@ -77,6 +77,17 @@ declined — the latter costs an iOS permission dialog). Spec amended in the sam
   candidate); the launcher is unreachable at hero/About rest on phones (pre-existing —
   the round-17 flag, reconfirmed).
 - **Feel is Kyle's on-device call** (§12): tap the hero and About trees on the iPhone.
+- **Confirmation pass (production, same day): 7/7 PASS, zero regressions.** On prod the
+  uniform rises to ~1.0 and reaches exactly 0 within ~2.0 s at both part spans; silent in ch2,
+  on copy/controls (Inspect's two-stage tap and Esc verified working), on drags, two-finger
+  touches, long presses, and while paused (pausing mid-ripple zeroes it next frame); desktop
+  hover-part intact, clicks inert, zero console errors both viewports. Round-17 spot-checks
+  all hold. Every silent case was backed by a positive control. Two NEW harness traps cleared
+  and now on record: (1) CDP Input.dispatchTouchEvent inserts ~405 ms between down and up —
+  the classifier correctly reads that as a press, so everything measures silent for the wrong
+  reason; drive taps with Playwright's touchscreen (~1 ms). (2) setTimeout polling of a world
+  uniform starves to 4–6 samples per 2.4 s under SwiftShader and aliases the whole envelope —
+  wrap the mutation point (setForestPointer) for one true record per rendered frame instead.
 
 ## Era 8 — round 17: the Gemini lane verified, the fixed-overlay class closed (2026-08-21, session 3)
 
