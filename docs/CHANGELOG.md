@@ -112,6 +112,10 @@ into mechanism and fix, not existence.
   it feeds (fit chip shy + reachable, Inspect two-stage + Esc, channel card, ripple
   fire/silent, launcher stand-down, caption-over-copy); zero console errors; desktop
   identity untouched at 1440×900.
+- **Owner-verified on device (2026-08-22): "Did the mobile test. Worked perfectly."** All
+  three walkthrough fixes confirmed on the iPhone 17 Pro Max — the mobile experience is now
+  fully owner-verified end to end for the first time (rounds 16–19 all carry both a
+  production confirmation pass AND Kyle's thumb).
 
 ## Era 9 — round 18: the world answers the thumb (2026-08-21, session 3)
 
