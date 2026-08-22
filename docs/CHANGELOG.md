@@ -97,7 +97,21 @@ into mechanism and fix, not existence.
   by band minus stack height — widening costs scroll budget); the phone ch4 frame has never
   contained the tool (pre-existing — the x-ray "two legs" beat has nothing on screen there);
   `.commission-block`'s new band is probe-list UI, so a tap there places the receiver but
-  never probes rock (the round-18 transparent-container tension, now with a second instance).
+  never probes rock (the round-18 transparent-container tension, now with a second instance);
+  and from the consolidation session: the built `main` eagerly pulls `boot` (~211 KB gz) on
+  every path including stills — pre-existing since the rolldown migration, chip filed.
+- **Confirmation pass (production, same day): 5/5 PASS at 440×956 AND 440×758, zero
+  regressions.** Receiver/footprint/bloom 0 % covered in the open band with the full beat and
+  a clean lift-reset; the world-side footprint tap places the receiver with the ripple at
+  0.000 and zero rock-probe calls (instrumented); fluid tick 0 % covered at levels 0/50/100
+  with ghost + 300 kPa intact; the caption reproducibly hidden at the arrival and visible
+  ~900 px deeper on both geometries; eyebrow cap/base ≈ 1.0 in pixels at every washed head
+  (the single 1.675 outlier chased to a luminance-threshold artifact over a flat-247 glyph
+  profile — raw rows in the log) with 5.8–10.9:1 grounds; round-17 arrival numbers hold to a
+  tenth of a pixel. Regression sweep clean AFTER the overUI consolidation across every path
+  it feeds (fit chip shy + reachable, Inspect two-stage + Esc, channel card, ripple
+  fire/silent, launcher stand-down, caption-over-copy); zero console errors; desktop
+  identity untouched at 1440×900.
 
 ## Era 9 — round 18: the world answers the thumb (2026-08-21, session 3)
 
