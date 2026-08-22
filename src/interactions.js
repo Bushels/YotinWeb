@@ -115,5 +115,7 @@ export function createInteractions({ camera, canvas, world, getExact, requestRen
 
   function update() { resolve(); }
 
-  return { register, activate, set, get: (id) => registry.get(id), update, updateAvailability, registry };
+  // `hovered` is the hotspot the last resolved pointer event landed on (resolve() runs synchronously inside
+  // onPointerDown). The tap ripple reads it to prove a hotspot took the tap first — hotspots always win.
+  return { register, activate, set, get: (id) => registry.get(id), update, updateAvailability, registry, get hovered() { return hovered; } };
 }

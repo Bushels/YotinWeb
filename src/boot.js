@@ -10,6 +10,7 @@ import { createScrollConductor } from './conductor.js';
 import { createCameraRig } from './cameraRig.js';
 import { gate } from './gate.js';
 import { createInteractions } from './interactions.js';
+import { createTapRipple, inPartSpan } from './tapRipple.js';
 
 export function bootWorld() {
   const host = document.getElementById('world');
@@ -84,19 +85,25 @@ export function bootWorld() {
   // ground plane y = 0 in parallax-local space.
   const groundRay = new THREE.Raycaster(), groundNdc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), groundHit = new THREE.Vector3(), groundInv = new THREE.Matrix4();
   let partStrength = 0, partTarget = 0;
+  // Screen point → ground plane (y = 0) in parallax-local space. Shared by the fine-pointer part and the
+  // coarse-pointer tap ripple so the two land on the same square metre of lease.
+  function projectGround(clientX, clientY) {
+    const r = canvas.getBoundingClientRect();
+    groundNdc.set(((clientX - r.left) / r.width) * 2 - 1, ((clientY - r.top) / r.height) * -2 + 1);
+    groundRay.setFromCamera(groundNdc, camera);
+    groundInv.copy(island.parallax.matrixWorld).invert();
+    const lr = groundRay.ray.clone().applyMatrix4(groundInv);
+    return lr.intersectPlane(groundPlane, groundHit) ? { x: groundHit.x, z: groundHit.z } : null;
+  }
   window.addEventListener('pointermove', (e) => {
     if (gate.coarse) return;
     rig.parallax.x = (e.clientX / window.innerWidth) * 2 - 1;
     rig.parallax.y = -((e.clientY / window.innerHeight) * 2 - 1);
     island.pointer.x = rig.parallax.x; island.pointer.y = rig.parallax.y;
     const p = (lastState || conductor.getState()).exact;
-    if (p < 0.7 || (p > 4.7 && p < 5.8)) {
-      const r = canvas.getBoundingClientRect();
-      groundNdc.set(((e.clientX - r.left) / r.width) * 2 - 1, ((e.clientY - r.top) / r.height) * -2 + 1);
-      groundRay.setFromCamera(groundNdc, camera);
-      groundInv.copy(island.parallax.matrixWorld).invert();
-      const lr = groundRay.ray.clone().applyMatrix4(groundInv);
-      if (lr.intersectPlane(groundPlane, groundHit)) { partTarget = 1; island.setForestPointer(groundHit.x, groundHit.z, partStrength); }
+    if (inPartSpan(p)) {
+      const hit = projectGround(e.clientX, e.clientY);
+      if (hit) { partTarget = 1; island.setForestPointer(hit.x, hit.z, partStrength); }
     } else partTarget = 0;
     dirty = true;
   }, { passive: true });
@@ -120,6 +127,19 @@ export function bootWorld() {
   const interactions = createInteractions({ camera, canvas, world: island, getExact: () => (lastState || conductor.getState()).exact, requestRender: () => { dirty = true; }, track });
   document.addEventListener('world:progress', () => interactions.updateAvailability());
 
+  // Tap ripple (spec §5, §12) — coarse pointers only. Created AFTER createInteractions so its window
+  // pointerdown listener runs after interactions', which means interactions.hovered already reflects this tap
+  // and a hotspot that took the tap suppresses the ripple.
+  const tapRipple = createTapRipple({
+    coarse: gate.coarse,
+    isLive: () => firstFrame,
+    isPaused: () => paused,
+    getExact: () => (lastState || conductor.getState()).exact,
+    hotspotHit: () => Boolean(interactions.hovered),
+    project: projectGround,
+    requestRender: () => { dirty = true; },
+  });
+
   const timer = new THREE.Timer();
   timer.connect(document);
   let idleFrames = 0;
@@ -130,6 +150,9 @@ export function bootWorld() {
   if (paused) timer.setTimescale(0);
   function frame() {
     if (!running) return;
+    // A live tap ripple keeps the loop hot for its ~1.5 s and not one frame longer (spec §13b: a response,
+    // never ambient).
+    if (tapRipple.active) dirty = true;
     // On-demand: after 90 quiet frames (no scroll/pointer/resize), drop to a low ambient tick (every 4th frame).
     idleFrames = dirty ? 0 : idleFrames + 1;
     if (paused ? !dirty : (idleFrames > 90 && (idleFrames % 4) !== 0)) return;
@@ -146,7 +169,11 @@ export function bootWorld() {
     interactions.update();
     // spring the parting strength toward its target so the wind/spruce ease in and out
     partStrength += (partTarget - partStrength) * (1 - Math.exp(-4 * dt));
-    if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
+    // The tap ripple owns the pointer uniform only while it is alive (coarse pointers have no hover to fight);
+    // on the frame it ends it zeroes the uniform and hands it straight back.
+    const rip = tapRipple.sample();
+    if (rip) island.setForestPointer(rip.x, rip.z, rip.strength);
+    else if (partStrength > 0.001) island.setForestPointer(island.forest.uniforms.pointer.value.x, island.forest.uniforms.pointer.value.z, partStrength); else island.setForestPointer(0, 0, 0);
     rig.apply(poseProgress(p, mobileNow), dt, camera.aspect);
     island.wind.setCameraHeight(camera.getWorldPosition(_camWorld).y); // WORLD height (the camera sits inside the rig): the wind is only seen from above ground
     island.update(elapsed % 12, elapsed, w);

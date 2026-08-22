@@ -42,6 +42,42 @@ preferences — each one exists because breaking it produced a measured defect.
 
 ---
 
+## Era 9 — round 18: the world answers the thumb (2026-08-21, session 3)
+
+Kyle asked why the desktop easter eggs — the pointer parting the spruce, the micro-parallax,
+the probe ring — are missing on mobile. The honest answer was not horsepower (phone tier sits
+at 53/56 draw calls): touch has no hover, and the finger owns scroll. Kyle picked the tap
+ripple from three researched options (scroll-coupled gusts and gyro tilt considered and
+declined — the latter costs an iOS permission dialog). Spec amended in the same batch
+(§5 Touch clause + §12 "The world answers the thumb", lead decision recorded).
+
+- **NEW `src/tapRipple.js`**: pure tap classifier (one pointer, ≤ 350 ms, ≤ 12 px,
+  pinch-proof solo tracking), a smoothstep envelope in real elapsed seconds (peak at 140 ms,
+  hard zero at 1.49 s — §13b time-based rule), the probe.js UI-selector discipline, and the
+  part-span gate `inPartSpan()` now the SINGLE source both paths call (desktop and touch can
+  never drift). Fine pointers register zero listeners.
+- boot.js: ground projection factored and shared; the ripple sample drives
+  `setForestPointer`, else the desktop partStrength branch byte-for-byte; a live ripple keeps
+  the on-demand render loop hot for its 1.5 s and not one frame longer.
+- Hotspots win by construction: interactions registers its pointerdown first, proven by
+  synchronous dispatch (+ one read-only `hovered` getter, the batch's single flagged
+  deviation).
+- Rendered verification, 16-case table at 440×956: ripples in hero and About; silent in ch2,
+  on controls, cards, Inspect (two-stage tap unchanged), scroll drags, two-finger,
+  long-press, and while paused (pause also kills a live ripple); desktop hover-part
+  byte-identical, clicks produce nothing.
+- Gates: 160/160 tests (4 new for classifier/envelope/gate/selectors), budget
+  (world 209.2 / 215 KB), colour, rm, scroll, runtime — phone tier unchanged at
+  53 calls / 39,926 tris: the ripple adds zero draws, as designed.
+- Known edge, on record: a handset stalling > 350 ms mid-tap classifies the tap as a press —
+  a graceful no-op; revisit the threshold only if Kyle reports dead taps on metal.
+- Flagged, not fixed: transparent list containers count as open world per the probe
+  precedent (a tap on the hero chips' empty band ripples — harmless, critics may weigh);
+  five near-identical "over UI" selector lists now exist across modules (consolidation
+  candidate); the launcher is unreachable at hero/About rest on phones (pre-existing —
+  the round-17 flag, reconfirmed).
+- **Feel is Kyle's on-device call** (§12): tap the hero and About trees on the iPhone.
+
 ## Era 8 — round 17: the Gemini lane verified, the fixed-overlay class closed (2026-08-21, session 3)
 
 First different-model-family audit (Gemini 3.7 in Antigravity, Lane B of the mobile-audit
